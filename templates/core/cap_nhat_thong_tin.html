@@ -1,0 +1,83 @@
+{% extends "core/tenant_base.html" %}
+{% load static %}
+
+{% block title %}Cập nhật thông tin cá nhân - NDT MOTEL{% endblock %}
+{% block page_title %}Cập nhật hồ sơ{% endblock %}
+
+{% block tenant_styles %}
+<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
+<link rel="stylesheet" href="{% static 'css/tenant/cap_nhat_thong_tin.css' %}">
+{% endblock %}
+
+{% block tenant_content %}
+<div class="account-profile-edit ndt-foundation">
+    {% url 'tai_khoan' as account_url %}
+    {% include 'core/foundation/page_header.html' with breadcrumb='Tài khoản / Hồ sơ' title='Cập nhật thông tin cá nhân' subtitle='Giữ hồ sơ thuê phòng chính xác để việc liên hệ và xử lý dịch vụ thuận tiện hơn.' action_url=account_url action_label='Về tài khoản' %}
+
+    <section class="ndt-card account-form-card" aria-labelledby="profile-form-title">
+        <div class="ndt-card__header">
+            <h2 id="profile-form-title">Thông tin cá nhân</h2>
+            <p>Các thông tin có thể chỉnh sửa trong tài khoản của bạn.</p>
+        </div>
+        <div class="ndt-card__body">
+            <form method="POST" class="account-form">
+                {% csrf_token %}
+
+                <div class="account-form-grid">
+                    <div class="ndt-field">
+                        <label class="ndt-label" for="ho_ten">Họ và tên <span class="ndt-required">*</span></label>
+                        <input class="ndt-control" type="text" id="ho_ten" name="ho_ten" value="{{ nguoi_thue.ho_ten|default:'' }}" autocomplete="name" required>
+                    </div>
+
+                    <div class="ndt-field">
+                        <label class="ndt-label" for="so_dien_thoai">Số điện thoại</label>
+                        <input class="ndt-control" type="tel" id="so_dien_thoai" name="so_dien_thoai" value="{{ nguoi_thue.so_dien_thoai|default:'' }}" autocomplete="tel" inputmode="tel">
+                    </div>
+
+                    <div class="ndt-field">
+                        <label class="ndt-label" for="email">Email</label>
+                        <input class="ndt-control" type="email" id="email" name="email" value="{{ nguoi_thue.email|default:'' }}" autocomplete="email">
+                    </div>
+
+                    <div class="ndt-field">
+                        <label class="ndt-label" for="nghe_nghiep">Nghề nghiệp</label>
+                        <input class="ndt-control" type="text" id="nghe_nghiep" name="nghe_nghiep" value="{{ nguoi_thue.nghe_nghiep|default:'' }}">
+                    </div>
+
+                    <div class="ndt-field">
+                        <label class="ndt-label" for="que_quan">Quê quán</label>
+                        <input class="ndt-control" type="text" id="que_quan" name="que_quan" value="{{ nguoi_thue.que_quan|default:'' }}">
+                    </div>
+
+                    <div class="ndt-field">
+                        <label class="ndt-label" for="nguoi_lien_he">Người liên hệ</label>
+                        <input class="ndt-control" type="text" id="nguoi_lien_he" name="nguoi_lien_he" value="{{ nguoi_thue.nguoi_lien_he|default:'' }}">
+                    </div>
+
+                    <div class="ndt-field account-form-grid__wide">
+                        <label class="ndt-label" for="dia_chi_thuong_tru">Địa chỉ thường trú</label>
+                        <input class="ndt-control" type="text" id="dia_chi_thuong_tru" name="dia_chi_thuong_tru" value="{{ nguoi_thue.dia_chi_thuong_tru|default:'' }}" autocomplete="street-address">
+                    </div>
+
+                    <div class="ndt-field">
+                        <label class="ndt-label" for="sdt_nguoi_lien_he">SĐT người liên hệ</label>
+                        <input class="ndt-control" type="tel" id="sdt_nguoi_lien_he" name="sdt_nguoi_lien_he" value="{{ nguoi_thue.sdt_nguoi_lien_he|default:'' }}" inputmode="tel">
+                    </div>
+                </div>
+
+                <p class="account-form-note">
+                    CCCD, ngày sinh và giới tính được quản lý trong hồ sơ người thuê, không chỉnh sửa trực tiếp tại đây.
+                </p>
+
+                <div class="ndt-actions account-form-actions">
+                    <a href="{{ account_url }}" class="ndt-button ndt-button--secondary">Quay lại</a>
+                    <button type="submit" class="ndt-button ndt-button--primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}

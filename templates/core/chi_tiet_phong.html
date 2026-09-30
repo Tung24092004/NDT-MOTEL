@@ -1,0 +1,291 @@
+{% extends "core/base.html" %}
+{% load static bo_loc %}
+
+{% block title %}Phòng {{ phong.so_phong }} - NDT MOTEL{% endblock %}
+{% block page_title %}Chi tiết phòng{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/room_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="stay-detail ndt-foundation">
+    <nav class="stay-breadcrumb" aria-label="Đường dẫn trang">
+        <a href="{% url 'home' %}">Trang chủ</a>
+        <span aria-hidden="true">/</span>
+        <a href="{% url 'danh_sach_phong' %}">Tìm phòng</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Phòng {{ phong.so_phong }}</span>
+    </nav>
+
+    <header class="stay-heading">
+        <div class="stay-heading__content">
+            <p class="stay-kicker">
+                {{ phong.co_so.ten_co_so }}
+                {% if phong.co_so.quan %} · {{ phong.co_so.quan }}{% endif %}
+            </p>
+            <h1 class="stay-heading__title">Phòng {{ phong.so_phong }}</h1>
+            <p class="stay-heading__meta">
+                {{ phong.get_loai_phong_display }} · Tầng {{ phong.tang }} · {{ phong.dien_tich }} m²
+            </p>
+        </div>
+        <span class="ndt-badge stay-status stay-status--{{ phong.trang_thai }}">
+            {{ phong.get_trang_thai_display }}
+        </span>
+    </header>
+
+    <section class="stay-gallery" aria-label="Thư viện ảnh phòng">
+        {% if anh_dai_dien %}
+            <img
+                id="stay-main-image"
+                src="{{ anh_dai_dien.anh.url }}"
+                alt="Phòng {{ phong.so_phong }} tại {{ phong.co_so.ten_co_so }}"
+            >
+            {% if hinh_anh_phong|length > 1 %}
+                <div class="stay-thumbnails" aria-label="Chọn ảnh phòng">
+                    {% for hinh in hinh_anh_phong %}
+                        <button
+                            type="button"
+                            data-gallery-src="{{ hinh.anh.url }}"
+                            aria-label="Xem ảnh {{ forloop.counter }} của phòng {{ phong.so_phong }}"
+                            aria-pressed="{% if hinh.id == anh_dai_dien.id %}true{% else %}false{% endif %}"
+                            {% if hinh.id == anh_dai_dien.id %}class="is-active"{% endif %}
+                        >
+                            <img src="{{ hinh.anh.url }}" alt="" loading="lazy">
+                        </button>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% else %}
+            <img
+                id="stay-main-image"
+                src="{% static 'images/room-placeholder.svg' %}"
+                alt="Ảnh mặc định cho phòng {{ phong.so_phong }}"
+            >
+        {% endif %}
+    </section>
+
+    <dl class="stay-facts" aria-label="Thông số chính của phòng">
+        <div>
+            <dt>Sức chứa</dt>
+            <dd>{% if suc_chua_da_cau_hinh %}{{ suc_chua }} người{% else %}Chưa cấu hình{% endif %}</dd>
+        </div>
+        <div>
+            <dt>Đang ở</dt>
+            <dd>{{ so_nguoi_hien_tai|default:0 }} người</dd>
+        </div>
+        <div>
+            <dt>Chỗ còn lại</dt>
+            <dd>{% if suc_chua_da_cau_hinh %}{{ cho_con_lai }} chỗ{% else %}Chưa xác định{% endif %}</dd>
+        </div>
+        <div>
+            <dt>Giá thuê</dt>
+            <dd>{{ phong.gia_thue|vnd }} VNĐ</dd>
+        </div>
+        <div>
+            <dt>Tiền cọc</dt>
+            <dd>{{ phong.tien_coc_mac_dinh|vnd }} VNĐ</dd>
+        </div>
+    </dl>
+
+    <div class="stay-layout">
+        <main class="stay-content">
+            <div class="stay-intro-grid">
+                <section class="stay-section">
+                    <p class="stay-section-label">Không gian</p>
+                    <h2>Về phòng {{ phong.so_phong }}</h2>
+                    <p class="stay-prose">
+                        {{ phong.mo_ta|default:"Thông tin mô tả phòng đang được cập nhật."|linebreaksbr }}
+                    </p>
+                </section>
+
+                <section class="stay-section stay-amenities">
+                    <p class="stay-section-label">Tiện nghi</p>
+                    <h2>Tiện ích trong phòng</h2>
+                    <p class="stay-prose">
+                        {{ phong.tien_ich|default:"Thông tin tiện ích đang được cập nhật."|linebreaksbr }}
+                    </p>
+                </section>
+            </div>
+
+            <section class="stay-section stay-cost-section">
+                <div class="stay-section-heading">
+                    <p class="stay-section-label">Chi phí hàng tháng</p>
+                    <h2>Chi phí sử dụng</h2>
+                </div>
+                <dl class="stay-costs">
+                    <div>
+                        <dt>Tiền điện</dt>
+                        <dd>{{ phong.tien_dien_moi_so|vnd }} VNĐ/số</dd>
+                    </div>
+                    <div>
+                        <dt>Tiền nước</dt>
+                        <dd>{{ phong.tien_nuoc_moi_khoi|vnd }} VNĐ/m³</dd>
+                    </div>
+                    <div>
+                        <dt>Phí dịch vụ</dt>
+                        <dd>{{ phong.phi_dich_vu|vnd }} VNĐ/tháng</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="stay-section stay-facility">
+                <div class="stay-facility__summary">
+                    <p class="stay-section-label">Cơ sở</p>
+                    <h2>{{ phong.co_so.ten_co_so }}</h2>
+                    <p class="stay-address">
+                        {{ phong.co_so.dia_chi }}{% if phong.co_so.quan %}, {{ phong.co_so.quan }}{% endif %}
+                    </p>
+                    {% if phong.co_so.mo_ta %}
+                        <p class="stay-prose">{{ phong.co_so.mo_ta|linebreaksbr }}</p>
+                    {% endif %}
+                </div>
+                <dl class="stay-facility__details">
+                    {% if phong.co_so.so_dien_thoai %}
+                        <div><dt>Liên hệ</dt><dd>{{ phong.co_so.so_dien_thoai }}</dd></div>
+                    {% endif %}
+                    {% if phong.co_so.email %}
+                        <div><dt>Email</dt><dd>{{ phong.co_so.email }}</dd></div>
+                    {% endif %}
+                    {% if phong.co_so.tien_ich_chung %}
+                        <div><dt>Tiện ích chung</dt><dd>{{ phong.co_so.tien_ich_chung }}</dd></div>
+                    {% endif %}
+                </dl>
+            </section>
+
+            {% if hop_dong_hien_tai or phong.trang_thai == 'da_dat' or ly_do_khong_the_ghep %}
+                <section class="stay-section stay-sharing" data-room-sharing-state>
+                    <p class="stay-section-label">Lưu trú dài hạn</p>
+                    <h2>Tình trạng ở ghép</h2>
+
+                    {% if ly_do_khong_the_ghep %}<p class="stay-notice">{{ ly_do_khong_the_ghep }}</p>{% endif %}
+                    {% if phong.trang_thai == 'da_dat' and not hop_dong_hien_tai %}
+                        <p class="stay-notice">
+                            Phòng đã được đặt và chưa có hợp đồng đang hiệu lực nên chức năng ở ghép chưa được mở.
+                        </p>
+                    {% endif %}
+
+                    {% if hop_dong_hien_tai %}
+                        {% if not suc_chua_da_cau_hinh %}
+                            <p class="stay-notice">Chưa thể xác định khả năng ở ghép vì sức chứa chưa được cấu hình.</p>
+                        {% elif not phong_con_cho_ghep %}
+                            <p class="stay-notice">Phòng đã đủ sức chứa và không thể tiếp nhận thêm người.</p>
+                        {% elif phong_co_the_ghep %}
+                            <p class="stay-notice stay-notice--success">
+                                Phòng đang mở đăng ký ở ghép, còn {{ cho_con_lai }} chỗ.
+                            </p>
+                        {% else %}
+                            <p class="stay-notice">
+                                Phòng còn {{ cho_con_lai }} chỗ nhưng chủ hợp đồng chưa mở đăng ký ở ghép.
+                            </p>
+                        {% endif %}
+
+                        {% if la_chu_phong and suc_chua_da_cau_hinh and cho_con_lai > 0 %}
+                            <form
+                                method="post"
+                                action="{% url 'bat_tat_cho_phep_ghep' hop_dong_hien_tai.id %}"
+                                class="stay-sharing-form"
+                            >
+                                {% csrf_token %}
+                                <label class="ndt-choice">
+                                    <input
+                                        type="checkbox"
+                                        name="cho_phep_ghep"
+                                        value="1"
+                                        {% if hop_dong_hien_tai.cho_phep_ghep %}checked{% endif %}
+                                    >
+                                    Cho phép đăng ký ở ghép
+                                </label>
+                                <button type="submit" class="ndt-button ndt-button--secondary">
+                                    {% if hop_dong_hien_tai.cho_phep_ghep %}Tắt nhận ở ghép{% else %}Bật nhận ở ghép{% endif %}
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        {% if co_the_dang_ky_ghep %}
+                            <a
+                                href="{% url 'dang_ky_ghep_phong' phong.id %}"
+                                class="ndt-button ndt-button--primary stay-inline-action"
+                            >Đăng ký ở ghép</a>
+                        {% elif not user.is_authenticated and phong_co_the_ghep %}
+                            <a
+                                href="{% url 'dang_nhap' %}?next={% url 'dang_ky_ghep_phong' phong.id %}"
+                                class="ndt-button ndt-button--primary stay-inline-action"
+                            >Đăng nhập để đăng ký ở ghép</a>
+                        {% endif %}
+                    {% endif %}
+                </section>
+            {% endif %}
+        </main>
+
+        <aside class="stay-booking" aria-label="Giá và hành động phòng">
+            <p class="stay-booking-label">Giá thuê hàng tháng</p>
+            <p class="stay-booking-price">{{ phong.gia_thue|vnd }} <span>VNĐ</span></p>
+            <div class="stay-booking-deposit">
+                <span>Tiền cọc</span>
+                <strong>{{ phong.tien_coc_mac_dinh|vnd }} VNĐ</strong>
+            </div>
+
+            {% if phong.trang_thai == 'trong' and suc_chua_da_cau_hinh %}
+                <p class="stay-availability stay-availability--ready">Phòng đang sẵn sàng</p>
+                <p>Phòng chưa có người thuê và có thể gửi yêu cầu đặt phòng.</p>
+                {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
+                    <a href="{% url 'dat_phong' phong.id %}" class="ndt-button ndt-button--primary">Đặt phòng</a>
+                {% elif not user.is_authenticated %}
+                    <a
+                        href="{% url 'dang_nhap' %}?next={% url 'dat_phong' phong.id %}"
+                        class="ndt-button ndt-button--primary"
+                    >Đăng nhập để đặt phòng</a>
+                {% endif %}
+            {% elif phong.trang_thai == 'trong' %}
+                <p class="stay-availability">Chưa thể tiếp nhận đặt phòng</p>
+                <p>Phòng chưa được cấu hình sức chứa tối đa.</p>
+            {% elif phong.trang_thai == 'da_dat' %}
+                <p class="stay-availability">Phòng đã được đặt</p>
+                <p>Phòng chưa thể tiếp nhận lượt đặt mới.</p>
+            {% elif phong.trang_thai == 'dang_thue' %}
+                <p class="stay-availability">Phòng đang có người thuê</p>
+                <p>
+                    {% if not suc_chua_da_cau_hinh %}
+                        Chưa xác định khả năng tiếp nhận thêm người.
+                    {% elif cho_con_lai <= 0 %}
+                        Phòng đã đủ số người tối đa.
+                    {% elif hop_dong_hien_tai and hop_dong_hien_tai.cho_phep_ghep %}
+                        Còn {{ cho_con_lai }} chỗ và đang nhận yêu cầu ở ghép.
+                    {% else %}
+                        Còn {{ cho_con_lai }} chỗ nhưng chưa mở đăng ký ở ghép.
+                    {% endif %}
+                </p>
+                {% if co_the_dang_ky_ghep %}
+                    <a href="{% url 'dang_ky_ghep_phong' phong.id %}" class="ndt-button ndt-button--primary">
+                        Đăng ký ở ghép
+                    </a>
+                {% endif %}
+            {% elif phong.trang_thai == 'bao_tri' %}
+                <p class="stay-availability stay-availability--maintenance">Phòng đang bảo trì</p>
+                <p>Phòng tạm thời không tiếp nhận khách thuê.</p>
+            {% endif %}
+
+            <div class="stay-actions">
+                {% if user.is_staff or user.is_superuser %}
+                    <a href="{% url 'sua_phong' phong.id %}" class="ndt-button ndt-button--primary">
+                        Sửa thông tin phòng
+                    </a>
+                {% endif %}
+                <a href="{% url 'danh_sach_phong' %}" class="ndt-button ndt-button--secondary">
+                    Quay lại danh sách
+                </a>
+                {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
+                    <a href="{% url 'yeu_cau_sua_chua_cua_toi' %}" class="ndt-button ndt-button--ghost">
+                        Liên hệ hỗ trợ
+                    </a>
+                {% endif %}
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script src="{% static 'js/room_detail.js' %}" defer></script>
+{% endblock %}

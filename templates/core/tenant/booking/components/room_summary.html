@@ -1,0 +1,26 @@
+{% load static bo_loc %}
+<article class="room-overview">
+    {% with image=phong.anh_dai_dien_hien_thi %}
+        {% if image %}
+            <img src="{{ image.anh.url }}" alt="Phòng {{ phong.so_phong }}" class="booking-room-image">
+        {% else %}
+            <img src="{% static 'images/room-placeholder.svg' %}" alt="Ảnh mặc định cho phòng {{ phong.so_phong }}" class="booking-room-image">
+        {% endif %}
+    {% endwith %}
+    <div class="booking-room-copy">
+        <div class="booking-room-title">
+            <div>
+                <p class="booking-kicker">Thông tin phòng</p>
+                <h2>Phòng {{ phong.so_phong }}</h2>
+            </div>
+            <span class="booking-status-badge booking-status-available">{{ phong.get_trang_thai_display }}</span>
+        </div>
+        <p class="booking-room-address">{{ phong.co_so.ten_co_so }} · {{ phong.co_so.dia_chi }}</p>
+        <dl class="booking-facts booking-room-facts">
+            <div><dt>Loại phòng</dt><dd>{{ phong.get_loai_phong_display }}</dd></div>
+            <div><dt>Sức chứa</dt><dd>{{ phong.so_nguoi_toi_da }} người</dd></div>
+            <div><dt>Giá thuê</dt><dd class="booking-money">{{ phong.gia_thue|vnd }} VNĐ</dd></div>
+            <div><dt>Tiền cọc</dt><dd class="booking-money">{{ phong.tien_coc_mac_dinh|vnd }} VNĐ</dd></div>
+        </dl>
+    </div>
+</article>

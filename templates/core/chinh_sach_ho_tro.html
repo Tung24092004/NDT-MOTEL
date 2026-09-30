@@ -1,0 +1,86 @@
+{% extends "core/tenant_base.html" %}
+{% load static bo_loc %}
+
+{% block title %}Chính sách hỗ trợ - NDT Motel{% endblock %}
+{% block page_title %}Chính sách hỗ trợ{% endblock %}
+{% block tenant_styles %}<link rel="stylesheet" href="{% static 'css/tenant/chinh_sach_ho_tro.css' %}">{% endblock %}
+
+{% block tenant_content %}
+<main class="policy-page">
+    <nav class="policy-breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'home' %}">Trang chủ</a><span aria-hidden="true">/</span><span>Chính sách hỗ trợ</span>
+    </nav>
+
+    <header class="policy-intro">
+        <div>
+            <span class="policy-eyebrow">Hỗ trợ người thuê</span>
+            <h1>Chính sách hỗ trợ</h1>
+            <p>Thông tin các chính sách đang có hiệu lực và điều kiện áp dụng cho người thuê tại NDT Motel.</p>
+        </div>
+        {% if request.user.is_authenticated and not request.user.is_staff and not request.user.is_superuser %}
+            <a class="policy-back" href="{% url 'tai_khoan' %}"><span aria-hidden="true">←</span> Tài khoản</a>
+        {% else %}
+            <a class="policy-back" href="{% url 'home' %}"><span aria-hidden="true">←</span> Trang chủ</a>
+        {% endif %}
+    </header>
+
+    {% if policies %}
+        <div class="policy-layout">
+            <aside class="policy-index" aria-label="Danh sách chính sách">
+                <span>Đang áp dụng</span>
+                <strong>{{ policies|length }} chính sách</strong>
+                <nav>
+                    {% for policy in policies %}
+                        <a href="#chinh-sach-{{ policy.id }}"><span>{{ forloop.counter|stringformat:"02d" }}</span>{{ policy.ten_chinh_sach }}</a>
+                    {% endfor %}
+                </nav>
+                <p>Liên hệ quản lý để kiểm tra điều kiện áp dụng cho hợp đồng của bạn.</p>
+            </aside>
+
+            <div class="policy-reading">
+                {% for policy in policies %}
+                    <article class="policy-article" id="chinh-sach-{{ policy.id }}">
+                        <header class="policy-article-header">
+                            <div>
+                                <span class="policy-group">{{ policy.get_doi_tuong_display }}{% if policy.doi_tuong_khac %} · {{ policy.doi_tuong_khac }}{% endif %}</span>
+                                <h2>{{ policy.ten_chinh_sach }}</h2>
+                            </div>
+                            <span class="policy-value">{% if policy.loai_ho_tro == 'phan_tram' %}{{ policy.gia_tri_ho_tro|floatformat:0 }}%{% elif policy.loai_ho_tro == 'so_tien' %}{{ policy.gia_tri_ho_tro|vnd }} VND{% else %}{{ policy.get_loai_ho_tro_display }}{% endif %}</span>
+                        </header>
+
+                        <dl class="policy-meta">
+                            <div><dt>Đối tượng áp dụng</dt><dd>{{ policy.get_doi_tuong_display }}{% if policy.doi_tuong_khac %} — {{ policy.doi_tuong_khac }}{% endif %}</dd></div>
+                            <div><dt>Thời gian hiệu lực</dt><dd>{{ policy.ngay_bat_dau|date:"d/m/Y" }} – {{ policy.ngay_ket_thuc|date:"d/m/Y" }}</dd></div>
+                            <div><dt>Hình thức hỗ trợ</dt><dd>{{ policy.get_loai_ho_tro_display }}</dd></div>
+                            <div><dt>Cập nhật</dt><dd>{{ policy.ngay_cap_nhat|date:"d/m/Y" }}</dd></div>
+                            {% if policy.so_luong_nguoi_duoc_ap_dung %}<div><dt>Giới hạn áp dụng</dt><dd>{{ policy.so_luong_nguoi_duoc_ap_dung }} người</dd></div>{% endif %}
+                            <div><dt>Trạng thái</dt><dd><span class="policy-status">Đang áp dụng</span></dd></div>
+                        </dl>
+
+                        {% if policy.mo_ta %}
+                            <section class="policy-section">
+                                <h3>Mô tả chính sách</h3>
+                                <div class="policy-copy">{{ policy.mo_ta|linebreaks }}</div>
+                            </section>
+                        {% endif %}
+                        {% if policy.dieu_kien %}
+                            <section class="policy-section policy-conditions">
+                                <h3>Điều kiện áp dụng</h3>
+                                <div class="policy-copy">{{ policy.dieu_kien|linebreaks }}</div>
+                            </section>
+                        {% endif %}
+
+                        <a class="policy-top" href="#top">Lên đầu trang <span aria-hidden="true">↑</span></a>
+                    </article>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <section class="policy-empty" role="status">
+            <span aria-hidden="true">i</span>
+            <h2>Chưa có chính sách đang áp dụng</h2>
+            <p>Chính sách mới sẽ được cập nhật tại đây.</p>
+        </section>
+    {% endif %}
+</main>
+{% endblock %}

@@ -1,0 +1,555 @@
+﻿{% extends "core/base.html" %}
+{% load static bo_loc %}
+
+{% block title %}
+Tìm phòng - NDT MOTEL
+{% endblock %}
+
+{% block page_title %}
+Tìm phòng
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+
+/* Room presentation contract: DB cover, identity, facts, availability, VND, detail link.
+   Home can use a condensed version of this anatomy in the next phase. */
+.ndt-premium-ui .site-main:has(.ndt-room-page){width:100%;max-width:none;margin:0;padding:0}
+.ndt-room-page{--room-teal:#087f91;--room-ink:#16333a;--room-muted:#5c737a;--room-line:#dce7e9;width:100%;padding:32px;box-sizing:border-box;color:var(--room-ink);overflow-wrap:anywhere}
+.ndt-room-page *{box-sizing:border-box}
+.ndt-room-page .room-icon{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}
+.ndt-room-page .ndt-room-hero{margin-bottom:24px}
+.ndt-room-page .ndt-room-breadcrumb{font-size:12px;font-weight:700;color:var(--room-muted);margin-bottom:12px}
+.ndt-room-page .ndt-room-hero h1{font-size:clamp(28px,2.5vw,40px);line-height:1.2;letter-spacing:-.025em;margin:0 0 12px;color:var(--room-ink)}
+.ndt-room-page .ndt-room-hero p{margin:0;color:var(--room-muted);font-size:15px;line-height:1.6}
+.ndt-room-page .ndt-room-filter{padding:24px;border:1px solid var(--room-line);border-radius:16px;background:#fff;margin-bottom:32px}
+.ndt-room-page .ndt-room-filter-title{display:flex;gap:8px;align-items:center;font-weight:700;font-size:16px;margin-bottom:16px}
+.ndt-room-page .ndt-room-filter-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,.5fr) auto;gap:16px;align-items:end}
+.ndt-room-page .ndt-filter-group{min-width:0;display:grid;gap:8px}
+.ndt-room-page label{font-size:14px;font-weight:600;color:var(--room-ink)}
+.ndt-room-page .ndt-filter-group input,.ndt-room-page .ndt-filter-group select{width:100%;min-width:0;height:48px;padding:0 12px;border:1px solid #aebfc4;border-radius:8px;background:#fff;color:var(--room-ink);font:inherit;font-size:15px}
+.ndt-room-page .ndt-filter-button,.ndt-room-page .ndt-room-button,.ndt-room-page .ndt-room-empty-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 16px;border:1px solid var(--room-teal);border-radius:8px;background:var(--room-teal);color:#fff;font:inherit;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer;transition:background .18s ease}
+.ndt-room-page .ndt-filter-button:hover,.ndt-room-page .ndt-room-button:hover{background:#066b7b;color:#fff}
+.ndt-room-page .ndt-filter-reset,.ndt-room-page .ndt-room-empty-button{display:inline-flex;align-items:center;gap:8px;min-height:44px;color:#066b7b;background:#fff;border:1px solid var(--room-line);border-radius:8px;padding:8px 12px;text-decoration:none;font-size:14px;font-weight:600}
+.ndt-room-page .ndt-filter-reset:hover,.ndt-room-page .ndt-room-empty-button:hover{background:#eef7f8}
+.ndt-room-page .ndt-result-header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px}
+.ndt-room-page .ndt-result-header h2{font-size:24px;margin:0 0 8px;color:var(--room-ink)}
+.ndt-room-page .ndt-result-header p{font-size:14px;line-height:1.6;margin:0;color:var(--room-muted)}
+.ndt-room-page .ndt-room-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.ndt-room-page .ndt-room-card{min-width:0;display:flex;flex-direction:column;background:#fff;border:1px solid var(--room-line);border-radius:16px;overflow:hidden;transition:border-color .18s ease,box-shadow .18s ease}
+.ndt-room-page .ndt-room-card:hover,.ndt-room-page .ndt-room-card:focus-within{border-color:#83b8c1;box-shadow:0 8px 24px #16434c12}
+.ndt-room-page .ndt-room-card-image{position:relative;aspect-ratio:16/10;background:#eaf4f6;overflow:hidden}
+.ndt-room-page .ndt-room-card-image img{width:100%;height:100%;object-fit:cover;display:block}
+.ndt-room-page .ndt-room-card-image-fallback{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#547980;font-size:14px;padding:48px 16px 16px}
+.ndt-room-page .ndt-room-card-image-fallback .room-icon{width:48px;height:48px;color:var(--room-teal)}
+.ndt-room-page .ndt-room-status{position:absolute;top:16px;left:16px;display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#edf2f3;color:#435d64}
+.ndt-room-page .ndt-room-status:before{content:'';width:6px;height:6px;flex:none;background:currentColor;border-radius:50%}
+.ndt-room-page .ndt-status-empty{background:#e8f6f2;color:#176a59}
+.ndt-room-page .ndt-status-booked{background:#fff4da;color:#805a16}
+.ndt-room-page .ndt-status-rented{background:#e9f4f8;color:#24657a}
+.ndt-room-page .ndt-status-maintenance{background:#fff0ed;color:#9a4439}
+.ndt-room-page .ndt-room-card-top{padding:24px 24px 0}
+.ndt-room-page .ndt-room-number{font-size:24px;line-height:1.25;color:var(--room-ink);margin:0 0 8px}
+.ndt-room-page .ndt-room-type{font-size:13px;color:var(--room-muted);line-height:1.6}
+.ndt-room-page .ndt-room-card-body{padding:16px 24px 24px;display:flex;flex-direction:column;flex:1}
+.ndt-room-page .ndt-room-location{margin-bottom:16px}
+.ndt-room-page .ndt-room-location-name{font-size:15px;font-weight:700;line-height:1.5}
+.ndt-room-page .ndt-room-address{font-size:13px;color:var(--room-muted);line-height:1.6;margin-top:4px}
+.ndt-room-page .ndt-room-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px;padding:16px 0;border-top:1px solid var(--room-line);border-bottom:1px solid var(--room-line)}
+.ndt-room-page .ndt-room-info-label{display:block;font-size:12px;color:var(--room-muted);margin-bottom:4px}
+.ndt-room-page .ndt-room-info-value{display:block;font-size:14px;font-weight:600;line-height:1.5}
+.ndt-room-page .ndt-room-amenities{font-size:13px;color:var(--room-muted);line-height:1.6;margin:16px 0 0}
+.ndt-room-page .ndt-room-notice{font-size:13px;color:var(--room-muted);line-height:1.6;padding:12px 0;margin-bottom:16px}
+.ndt-room-page .ndt-room-notice.available{color:#176a59}
+.ndt-room-page .ndt-room-card-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:16px;margin-top:auto;padding-top:16px;border-top:1px solid var(--room-line)}
+.ndt-room-page .ndt-room-price-label{display:block;font-size:12px;color:var(--room-muted);margin-bottom:4px}
+.ndt-room-page .ndt-room-price{color:#066b7b;font-size:22px;font-weight:800;line-height:1.4}
+.ndt-room-page .ndt-room-price span{display:block;color:var(--room-muted);font-size:12px;font-weight:400}
+.ndt-room-page .ndt-room-empty{padding:48px 24px;text-align:center;background:#fff;border:1px solid var(--room-line);border-radius:16px}
+.ndt-room-page .ndt-room-empty-icon{margin-bottom:16px;color:var(--room-teal)}
+.ndt-room-page .ndt-room-empty-icon .room-icon{width:48px;height:48px}
+.ndt-room-page .ndt-room-empty h3{font-size:24px;margin:0 0 12px}
+.ndt-room-page .ndt-room-empty p{font-size:15px;line-height:1.6;color:var(--room-muted);margin:0 0 24px}
+.ndt-room-page :is(a,button,input,select):focus-visible{outline:3px solid #087f91;outline-offset:3px}
+@media(min-width:1440px){.ndt-room-page{padding:40px}}
+@media(min-width:1024px) and (max-width:1439px){.ndt-room-page .ndt-room-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:768px) and (max-width:1023px){.ndt-room-page{padding:24px}.ndt-room-page .ndt-room-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.ndt-room-page .ndt-room-filter-form{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ndt-room-page .ndt-filter-button{grid-column:1/-1}.ndt-room-page .ndt-room-card-top{padding:16px 16px 0}.ndt-room-page .ndt-room-card-body{padding:16px}}
+@media(max-width:767px){.ndt-room-page{padding:24px 16px}.ndt-room-page .ndt-room-filter{padding:16px}.ndt-room-page .ndt-room-filter-form,.ndt-room-page .ndt-room-grid{grid-template-columns:1fr}.ndt-room-page .ndt-result-header{align-items:flex-start;flex-direction:column}.ndt-room-page .ndt-room-button{width:100%}.ndt-room-page .ndt-room-card-top{padding:16px 16px 0}.ndt-room-page .ndt-room-card-body{padding:16px}}
+@media(prefers-reduced-motion:reduce){.ndt-room-page *{transition:none!important}}
+.ndt-room-pagination{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:32px;padding:18px 20px;border:1px solid var(--room-line);border-radius:12px;background:#fff}
+.ndt-room-pagination a{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 18px;border:1px solid #b9cdd1;border-radius:7px;color:var(--room-teal-dark);font-size:14px;font-weight:750;text-decoration:none}
+.ndt-room-pagination a:hover{border-color:var(--room-teal);background:#edf7f8}
+.ndt-room-pagination-status{min-width:140px;color:var(--room-muted);font-size:14px;text-align:center}
+.ndt-room-pagination-status strong{color:var(--room-ink)}
+@media(max-width:767px){.ndt-room-pagination{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:14px}.ndt-room-pagination a{width:100%;padding:0 10px}.ndt-room-pagination-status{grid-column:1/-1;grid-row:1;min-width:0}.ndt-room-pagination .is-disabled{visibility:hidden}}
+</style>
+<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="ndt-room-page ndt-foundation" data-foundation-pilot="rooms-public">
+
+
+    <!-- =====================================================
+         PAGE HERO
+    ====================================================== -->
+
+    <section class="ndt-room-hero">
+        {% include "core/foundation/page_header.html" with breadcrumb="NDT MOTEL / Tìm phòng" title="Tìm phòng phù hợp với bạn" subtitle="So sánh giá thuê, cơ sở và sức chứa. Xem chi tiết để chọn phòng phù hợp." %}
+    </section>
+
+
+    <!-- =====================================================
+         FILTER
+    ====================================================== -->
+
+    <section class="ndt-room-filter ndt-filter-bar">
+
+        <div class="ndt-room-filter-title ndt-filter-bar__title">
+            <svg class="room-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg> Tìm kiếm và lọc phòng
+        </div>
+
+        <form
+            method="get"
+            action="{% url 'danh_sach_phong' %}"
+            class="ndt-room-filter-form ndt-filter-bar__form"
+        >
+
+            <!-- SEARCH -->
+
+            <div class="ndt-filter-group ndt-field">
+
+                <label class="ndt-label" for="q">
+                    Từ khóa
+                </label>
+
+                <input
+                    id="q"
+                    type="text"
+                    name="q"
+                    value="{{ tu_khoa }}"
+                    placeholder="Số phòng, cơ sở hoặc quận..."
+                    class="ndt-control"
+                >
+
+            </div>
+
+
+            <!-- PRICE -->
+
+            <div class="ndt-filter-group ndt-field">
+
+                <label class="ndt-label" for="gia_max">
+                    Giá thuê tối đa (đ/tháng)
+                </label>
+
+                <input id="gia_max" name="gia_max" type="number" min="0" step="any"
+                       value="{{ gia_max }}" placeholder="Không giới hạn" list="room-price-options" class="ndt-control">
+                <datalist id="room-price-options">
+                    <option value="2000000">2.000.000 đ</option>
+                    <option value="3000000">3.000.000 đ</option>
+                    <option value="5000000">5.000.000 đ</option>
+                </datalist>
+
+            </div>
+
+
+            <!-- SUBMIT -->
+
+            <button
+                type="submit"
+                class="ndt-filter-button ndt-button ndt-button--primary"
+            >
+                <svg class="room-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg> Tìm phòng
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- =====================================================
+         RESULT HEADER
+    ====================================================== -->
+
+    <section>
+
+        <div class="ndt-result-header">
+
+            <div>
+
+                <h2>
+                    {{ tong_phong }} phòng phù hợp
+                </h2>
+
+                <p>
+                    {% if tu_khoa %}Từ khóa: “{{ tu_khoa }}”. {% endif %}
+                    Kết quả bao gồm các trạng thái phòng; xem trạng thái trước khi lựa chọn.
+                </p>
+
+            </div>
+
+
+            {% if tu_khoa or gia_max %}
+                <a class="ndt-filter-reset ndt-button ndt-button--secondary" href="{% url 'danh_sach_phong' %}">Xóa bộ lọc</a>
+            {% endif %}
+
+        </div>
+
+
+        <!-- =================================================
+             ROOM GRID
+        ================================================== -->
+
+        {% if phong %}
+
+        <div class="ndt-room-grid">
+
+            {% for p in phong %}
+
+            <article class="ndt-room-card ndt-card">
+
+                <div class="ndt-room-card-image">
+                    {% with cover=p.anh_dai_dien_hien_thi %}
+                    {% if cover %}
+                        <img
+                            src="{{ cover.anh.url }}"
+                            alt="Phòng {{ p.so_phong }} - {{ p.co_so.ten_co_so }}"
+                            loading="lazy"
+                        >
+                    {% else %}
+                        <img src="{% static 'images/room-placeholder.svg' %}" alt="Ảnh mặc định cho phòng {{ p.so_phong }}" loading="lazy">
+                    {% endif %}
+
+                    {% endwith %}
+                    {% if p.trang_thai == "trong" %}
+                        <span class="ndt-room-status ndt-status-empty ndt-badge ndt-badge--success">Phòng trống</span>
+                    {% elif p.trang_thai == "da_dat" %}
+                        <span class="ndt-room-status ndt-status-booked ndt-badge ndt-badge--warning">Đã đặt</span>
+                    {% elif p.trang_thai == "dang_thue" %}
+                        <span class="ndt-room-status ndt-status-rented ndt-badge ndt-badge--info">Đang thuê</span>
+                    {% elif p.trang_thai == "bao_tri" %}
+                        <span class="ndt-room-status ndt-status-maintenance ndt-badge ndt-badge--danger">Bảo trì</span>
+                    {% else %}
+                        <span class="ndt-room-status ndt-status-default ndt-badge">{{ p.get_trang_thai_display }}</span>
+                    {% endif %}
+                </div>
+
+
+                <!-- =========================================
+                     CARD TOP
+                ========================================== -->
+
+                <div class="ndt-room-card-top">
+
+                    <div class="ndt-room-number-wrap">
+
+                        <h3 class="ndt-room-number">Phòng {{ p.so_phong }}</h3>
+                        <div class="ndt-room-type">{{ p.get_loai_phong_display }} · Tầng {{ p.tang }}</div>
+
+                    </div>
+
+
+
+
+                </div>
+
+
+                <!-- =========================================
+                     CARD BODY
+                ========================================== -->
+
+                <div class="ndt-room-card-body">
+
+
+                    <!-- LOCATION -->
+
+                    <div class="ndt-room-location">
+
+                        <div class="ndt-room-location-name">
+                            <svg class="room-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V3h12v18M16 9h4v12M2 21h20M8 7h4M8 11h4M8 15h4M9 21v-3h2v3"></path></svg> {{ p.co_so.ten_co_so }}
+                        </div>
+
+                        <div class="ndt-room-address">
+
+                            {% if p.co_so.quan %}
+                                 {{ p.co_so.quan }}
+                            {% endif %}
+
+                            {% if p.co_so.dia_chi %}
+                                · {{ p.co_so.dia_chi }}
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- BASIC INFORMATION -->
+
+                    <div class="ndt-room-info-grid">
+
+
+                        <div class="ndt-room-info-item">
+
+                            <span class="ndt-room-info-label">
+                                 Diện tích
+                            </span>
+
+                            <span class="ndt-room-info-value">
+                                {{ p.dien_tich }} m²
+                            </span>
+
+                        </div>
+
+
+                        <div class="ndt-room-info-item">
+
+                            <span class="ndt-room-info-label">
+                                 Sức chứa
+                            </span>
+
+                            <span class="ndt-room-info-value">
+                                {% if p.suc_chua_da_cau_hinh %}
+                                    Tối đa {{ p.suc_chua_hien_thi }} người
+                                {% else %}
+                                    Chưa cấu hình sức chứa
+                                {% endif %}
+                            </span>
+
+                        </div>
+
+
+                        <div class="ndt-room-info-item">
+
+                            <span class="ndt-room-info-label">
+                                 Đang ở
+                            </span>
+
+                            <span class="ndt-room-info-value">
+                                {% if p.suc_chua_da_cau_hinh %}
+                                    {{ p.so_nguoi_hien_tai }}
+                                    /
+                                    {{ p.suc_chua_hien_thi }}
+                                {% else %}
+                                    {{ p.so_nguoi_hien_tai }} người
+                                {% endif %}
+                            </span>
+
+                        </div>
+
+
+                        <div class="ndt-room-info-item">
+
+                            <span class="ndt-room-info-label">
+                                 Chỗ còn lại
+                            </span>
+
+                            <span class="ndt-room-info-value">
+
+                                {% if not p.suc_chua_da_cau_hinh %}
+
+                                    Chưa xác định
+
+                                {% elif p.cho_con_lai > 0 %}
+
+                                    {{ p.cho_con_lai }} chỗ
+
+                                {% else %}
+
+                                    Đã đủ người
+
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         AMENITIES
+                    ====================================== -->
+
+                    {% if p.tien_ich %}
+                        <p class="ndt-room-amenities"><strong>Tiện ích:</strong> {{ p.tien_ich|truncatechars:110 }}</p>
+                    {% endif %}
+
+                    <!-- =====================================
+                         BUSINESS STATUS
+                    ====================================== -->
+
+                    {% if p.trang_thai == "trong" %}
+
+                        <div class="ndt-room-notice available">
+                             {% if p.suc_chua_da_cau_hinh %}
+                                Phòng chưa có người thuê và đang có thể đặt phòng.
+                            {% else %}
+                                Chưa cấu hình sức chứa; chưa thể tiếp nhận đặt phòng.
+                            {% endif %}
+                        </div>
+
+                    {% elif p.trang_thai == "da_dat" %}
+
+                        <div class="ndt-room-notice booked">
+                             Phòng đã có lượt đặt được duyệt và đang chờ hoàn tất thuê.
+                        </div>
+
+                    {% elif p.trang_thai == "dang_thue" %}
+
+                        {% if not p.suc_chua_da_cau_hinh %}
+
+                            <div class="ndt-room-notice rented">
+                                 Phòng đang có người thuê. Sức chứa tối đa chưa được cấu hình.
+                            </div>
+
+                        {% elif p.cho_phep_ghep_hien_tai %}
+
+                            <div class="ndt-room-notice rented">
+                                 Phòng đang có người thuê, còn
+                                {{ p.cho_con_lai }} chỗ và hiện đang nhận đăng ký ở ghép.
+                            </div>
+
+                        {% elif p.cho_con_lai > 0 %}
+
+                            <div class="ndt-room-notice rented">
+                                 Phòng đang có người thuê và còn
+                                {{ p.cho_con_lai }} chỗ theo sức chứa.
+                                Xem chi tiết để kiểm tra điều kiện ở ghép.
+                            </div>
+
+                        {% else %}
+
+                            <div class="ndt-room-notice full">
+                                 Phòng đang thuê và đã đủ số người tối đa.
+                            </div>
+
+                        {% endif %}
+
+                    {% elif p.trang_thai == "bao_tri" %}
+
+                        <div class="ndt-room-notice maintenance">
+                             Phòng đang bảo trì và tạm thời không tiếp nhận người thuê.
+                        </div>
+
+                    {% endif %}
+
+
+                    <!-- =====================================
+                         PRICE + BUTTON
+                    ====================================== -->
+
+                    <div class="ndt-room-card-bottom">
+
+                        <div>
+
+                            <span class="ndt-room-price-label">
+                                Giá thuê
+                            </span>
+
+                            <div class="ndt-room-price">
+
+                                {{ p.gia_thue|vnd }} đ
+
+                                <span>
+                                    / tháng
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <a
+                            href="{% url 'chi_tiet_phong' p.id %}"
+                            class="ndt-room-button ndt-button ndt-button--primary"
+                        >
+                            Xem chi tiết <svg class="room-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"></path></svg>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="ndt-room-pagination" aria-label="Phân trang danh sách phòng">
+            {% if page_obj.has_previous %}
+                <a href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" rel="prev">
+                    <span aria-hidden="true">←</span> Trang trước
+                </a>
+            {% else %}
+                <span class="is-disabled" aria-hidden="true"></span>
+            {% endif %}
+
+            <span class="ndt-room-pagination-status">
+                Trang <strong>{{ page_obj.number }}</strong> / {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}" rel="next">
+                    Trang sau <span aria-hidden="true">→</span>
+                </a>
+            {% else %}
+                <span class="is-disabled" aria-hidden="true"></span>
+            {% endif %}
+        </nav>
+        {% endif %}
+
+
+        {% else %}
+
+
+        <!-- =================================================
+             EMPTY STATE
+        ================================================== -->
+
+        <div class="ndt-room-empty ndt-empty-state" role="status">
+
+            <div class="ndt-room-empty-icon ndt-empty-state__icon">
+                <svg class="room-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V3h12v18M16 9h4v12M2 21h20M8 7h4M8 11h4M8 15h4M9 21v-3h2v3"></path></svg>
+            </div>
+
+            <h3 class="ndt-empty-state__title">
+                Chưa tìm thấy phòng phù hợp
+            </h3>
+
+            <p class="ndt-empty-state__description">
+                Không có phòng nào phù hợp với từ khóa hoặc mức giá
+                mà bạn đang tìm kiếm. Hãy thử thay đổi điều kiện lọc.
+            </p>
+
+            {% if tu_khoa or gia_max %}
+            <a
+                href="{% url 'danh_sach_phong' %}"
+                class="ndt-room-empty-button ndt-button ndt-button--secondary"
+            >
+                Xóa bộ lọc
+            </a>
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,263 @@
+{% extends "core/tenant_base.html" %}
+{% load static bo_loc %}
+{% block title %}Đăng ký - NDT MOTEL{% endblock %}
+{% block tenant_styles %}<link rel="stylesheet" href="{% static 'css/tenant/dang_ky.css' %}">{% endblock %}
+{% block tenant_content %}
+
+
+<section class="auth-page">
+
+    <div class="auth-card">
+
+        <div class="auth-brand">
+            <div class="auth-logo">N</div>
+
+            <h1>Tạo tài khoản</h1>
+
+            <p>
+                Đăng ký tài khoản để sử dụng NDT MOTEL
+            </p>
+        </div>
+
+        {% if next %}
+            <div class="auth-return-notice">
+                Sau khi đăng ký thành công, hệ thống sẽ đưa bạn tiếp tục chức năng đang sử dụng.
+            </div>
+        {% endif %}
+
+        
+
+        <form
+            method="POST"
+            action="{% url 'dang_ky' %}"
+            autocomplete="off"
+        >
+
+            {% csrf_token %}
+
+            {% if next %}
+                <input
+                    type="hidden"
+                    name="next"
+                    value="{{ next }}"
+                >
+            {% endif %}
+
+            <div class="form-section-title">
+                 Thông tin tài khoản
+            </div>
+
+            <div class="form-grid">
+
+                <div class="auth-field">
+                    <label for="username">
+                        Tên đăng nhập
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="auth-input-wrap">
+                        <span class="auth-icon"></span>
+
+                        <input
+                            id="username"
+                            class="auth-input"
+                            type="text"
+                            name="username"
+                            value="{{ form_data.username|default:'' }}"
+                            placeholder="Nhập tên đăng nhập"
+                            autocomplete="username"
+                            required
+                            autofocus
+                        >
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label for="register-password">
+                        Mật khẩu
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="auth-input-wrap">
+                        <span class="auth-icon"></span>
+
+                        <input
+                            id="register-password"
+                            class="tenant-inline-1 auth-input"
+                            type="password"
+                            name="password"
+                            placeholder="Nhập mật khẩu"
+                            autocomplete="new-password"
+                            required
+                           
+                        >
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            onclick="togglePassword('register-password', this)"
+                            aria-label="Hiện mật khẩu"
+                        >Hiện</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-section-title">
+                 Thông tin cá nhân
+            </div>
+
+            <div class="form-grid">
+
+                <div class="auth-field full">
+                    <label for="ho_ten">
+                        Họ và tên
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="auth-input-wrap">
+                        <span class="auth-icon"></span>
+
+                        <input
+                            id="ho_ten"
+                            class="auth-input"
+                            type="text"
+                            name="ho_ten"
+                            value="{{ form_data.ho_ten|default:'' }}"
+                            placeholder="Nhập họ và tên đầy đủ"
+                            autocomplete="name"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label for="so_dien_thoai">
+                        Số điện thoại
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="auth-input-wrap">
+                        <span class="auth-icon"></span>
+
+                        <input
+                            id="so_dien_thoai"
+                            class="auth-input"
+                            type="tel"
+                            name="so_dien_thoai"
+                            value="{{ form_data.so_dien_thoai|default:'' }}"
+                            placeholder="Nhập số điện thoại"
+                            autocomplete="tel"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label for="email">
+                        Email
+                    </label>
+
+                    <div class="auth-input-wrap">
+                        <span class="auth-icon"></span>
+
+                        <input
+                            id="email"
+                            class="auth-input"
+                            type="email"
+                            name="email"
+                            value="{{ form_data.email|default:'' }}"
+                            placeholder="Nhập email"
+                            autocomplete="email"
+                        >
+                    </div>
+                </div>
+
+                <div class="auth-field full">
+                    <label for="cccd">
+                        CCCD
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="auth-input-wrap">
+                        <span class="auth-icon"></span>
+
+                        <input
+                            id="cccd"
+                            class="auth-input"
+                            type="text"
+                            name="cccd"
+                            value="{{ form_data.cccd|default:'' }}"
+                            placeholder="Nhập số CCCD"
+                            inputmode="numeric"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+
+                    <div class="auth-help">
+                        CCCD được sử dụng để quản lý thông tin người thuê.
+                    </div>
+                </div>
+
+            </div>
+
+            <button
+                type="submit"
+                class="auth-submit"
+            >
+                Tạo tài khoản
+            </button>
+
+        </form>
+
+        <div class="auth-divider">
+            hoặc
+        </div>
+
+        <div class="auth-login">
+            Đã có tài khoản?
+            <a href="{% url 'dang_nhap' %}{% if next %}?next={{ next|urlencode }}{% endif %}">
+                Đăng nhập ngay
+            </a>
+        </div>
+
+        <a
+            href="{% url 'home' %}"
+            class="auth-home"
+        >
+            ← Quay lại trang chủ
+        </a>
+
+    </div>
+
+</section>
+
+<script>
+    function togglePassword(inputId, button) {
+        const input = document.getElementById(inputId);
+
+        if (!input) {
+            return;
+        }
+
+        if (input.type === "password") {
+            input.type = "text";
+            button.textContent = input.type === "password" ? "Hiện" : "Ẩn";
+            button.setAttribute(
+                "aria-label",
+                "Ẩn mật khẩu"
+            );
+        } else {
+            input.type = "password";
+            button.textContent = input.type === "password" ? "Hiện" : "Ẩn";
+            button.setAttribute(
+                "aria-label",
+                "Hiện mật khẩu"
+            );
+        }
+    }
+</script>
+
+
+{% endblock %}

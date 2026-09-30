@@ -1,0 +1,38 @@
+.tenant-ui .account-password {
+    width: min(100%, 720px);
+    margin: 0 auto;
+    padding: var(--ndt-space-1) 0 var(--ndt-space-8);
+}
+
+.tenant-ui .account-password .ndt-page-header h1 {
+    margin: 0;
+    color: var(--ndt-text);
+    font-size: var(--ndt-text-2xl);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.tenant-ui .account-form-card .ndt-card__header h2 {
+    margin: 0;
+    color: var(--ndt-text);
+    font-size: var(--ndt-text-lg);
+    line-height: 1.3;
+}
+
+.tenant-ui .account-form-card .ndt-card__header p {
+    margin: var(--ndt-space-2) 0 0;
+    color: var(--ndt-text-muted);
+    font-size: var(--ndt-text-sm);
+    line-height: 1.6;
+}
+
+.tenant-ui .account-form {
+    display: grid;
+    gap: var(--ndt-space-4);
+}
+
+.tenant-ui .account-form-actions {
+    margin-top: var(--ndt-space-2);
+    padding-top: var(--ndt-space-4);
+    border-top: 1px solid var(--ndt-border);
+}

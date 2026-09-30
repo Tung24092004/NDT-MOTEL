@@ -1,0 +1,320 @@
+﻿{% extends "core/base.html" %}
+
+{% block title %}Thêm cơ sở - NDT MOTEL{% endblock %}
+
+{% block extra_css %}
+<style>
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color:#07859a !important;
+    box-shadow:0 0 0 3px rgba(47,125,91,.08);
+}
+
+@media (max-width:600px) {
+
+    .page-header {
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+
+    div[style*="justify-content:flex-end"] {
+        flex-direction:column-reverse;
+    }
+
+    div[style*="justify-content:flex-end"] a,
+    div[style*="justify-content:flex-end"] button {
+        width:100%;
+        box-sizing:border-box;
+        text-align:center;
+    }
+
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>Thêm cơ sở</h1>
+        <p>Tạo một cơ sở mới cho hệ thống NDT MOTEL</p>
+    </div>
+
+    <a
+        href="{% url 'quan_ly_co_so' %}"
+        class="admin-secondary-btn"
+    >
+        ← Danh sách cơ sở
+    </a>
+
+</div>
+
+
+<div style="
+    max-width:850px;
+    margin:0 auto;
+">
+
+    <div class="booking-table-card">
+
+        <div class="booking-table-header">
+
+            <div>
+                <h2>Thông tin cơ sở</h2>
+
+                <span>
+                    Nhập đầy đủ thông tin cơ sở mới
+                </span>
+            </div>
+
+        </div>
+
+
+        <form
+            method="post"
+            action="{% url 'tao_co_so' %}"
+        >
+
+            {% csrf_token %}
+
+
+            <div style="padding:26px;">
+
+
+                <!-- TÊN CƠ SỞ -->
+
+                <div style="margin-bottom:20px;">
+
+                    <label
+                        for="ten_co_so"
+                        style="
+                            display:block;
+                            margin-bottom:8px;
+                            font-size:13px;
+                            font-weight:700;
+                            color:#26322c;
+                        "
+                    >
+                        Tên cơ sở <span style="color:#b84b4b;">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="ten_co_so"
+                        name="ten_co_so"
+                        required
+                        placeholder="Ví dụ: NDT Motel Cẩm Lệ"
+                        style="
+                            width:100%;
+                            box-sizing:border-box;
+                            min-height:45px;
+                            padding:0 14px;
+                            border:1px solid #dce3df;
+                            border-radius:10px;
+                            font-size:14px;
+                            outline:none;
+                        "
+                    >
+
+                </div>
+
+
+                <!-- ĐỊA CHỈ -->
+
+                <div style="margin-bottom:20px;">
+
+                    <label
+                        for="dia_chi"
+                        style="
+                            display:block;
+                            margin-bottom:8px;
+                            font-size:13px;
+                            font-weight:700;
+                            color:#26322c;
+                        "
+                    >
+                        Địa chỉ <span style="color:#b84b4b;">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="dia_chi"
+                        name="dia_chi"
+                        required
+                        placeholder="Ví dụ: 123 Nguyễn Văn Linh"
+                        style="
+                            width:100%;
+                            box-sizing:border-box;
+                            min-height:45px;
+                            padding:0 14px;
+                            border:1px solid #dce3df;
+                            border-radius:10px;
+                            font-size:14px;
+                            outline:none;
+                        "
+                    >
+
+                </div>
+
+
+                <!-- QUẬN -->
+
+                <div style="margin-bottom:20px;">
+
+                    <label
+                        for="quan"
+                        style="
+                            display:block;
+                            margin-bottom:8px;
+                            font-size:13px;
+                            font-weight:700;
+                            color:#26322c;
+                        "
+                    >
+                        Quận / khu vực <span style="color:#b84b4b;">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="quan"
+                        name="quan"
+                        required
+                        placeholder="Ví dụ: Cẩm Lệ"
+                        style="
+                            width:100%;
+                            box-sizing:border-box;
+                            min-height:45px;
+                            padding:0 14px;
+                            border:1px solid #dce3df;
+                            border-radius:10px;
+                            font-size:14px;
+                            outline:none;
+                        "
+                    >
+
+                </div>
+
+
+                <!-- TRẠNG THÁI -->
+
+                <div style="margin-bottom:24px;">
+
+                    <label
+                        for="trang_thai"
+                        style="
+                            display:block;
+                            margin-bottom:8px;
+                            font-size:13px;
+                            font-weight:700;
+                            color:#26322c;
+                        "
+                    >
+                        Trạng thái
+                    </label>
+
+                    <select
+                        id="trang_thai"
+                        name="trang_thai"
+                        style="
+                            width:100%;
+                            box-sizing:border-box;
+                            min-height:45px;
+                            padding:0 14px;
+                            border:1px solid #dce3df;
+                            border-radius:10px;
+                            font-size:14px;
+                            background:#fff;
+                            outline:none;
+                        "
+                    >
+
+                        <option value="hoat_dong">
+                            Đang hoạt động
+                        </option>
+
+                        <option value="tam_ngung">
+                            Tạm ngưng
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- GHI CHÚ -->
+
+                <div style="
+                    padding:16px;
+                    background:#f8faf9;
+                    border:1px solid #edf0ee;
+                    border-radius:12px;
+                    margin-bottom:24px;
+                ">
+
+                    <strong
+                        style="
+                            display:block;
+                            margin-bottom:6px;
+                            color:#26322c;
+                        "
+                    >
+                        Lưu ý
+                    </strong>
+
+                    <span
+                        style="
+                            color:#66736c;
+                            font-size:13px;
+                            line-height:1.6;
+                        "
+                    >
+                        Sau khi tạo cơ sở, bạn có thể thêm và quản lý
+                        các phòng thuộc cơ sở này trong phần quản lý phòng.
+                    </span>
+
+                </div>
+
+
+                <!-- BUTTON -->
+
+                <div style="
+                    display:flex;
+                    justify-content:flex-end;
+                    gap:10px;
+                    padding-top:20px;
+                    border-top:1px solid #edf0ee;
+                ">
+
+                    <a
+                        href="{% url 'quan_ly_co_so' %}"
+                        class="admin-secondary-btn"
+                    >
+                        Hủy
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="admin-primary-btn"
+                    >
+                        + Tạo cơ sở
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends "core/tenant_base.html" %}
+{% load static bo_loc %}
+{% block title %}Sửa chữa của tôi - NDT MOTEL{% endblock %}
+{% block page_title %}Sửa chữa của tôi{% endblock %}
+{% block tenant_styles %}
+<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
+<link rel="stylesheet" href="{% static 'css/repair.css' %}">
+{% endblock %}
+{% block tenant_content %}
+<div class="repair repair--tenant ndt-foundation" data-repair-screen="tenant-list">
+    {% url 'tao_yeu_cau_sua_chua' as create_url %}
+    {% include 'core/foundation/page_header.html' with breadcrumb='Tài khoản / Sửa chữa' title='Sửa chữa của tôi' subtitle='Theo dõi phòng, vấn đề, tiến độ xử lý và phản hồi từ quản lý.' action_url=create_url action_label='Gửi yêu cầu' %}
+
+    <section class="ndt-filter-bar repair-filter" aria-labelledby="tenant-repair-filter">
+        <h2 class="ndt-filter-bar__title" id="tenant-repair-filter">Trạng thái yêu cầu</h2>
+        <form class="ndt-filter-bar__form" method="get">
+            <div class="ndt-field">
+                <label class="ndt-label" for="repair-status">Lọc theo trạng thái</label>
+                <select class="ndt-control" id="repair-status" name="trang_thai">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="moi" {% if trang_thai == 'moi' %}selected{% endif %}>Mới</option>
+                    <option value="dang_xu_ly" {% if trang_thai == 'dang_xu_ly' %}selected{% endif %}>Đang xử lý</option>
+                    <option value="cho_thay_the" {% if trang_thai == 'cho_thay_the' %}selected{% endif %}>Chờ thay thế</option>
+                    <option value="hoan_thanh" {% if trang_thai == 'hoan_thanh' %}selected{% endif %}>Hoàn thành</option>
+                    <option value="tu_choi" {% if trang_thai == 'tu_choi' %}selected{% endif %}>Từ chối</option>
+                </select>
+            </div>
+            <div class="repair-filter__actions">
+                <button class="ndt-button ndt-button--primary" type="submit">Lọc</button>
+                {% if trang_thai %}
+                    <a class="ndt-button ndt-button--ghost" href="{% url 'yeu_cau_sua_chua_cua_toi' %}">Xóa lọc</a>
+                {% endif %}
+            </div>
+        </form>
+    </section>
+
+    {% if yeu_cau %}
+        <section class="repair-request-grid" aria-label="Danh sách yêu cầu sửa chữa">
+            {% for item in yeu_cau %}
+                <article class="ndt-surface repair-request-card">
+                    <div class="repair-request-card__main">
+                        <div>
+                            <span class="repair-eyebrow">Yêu cầu #{{ item.id }}</span>
+                            <h2>{{ item.tieu_de }}</h2>
+                        </div>
+                        <div class="repair-request-card__badges">
+                            {% include 'core/partials/repair_priority_badge.html' with repair=item %}
+                            {% include 'core/partials/repair_status_badge.html' with repair=item %}
+                        </div>
+                    </div>
+                    <dl class="repair-card-facts">
+                        <div>
+                            <dt>Phòng</dt>
+                            <dd>{{ item.phong.so_phong }}{% if item.phong.co_so %} · {{ item.phong.co_so.ten_co_so }}{% endif %}</dd>
+                        </div>
+                        <div>
+                            <dt>Vấn đề</dt>
+                            <dd>{{ item.get_loai_su_co_display }}</dd>
+                        </div>
+                        <div>
+                            <dt>Ngày gửi</dt>
+                            <dd>{{ item.ngay_tao|date:'d/m/Y H:i' }}</dd>
+                        </div>
+                        <div>
+                            <dt>Chi phí cập nhật</dt>
+                            <dd>{{ item.chi_phi|vnd }} đ</dd>
+                        </div>
+                    </dl>
+                    <div class="repair-next-step">
+                        <span>Bước tiếp theo</span>
+                        {% if item.trang_thai == 'moi' %}
+                            <p>Quản lý tiếp nhận và phân công người xử lý.</p>
+                        {% elif item.trang_thai == 'dang_xu_ly' %}
+                            <p>Kỹ thuật đang kiểm tra; theo dõi phản hồi mới từ quản lý.</p>
+                        {% elif item.trang_thai == 'cho_thay_the' %}
+                            <p>Chờ vật tư hoặc lịch thay thế trước khi hoàn tất.</p>
+                        {% elif item.trang_thai == 'hoan_thanh' %}
+                            <p>Yêu cầu đã hoàn thành; kiểm tra chi phí và ghi chú cuối.</p>
+                        {% elif item.trang_thai == 'tu_choi' %}
+                            <p>Yêu cầu bị từ chối; xem chi tiết để biết lý do nếu có.</p>
+                        {% endif %}
+                    </div>
+                    <div class="repair-card-actions">
+                        <a class="ndt-button ndt-button--secondary" href="{% url 'chi_tiet_yeu_cau_sua_chua_cua_toi' item.id %}">Xem chi tiết</a>
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        {% if trang_thai %}
+            {% include 'core/foundation/empty_state.html' with title='Không có yêu cầu phù hợp' description='Không có yêu cầu sửa chữa ở trạng thái đã chọn.' action_url=request.path action_label='Xem tất cả' %}
+        {% else %}
+            {% include 'core/foundation/empty_state.html' with title='Chưa có yêu cầu sửa chữa' description='Khi phòng gặp sự cố, hãy gửi thông tin để quản lý tiếp nhận.' action_url=create_url action_label='Gửi yêu cầu đầu tiên' %}
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,525 @@
+/* Danh sach hoa don cua nguoi thue */
+.tenant-ui .billing-page {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 12px 0 56px;
+    color: #18343b;
+}
+
+.tenant-ui .billing-page .ndt-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.25;
+    text-decoration: none;
+}
+
+.tenant-ui .billing-page .ndt-button--primary {
+    border-color: #087f8c;
+    background: #087f8c;
+    color: #fff;
+}
+
+.tenant-ui .billing-page .ndt-button--secondary {
+    border-color: #c8d9dc;
+    background: #fff;
+    color: #234b54;
+}
+
+.tenant-ui .billing-page .ndt-button:focus-visible {
+    outline: 3px solid rgba(8, 127, 140, 0.3);
+    outline-offset: 2px;
+}
+
+.tenant-ui .billing-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+    color: #71858a;
+    font-size: 13px;
+}
+
+.tenant-ui .billing-breadcrumb a {
+    color: #087f8c;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.tenant-ui .billing-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #dbe7e9;
+}
+
+.tenant-ui .billing-kicker,
+.tenant-ui .register-head p,
+.tenant-ui .billing-empty__eyebrow {
+    margin: 0 0 6px;
+    color: #087f8c;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.tenant-ui .billing-heading h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.15;
+}
+
+.tenant-ui .billing-heading > div > p:last-child {
+    margin: 8px 0 0;
+    color: #5d747a;
+    font-size: 15px;
+}
+
+.tenant-ui .billing-heading .ndt-button,
+.tenant-ui .invoice-actions .ndt-button,
+.tenant-ui .billing-empty .ndt-button {
+    min-height: 44px;
+}
+
+/* Tong quan */
+.tenant-ui .billing-overview {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    margin: 24px 0 34px;
+    border: 1px solid #d8e5e7;
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.tenant-ui .overview-primary {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 22px 26px;
+    background: #087f8c;
+    color: #fff;
+}
+
+.tenant-ui .overview-primary span,
+.tenant-ui .overview-primary small {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tenant-ui .overview-primary strong {
+    margin: 4px 0;
+    font-size: 34px;
+    line-height: 1;
+}
+
+.tenant-ui .overview-stats {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin: 0;
+}
+
+.tenant-ui .overview-stats div {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+    padding: 18px;
+    border-left: 1px solid #e3ecee;
+}
+
+.tenant-ui .overview-stats dt {
+    color: #6d8085;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.tenant-ui .overview-stats dd {
+    margin: 7px 0 0;
+    color: #163b43;
+    font-size: 22px;
+    font-weight: 900;
+}
+
+/* Bang dang ky hoa don */
+.tenant-ui .register-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 14px;
+}
+
+.tenant-ui .register-head h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.tenant-ui .register-head > span {
+    color: #71858a;
+    font-size: 13px;
+}
+
+.tenant-ui .invoice-row {
+    display: grid;
+    grid-template-columns: 150px minmax(180px, 0.8fr) minmax(180px, 0.9fr) minmax(210px, 1fr) 180px;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 20px 22px;
+    border: 1px solid #d7e4e6;
+    border-left: 4px solid #bfd2d5;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.tenant-ui .invoice-row--chua_thanh_toan {
+    border-left-color: #d49a18;
+}
+
+.tenant-ui .invoice-row--cho_xac_nhan {
+    border-left-color: #2e8198;
+}
+
+.tenant-ui .invoice-row--da_thanh_toan {
+    border-left-color: #36855a;
+}
+
+.tenant-ui .invoice-row--qua_han {
+    border-left-color: #c83d34;
+}
+
+.tenant-ui .invoice-row--huy {
+    border-left-color: #89989b;
+}
+
+.tenant-ui .invoice-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tenant-ui .invoice-code {
+    flex: 0 0 auto;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #eaf6f6;
+    color: #087581;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.tenant-ui .invoice-identity p,
+.tenant-ui .invoice-priority span,
+.tenant-ui .invoice-next-step > span {
+    margin: 0 0 4px;
+    color: #708388;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.tenant-ui .invoice-identity h3 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.3;
+}
+
+.tenant-ui .invoice-priority {
+    display: grid;
+    gap: 10px;
+}
+
+.tenant-ui .invoice-amount,
+.tenant-ui .invoice-due {
+    display: grid;
+    gap: 2px;
+}
+
+.tenant-ui .invoice-amount strong {
+    color: #087581;
+    font-size: 20px;
+    line-height: 1.2;
+}
+
+.tenant-ui .invoice-due strong {
+    font-size: 14px;
+}
+
+.tenant-ui .status {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    min-height: 26px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #edf2f3;
+    color: #4e6267;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.tenant-ui .status--paid {
+    background: #e5f5e9;
+    color: #267047;
+}
+
+.tenant-ui .status--pending {
+    background: #e5f3f8;
+    color: #236c82;
+}
+
+.tenant-ui .status--overdue {
+    background: #fff0ee;
+    color: #b52f28;
+}
+
+.tenant-ui .status--unpaid {
+    background: #fff5dc;
+    color: #9b6812;
+}
+
+.tenant-ui .invoice-context {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+}
+
+.tenant-ui .invoice-context div {
+    min-width: 0;
+}
+
+.tenant-ui .invoice-context dt {
+    color: #708388;
+    font-size: 11px;
+}
+
+.tenant-ui .invoice-context dd {
+    margin: 3px 0 0;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.tenant-ui .invoice-next-step p {
+    margin: 0;
+    color: #405b62;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.tenant-ui .invoice-actions {
+    display: grid;
+    gap: 8px;
+}
+
+.tenant-ui .invoice-actions .ndt-button {
+    width: 100%;
+    padding-right: 10px;
+    padding-left: 10px;
+    text-align: center;
+}
+
+/* Trang thai rong */
+.tenant-ui .billing-empty {
+    display: grid;
+    justify-items: center;
+    min-height: 260px;
+    align-content: center;
+    padding: 40px 24px;
+    border: 1px dashed #bfd2d5;
+    border-radius: 8px;
+    background: #f9fcfc;
+    text-align: center;
+}
+
+.tenant-ui .billing-empty h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.tenant-ui .billing-empty > p:not(.billing-empty__eyebrow) {
+    max-width: 480px;
+    margin: 10px 0 20px;
+    color: #667c82;
+    line-height: 1.6;
+}
+
+@media (max-width: 1180px) {
+    .tenant-ui .invoice-row {
+        grid-template-columns: 150px minmax(190px, 1fr) minmax(220px, 1.1fr);
+    }
+
+    .tenant-ui .invoice-context {
+        grid-column: 1 / 3;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .tenant-ui .invoice-next-step {
+        grid-column: 3;
+        grid-row: 2;
+    }
+
+    .tenant-ui .invoice-actions {
+        grid-column: 3;
+        grid-row: 1;
+    }
+}
+
+@media (max-width: 900px) {
+    .tenant-ui .billing-overview {
+        grid-template-columns: 180px 1fr;
+    }
+
+    .tenant-ui .overview-primary {
+        padding: 18px;
+    }
+
+    .tenant-ui .overview-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .tenant-ui .overview-stats div:nth-child(n + 4) {
+        border-top: 1px solid #e3ecee;
+    }
+
+    .tenant-ui .invoice-row {
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 0.8fr);
+    }
+
+    .tenant-ui .invoice-priority,
+    .tenant-ui .invoice-actions {
+        grid-column: 2;
+    }
+
+    .tenant-ui .invoice-priority {
+        grid-row: 1 / span 2;
+    }
+
+    .tenant-ui .invoice-context {
+        grid-column: 1;
+        grid-template-columns: 1fr;
+    }
+
+    .tenant-ui .invoice-next-step {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .tenant-ui .invoice-actions {
+        grid-row: 3;
+    }
+}
+
+@media (max-width: 680px) {
+    .tenant-ui .billing-page {
+        padding-top: 8px;
+    }
+
+    .tenant-ui .billing-heading {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .tenant-ui .billing-heading h1 {
+        font-size: 30px;
+    }
+
+    .tenant-ui .billing-heading .ndt-button {
+        width: 100%;
+    }
+
+    .tenant-ui .billing-overview {
+        grid-template-columns: 1fr;
+        margin: 20px 0 28px;
+    }
+
+    .tenant-ui .overview-primary {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 2px 16px;
+        padding: 16px 18px;
+    }
+
+    .tenant-ui .overview-primary strong {
+        grid-row: 1 / 3;
+        grid-column: 2;
+        align-self: center;
+        font-size: 30px;
+    }
+
+    .tenant-ui .overview-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .tenant-ui .overview-stats div {
+        padding: 13px 12px;
+    }
+
+    .tenant-ui .overview-stats div:nth-child(4) {
+        border-left: 0;
+    }
+
+    .tenant-ui .overview-stats dd {
+        font-size: 19px;
+    }
+
+    .tenant-ui .invoice-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 18px;
+    }
+
+    .tenant-ui .invoice-identity,
+    .tenant-ui .invoice-priority,
+    .tenant-ui .invoice-context,
+    .tenant-ui .invoice-next-step,
+    .tenant-ui .invoice-actions {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .tenant-ui .invoice-priority {
+        grid-template-columns: 1fr 1fr;
+        align-items: end;
+        padding: 14px;
+        border-radius: 6px;
+        background: #f3f8f8;
+    }
+
+    .tenant-ui .invoice-priority .status {
+        grid-column: 1 / -1;
+    }
+
+    .tenant-ui .invoice-context {
+        padding-top: 2px;
+    }
+
+    .tenant-ui .invoice-next-step {
+        padding-top: 14px;
+        border-top: 1px solid #e2ebec;
+    }
+
+    .tenant-ui .invoice-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .tenant-ui .register-head h2 {
+        font-size: 20px;
+    }
+
+    .tenant-ui .billing-empty {
+        min-height: 230px;
+    }
+}

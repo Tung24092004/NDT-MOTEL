@@ -1,0 +1,122 @@
+{% extends "core/tenant_base.html" %}
+{% load static bo_loc %}
+
+{% block title %}Hóa đơn của tôi - NDT MOTEL{% endblock %}
+{% block page_title %}Hóa đơn &amp; thanh toán{% endblock %}
+
+{% block tenant_styles %}
+    <link rel="stylesheet" href="{% static 'css/tenant/hoa_don_cua_toi.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bill_smart_full_refresh.css' %}">
+{% endblock %}
+
+{% block tenant_content %}
+<main class="billing-page">
+    <nav class="billing-breadcrumb" aria-label="Điều hướng">
+        <a href="{% url 'tai_khoan' %}">Tài khoản</a>
+        <span>/</span>
+        <span>Hóa đơn &amp; thanh toán</span>
+    </nav>
+
+    <header class="billing-heading">
+        <div>
+            <p class="billing-kicker">Hồ sơ thanh toán</p>
+            <h1>Hóa đơn của tôi</h1>
+            <p>Theo dõi kỳ thu, hạn thanh toán và kết quả đối soát.</p>
+        </div>
+        <a class="ndt-button ndt-button--secondary" href="{% url 'tai_khoan' %}">Quay lại tài khoản</a>
+    </header>
+
+    {% if hoa_don %}
+        <section class="billing-overview" aria-label="Tổng quan hóa đơn">
+            <div class="overview-primary">
+                <span>Cần thanh toán</span>
+                <strong>{{ chua_thanh_toan|add:qua_han }}</strong>
+                <small>hóa đơn cần bạn xử lý</small>
+            </div>
+            <dl class="overview-stats">
+                <div><dt>Tổng hóa đơn</dt><dd>{{ tong_hoa_don }}</dd></div>
+                <div><dt>Chờ Admin xác nhận</dt><dd>{{ cho_xac_nhan }}</dd></div>
+                <div><dt>Đã thanh toán</dt><dd>{{ da_thanh_toan }}</dd></div>
+                <div><dt>Quá hạn</dt><dd>{{ qua_han }}</dd></div>
+                <div><dt>Đã hủy</dt><dd>{{ da_huy }}</dd></div>
+            </dl>
+        </section>
+    {% endif %}
+
+    <section class="invoice-register" aria-labelledby="invoice-register-title">
+        <div class="register-head">
+            <div>
+                <p>Chứng từ</p>
+                <h2 id="invoice-register-title">Danh sách hóa đơn</h2>
+            </div>
+            <span>{{ tong_hoa_don }} hóa đơn</span>
+        </div>
+
+        {% for hd in hoa_don %}
+            <article class="invoice-row invoice-row--{{ hd.trang_thai }}">
+                <div class="invoice-identity">
+                    <span class="invoice-code">HĐ-{{ hd.id }}</span>
+                    <div><p>Kỳ thu</p><h3>Tháng {{ hd.thang }}/{{ hd.nam }}</h3></div>
+                </div>
+
+                <div class="invoice-priority">
+                    <div class="invoice-amount"><span>Tổng tiền</span><strong>{{ hd.tong_tien|vnd }} VNĐ</strong></div>
+                    <div class="invoice-due"><span>Hạn thanh toán</span><strong>{{ hd.han_thanh_toan|date:"d/m/Y"|default:"Chưa xác định" }}</strong></div>
+                    {% if hd.trang_thai == "da_thanh_toan" %}
+                        <span class="status status--paid">Đã thanh toán</span>
+                    {% elif hd.trang_thai == "cho_xac_nhan" %}
+                        <span class="status status--pending">Chờ xác nhận</span>
+                    {% elif hd.trang_thai == "qua_han" %}
+                        <span class="status status--overdue">Quá hạn</span>
+                    {% elif hd.trang_thai == "chua_thanh_toan" %}
+                        <span class="status status--unpaid">Chưa thanh toán</span>
+                    {% elif hd.trang_thai == "huy" %}
+                        <span class="status status--cancelled">Đã hủy</span>
+                    {% else %}
+                        <span class="status">{{ hd.get_trang_thai_display }}</span>
+                    {% endif %}
+                </div>
+
+                <dl class="invoice-context">
+                    <div>
+                        <dt>Phòng / cơ sở</dt>
+                        <dd>{{ hd.hop_dong.dat_phong.phong.so_phong }} · {{ hd.hop_dong.dat_phong.phong.co_so.ten_co_so }}</dd>
+                    </div>
+                    <div><dt>Hợp đồng</dt><dd>{{ hd.hop_dong.so_hop_dong }}</dd></div>
+                </dl>
+
+                <div class="invoice-next-step">
+                    <span>Bước tiếp theo</span>
+                    {% if hd.trang_thai == "chua_thanh_toan" %}
+                        <p>Thanh toán hoặc mở VietQR trước hạn.</p>
+                    {% elif hd.trang_thai == "qua_han" %}
+                        <p>Hóa đơn đã quá hạn. Vui lòng thanh toán sớm.</p>
+                    {% elif hd.trang_thai == "cho_xac_nhan" %}
+                        <p>Đã báo chuyển khoản. Chờ Admin đối soát và xác nhận.</p>
+                    {% elif hd.trang_thai == "da_thanh_toan" %}
+                        <p>Admin đã xác nhận thanh toán. Không cần thao tác thêm.</p>
+                    {% elif hd.trang_thai == "huy" %}
+                        <p>Hóa đơn đã hủy. Không cần thanh toán.</p>
+                    {% else %}
+                        <p>Xem chi tiết để theo dõi hóa đơn.</p>
+                    {% endif %}
+                </div>
+
+                <div class="invoice-actions">
+                    <a class="ndt-button ndt-button--secondary" href="{% url 'chi_tiet_hoa_don_cua_toi' hd.id %}">Xem chi tiết</a>
+                    {% if hd.trang_thai == "chua_thanh_toan" or hd.trang_thai == "qua_han" %}
+                        <a class="ndt-button ndt-button--primary" href="{% url 'thanh_toan_hoa_don_cua_toi' hd.id %}">Thanh toán / Xem QR</a>
+                    {% endif %}
+                </div>
+            </article>
+        {% empty %}
+            <div class="billing-empty">
+                <p class="billing-empty__eyebrow">Hóa đơn</p>
+                <h2>Chưa có hóa đơn</h2>
+                <p>Hóa đơn sẽ xuất hiện khi hợp đồng của bạn phát sinh kỳ thu.</p>
+                <a class="ndt-button ndt-button--secondary" href="{% url 'tai_khoan' %}">Quay lại tài khoản</a>
+            </div>
+        {% endfor %}
+    </section>
+</main>
+{% endblock %}

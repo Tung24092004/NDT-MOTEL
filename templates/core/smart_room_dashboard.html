@@ -1,0 +1,171 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Quản lý phòng thông minh - NDT MOTEL{% endblock %}
+{% block page_title %}Smart Room{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
+    <link rel="stylesheet" href="{% static 'css/smart_room_operations.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="smart-operations ndt-foundation" data-smart-screen="dashboard">
+    <header class="ndt-page-header">
+        <div class="ndt-page-header__content">
+            <p class="ndt-breadcrumb">Quản trị / Smart Room</p>
+            <h1 class="ndt-page-header__title">Quản lý phòng thông minh</h1>
+            <p class="ndt-page-header__subtitle">Theo dõi sức chứa, hồ sơ Face ID, quyền truy cập và các lượt ra vào gần nhất.</p>
+        </div>
+        <div class="ndt-page-header__actions">
+            <a class="ndt-button ndt-button--secondary" href="{% url 'quan_ly_lich_su_ra_vao' %}">Lịch sử ra vào</a>
+            <a class="ndt-button ndt-button--primary" href="{% url 'trang_xac_thuc_face_id' %}">Xác thực ra vào</a>
+        </div>
+    </header>
+
+    <nav class="smart-module-nav" aria-label="Chức năng Smart Room">
+        <a href="{% url 'quan_ly_nguoi_o_cung' %}"><strong>Người ở cùng</strong><span>{{ tong_nguoi_o_cung }} đang ở</span></a>
+        <a href="{% url 'quan_ly_face_profile' %}"><strong>Hồ sơ Face ID</strong><span>{{ face_da_xac_thuc }}/{{ tong_face_profile }} đã xác thực</span></a>
+        <a href="{% url 'quan_ly_quyen_ra_vao' %}"><strong>Quyền ra vào</strong><span>{{ quyen_hoat_dong }} còn hiệu lực</span></a>
+        <a href="{% url 'quan_ly_lich_su_ra_vao' %}"><strong>Nhật ký truy cập</strong><span>Xem toàn bộ lịch sử</span></a>
+    </nav>
+
+    <section class="smart-stats" aria-label="Chỉ số vận hành">
+        <article class="ndt-surface smart-stat">
+            <span>Phòng trong hệ thống</span>
+            <strong>{{ tong_phong }}</strong>
+            <small>{{ phong_dang_o }} phòng đang có người</small>
+        </article>
+        <article class="ndt-surface smart-stat smart-stat--success">
+            <span>Người đang ở / sức chứa</span>
+            <strong>{{ tong_nguoi_dang_o }} / {{ tong_suc_chua }}</strong>
+            <small>Còn {{ tong_cho_con_lai }} chỗ</small>
+        </article>
+        <article class="ndt-surface smart-stat smart-stat--info">
+            <span>Hồ sơ đã xác thực</span>
+            <strong>{{ face_da_xac_thuc }}</strong>
+            <small>{{ face_chua_san_sang }} hồ sơ chưa sẵn sàng</small>
+        </article>
+        <article class="ndt-surface smart-stat smart-stat--warning">
+            <span>Quyền còn hiệu lực</span>
+            <strong>{{ quyen_hoat_dong }}</strong>
+            <small>Đối chiếu theo ngày hiện tại</small>
+        </article>
+    </section>
+
+    <div class="smart-dashboard-grid">
+        <section class="ndt-card smart-room-panel" aria-labelledby="smart-room-list-title">
+            <div class="ndt-card__header smart-section-heading">
+                <div>
+                    <h2 id="smart-room-list-title">Tình trạng phòng</h2>
+                    <p>Sức chứa và khả năng tiếp nhận người ở của từng phòng.</p>
+                </div>
+                <div class="smart-summary-badges">
+                    <span class="ndt-badge ndt-badge--info">{{ phong_dang_o }} đang có người</span>
+                    {% if phong_day %}<span class="ndt-badge ndt-badge--warning">{{ phong_day }} đã đầy</span>{% endif %}
+                    {% if phong_chua_cau_hinh_suc_chua %}<span class="ndt-badge ndt-badge--danger">{{ phong_chua_cau_hinh_suc_chua }} chưa cấu hình</span>{% endif %}
+                </div>
+            </div>
+            <div class="ndt-card__body">
+                {% if danh_sach_phong %}
+                    <div class="smart-room-list">
+                        {% for item in danh_sach_phong %}
+                            <article class="smart-room-row">
+                                <div class="smart-room-identity">
+                                    <strong>Phòng {{ item.phong.so_phong }}</strong>
+                                    <span>{{ item.phong.co_so.ten_co_so }} · Tầng {{ item.phong.tang }}</span>
+                                </div>
+                                <div class="smart-room-capacity">
+                                    <div><strong>{{ item.so_nguoi }}</strong><span>/ {{ item.suc_chua }} người</span></div>
+                                    <div class="smart-progress" aria-label="Mức sử dụng {{ item.ty_le_suc_chua }}%">
+                                        <span class="smart-progress__bar" data-percent="{{ item.ty_le_suc_chua }}"></span>
+                                    </div>
+                                </div>
+                                <div class="smart-room-state">
+                                    {% if item.trang_thai_suc_chua == 'day' %}
+                                        <span class="ndt-badge ndt-badge--warning">Đã đầy</span>
+                                    {% elif item.trang_thai_suc_chua == 'chua_cau_hinh' %}
+                                        <span class="ndt-badge ndt-badge--danger">Chưa cấu hình</span>
+                                    {% elif item.trang_thai_suc_chua == 'dang_o' %}
+                                        <span class="ndt-badge ndt-badge--info">{{ item.nhan_suc_chua }}</span>
+                                    {% else %}
+                                        <span class="ndt-badge ndt-badge--success">{{ item.nhan_suc_chua }}</span>
+                                    {% endif %}
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="ndt-empty-state" role="status">
+                        <h3 class="ndt-empty-state__title">Chưa có phòng để theo dõi</h3>
+                        <p class="ndt-empty-state__description">Dữ liệu sức chứa sẽ xuất hiện khi hệ thống có phòng.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <aside class="smart-side-stack">
+            <section class="ndt-card" aria-labelledby="face-result-title">
+                <div class="ndt-card__header smart-section-heading"><div><h2 id="face-result-title">Kết quả Face ID</h2><p>Tổng lượt camera đã ghi nhận.</p></div></div>
+                <div class="ndt-card__body smart-face-results">
+                    <div><span>Cho phép</span><strong>{{ face_id_cho_phep_gan_day }}</strong></div>
+                    <div><span>Từ chối</span><strong>{{ face_id_tu_choi_gan_day }}</strong></div>
+                </div>
+            </section>
+            <section class="ndt-card" aria-labelledby="face-readiness-title">
+                <div class="ndt-card__header smart-section-heading"><div><h2 id="face-readiness-title">Mức sẵn sàng Face ID</h2></div></div>
+                <div class="ndt-card__body smart-readiness-list">
+                    <div><span>Tổng hồ sơ</span><strong>{{ tong_face_profile }}</strong></div>
+                    <div><span>Đã có ảnh</span><strong>{{ face_co_anh }}</strong></div>
+                    <div><span>Đã xác thực</span><strong>{{ face_da_xac_thuc }}</strong></div>
+                    <div><span>Chưa sẵn sàng</span><strong>{{ face_chua_san_sang }}</strong></div>
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <section class="smart-history" aria-labelledby="recent-access-title">
+        <div class="smart-section-heading smart-section-heading--outside">
+            <div><h2 id="recent-access-title">Hoạt động ra vào gần đây</h2><p>10 sự kiện mới nhất từ Face ID và ghi nhận thủ công.</p></div>
+            <a class="ndt-button ndt-button--secondary ndt-button--compact" href="{% url 'quan_ly_lich_su_ra_vao' %}">Xem tất cả</a>
+        </div>
+        {% if lich_su_gan_day %}
+            <div class="ndt-table-wrap smart-history-wrap">
+                <table class="ndt-table smart-history-table">
+                    <thead><tr><th>Người</th><th>Phòng</th><th>Thời điểm</th><th>Sự kiện</th><th>Nguồn</th><th>Kết quả</th></tr></thead>
+                    <tbody>
+                        {% for item in lich_su_gan_day %}
+                            <tr>
+                                <td data-label="Người"><strong>{% if item.nguoi_thue %}{{ item.nguoi_thue.ho_ten }}{% elif item.nguoi_o_cung %}{{ item.nguoi_o_cung.ho_ten }}{% else %}Không xác định{% endif %}</strong></td>
+                                <td data-label="Phòng">Phòng {{ item.phong.so_phong }}</td>
+                                <td data-label="Thời điểm">{{ item.thoi_diem|date:"d/m/Y H:i:s" }}</td>
+                                <td data-label="Sự kiện">{{ item.get_loai_su_kien_display }}</td>
+                                <td data-label="Nguồn">{% if item.nguon == "camera" %}Face ID{% elif item.nguon == "thu_cong" %}Thủ công{% else %}{{ item.get_nguon_display }}{% endif %}</td>
+                                <td data-label="Kết quả">
+                                    {% if "[CHO PHÉP]" in item.ghi_chu %}<span class="ndt-badge ndt-badge--success">Cho phép</span>
+                                    {% elif "[TỪ CHỐI]" in item.ghi_chu %}<span class="ndt-badge ndt-badge--danger">Từ chối</span>
+                                    {% else %}<span class="ndt-badge">Đã ghi nhận</span>{% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="ndt-empty-state" role="status"><h3 class="ndt-empty-state__title">Chưa có lịch sử ra vào</h3><p class="ndt-empty-state__description">Sự kiện mới sẽ được ghi tại đây.</p></div>
+        {% endif %}
+    </section>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".smart-progress__bar").forEach(function (bar) {
+        const percent = Math.max(0, Math.min(Number(bar.dataset.percent) || 0, 100));
+        bar.style.width = percent + "%";
+    });
+});
+</script>
+{% endblock %}

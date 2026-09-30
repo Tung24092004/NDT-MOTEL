@@ -1,0 +1,423 @@
+{% extends "core/base.html" %}
+
+{% block title %}Tạo chính sách hỗ trợ - NDT Motel{% endblock %}
+
+{% block extra_css %}
+<style>
+
+.admin-form-label {
+    display:block;
+    margin-bottom:7px;
+    color:#48524d;
+    font-size:13px;
+    font-weight:700;
+}
+
+.admin-form-input {
+    width:100%;
+    box-sizing:border-box;
+    padding:11px 12px;
+    border:1px solid #dfe7e2;
+    border-radius:10px;
+    background:#fff;
+    font-size:14px;
+    color:#26322c;
+    outline:none;
+}
+
+.admin-form-input:focus {
+    border-color:#07859a;
+    box-shadow:0 0 0 3px rgba(47,125,91,.08);
+}
+
+@media (max-width:700px) {
+
+    div[style*="repeat(2, minmax(0, 1fr))"] {
+        grid-template-columns:1fr !important;
+    }
+
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>Thêm chính sách hỗ trợ</h1>
+        <p>Tạo chính sách ưu đãi và hỗ trợ dành cho người thuê</p>
+    </div>
+
+    <a
+        href="{% url 'quan_ly_chinh_sach' %}"
+        class="admin-secondary-btn"
+    >
+        ← Danh sách chính sách
+    </a>
+
+</div>
+
+
+<div class="booking-table-card" style="max-width:1000px; margin:0 auto;">
+
+    <div class="booking-table-header">
+
+        <div>
+            <h2>Thông tin chính sách</h2>
+            <span>Nhập đầy đủ thông tin để tạo chính sách hỗ trợ</span>
+        </div>
+
+    </div>
+
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div style="padding:26px;">
+
+            <div style="
+                display:grid;
+                grid-template-columns:repeat(2, minmax(0, 1fr));
+                gap:20px;
+            ">
+
+
+                <!-- TÊN CHÍNH SÁCH -->
+
+                <div style="grid-column:1 / -1;">
+
+                    <label for="ten_chinh_sach" class="admin-form-label">
+                        Tên chính sách *
+                    </label>
+
+                    <input
+                        type="text"
+                        name="ten_chinh_sach"
+                        id="ten_chinh_sach"
+                        required
+                        maxlength="200"
+                        placeholder="Ví dụ: Ưu đãi sinh viên thuê phòng"
+                        class="admin-form-input"
+                    >
+
+                </div>
+
+
+                <!-- ĐỐI TƯỢNG -->
+
+                <div>
+
+                    <label for="doi_tuong" class="admin-form-label">
+                        Đối tượng áp dụng *
+                    </label>
+
+                    <select
+                        name="doi_tuong"
+                        id="doi_tuong"
+                        required
+                        class="admin-form-input"
+                    >
+
+                        <option value="sinh_vien">Sinh viên</option>
+                        <option value="nguoi_lao_dong">Người lao động</option>
+                        <option value="ho_gia_dinh">Hộ gia đình</option>
+                        <option value="nguoi_cao_tuoi">Người cao tuổi</option>
+                        <option value="khach_thue_moi">Khách thuê mới</option>
+                        <option value="khach_thue_lau_dai">Khách thuê lâu dài</option>
+                        <option value="khac">Khác</option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ĐỐI TƯỢNG KHÁC -->
+
+                <div>
+
+                    <label for="doi_tuong_khac" class="admin-form-label">
+                        Đối tượng khác
+                    </label>
+
+                    <input
+                        type="text"
+                        name="doi_tuong_khac"
+                        id="doi_tuong_khac"
+                        maxlength="200"
+                        placeholder="Chỉ nhập nếu chọn Khác"
+                        class="admin-form-input"
+                    >
+
+                </div>
+
+
+                <!-- LOẠI HỖ TRỢ -->
+
+                <div>
+
+                    <label for="loai_ho_tro" class="admin-form-label">
+                        Loại hỗ trợ *
+                    </label>
+
+                    <select
+                        name="loai_ho_tro"
+                        id="loai_ho_tro"
+                        required
+                        class="admin-form-input"
+                    >
+
+                        <option value="phan_tram">
+                            Theo phần trăm
+                        </option>
+
+                        <option value="so_tien">
+                            Theo số tiền
+                        </option>
+
+                        <option value="mien_phi">
+                            Miễn phí
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- GIÁ TRỊ HỖ TRỢ -->
+
+                <div>
+
+                    <label for="gia_tri_ho_tro" class="admin-form-label">
+                        Giá trị hỗ trợ
+                    </label>
+
+                    <input
+                        type="number"
+                        name="gia_tri_ho_tro"
+                        id="gia_tri_ho_tro"
+                        min="0"
+                        step="1"
+                        value="0"
+                        placeholder="Ví dụ: 10 hoặc 500000"
+                        class="admin-form-input"
+                    >
+
+                    <small style="
+                        display:block;
+                        margin-top:6px;
+                        color:#89978f;
+                    ">
+                        Nếu chọn theo phần trăm: nhập số %, ví dụ 10.
+                        Nếu theo số tiền: nhập số tiền VNĐ.
+                    </small>
+
+                </div>
+
+
+                <!-- NGÂN SÁCH -->
+
+                <div>
+
+                    <label for="ngan_sach" class="admin-form-label">
+                        Ngân sách hỗ trợ (VNĐ)
+                    </label>
+
+                    <input
+                        type="number"
+                        name="ngan_sach"
+                        id="ngan_sach"
+                        min="0"
+                        step="1"
+                        value="0"
+                        placeholder="0"
+                        class="admin-form-input"
+                    >
+
+                </div>
+
+
+                <!-- SỐ NGƯỜI -->
+
+                <div>
+
+                    <label
+                        for="so_luong_nguoi_duoc_ap_dung"
+                        class="admin-form-label"
+                    >
+                        Số người được áp dụng
+                    </label>
+
+                    <input
+                        type="number"
+                        name="so_luong_nguoi_duoc_ap_dung"
+                        id="so_luong_nguoi_duoc_ap_dung"
+                        min="0"
+                        step="1"
+                        value="0"
+                        placeholder="0"
+                        class="admin-form-input"
+                    >
+
+                    <small style="
+                        display:block;
+                        margin-top:6px;
+                        color:#89978f;
+                    ">
+                        Nhập 0 nếu không giới hạn.
+                    </small>
+
+                </div>
+
+
+                <!-- NGÀY BẮT ĐẦU -->
+
+                <div>
+
+                    <label for="ngay_bat_dau" class="admin-form-label">
+                        Ngày bắt đầu *
+                    </label>
+
+                    <input
+                        type="date"
+                        name="ngay_bat_dau"
+                        id="ngay_bat_dau"
+                        required
+                        class="admin-form-input"
+                    >
+
+                </div>
+
+
+                <!-- NGÀY KẾT THÚC -->
+
+                <div>
+
+                    <label for="ngay_ket_thuc" class="admin-form-label">
+                        Ngày kết thúc *
+                    </label>
+
+                    <input
+                        type="date"
+                        name="ngay_ket_thuc"
+                        id="ngay_ket_thuc"
+                        required
+                        class="admin-form-input"
+                    >
+
+                </div>
+
+
+                <!-- ĐIỀU KIỆN -->
+
+                <div style="grid-column:1 / -1;">
+
+                    <label for="dieu_kien" class="admin-form-label">
+                        Điều kiện áp dụng
+                    </label>
+
+                    <textarea
+                        name="dieu_kien"
+                        id="dieu_kien"
+                        rows="4"
+                        placeholder="Ví dụ: Áp dụng cho khách thuê có giấy xác nhận sinh viên..."
+                        class="admin-form-input"
+                        style="resize:vertical;"
+                    ></textarea>
+
+                </div>
+
+
+                <!-- MÔ TẢ -->
+
+                <div style="grid-column:1 / -1;">
+
+                    <label for="mo_ta" class="admin-form-label">
+                        Mô tả chính sách
+                    </label>
+
+                    <textarea
+                        name="mo_ta"
+                        id="mo_ta"
+                        rows="4"
+                        placeholder="Mô tả chi tiết về chính sách hỗ trợ..."
+                        class="admin-form-input"
+                        style="resize:vertical;"
+                    ></textarea>
+
+                </div>
+
+
+                <!-- TRẠNG THÁI -->
+
+                <div style="grid-column:1 / -1;">
+
+                    <label style="
+                        display:flex;
+                        align-items:center;
+                        gap:10px;
+                        cursor:pointer;
+                    ">
+
+                        <input
+                            type="checkbox"
+                            name="trang_thai"
+                            checked
+                            style="
+                                width:18px;
+                                height:18px;
+                                cursor:pointer;
+                            "
+                        >
+
+                        <span style="font-weight:600;">
+                            Kích hoạt chính sách ngay sau khi tạo
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- BUTTON -->
+
+            <div style="
+                display:flex;
+                justify-content:flex-end;
+                gap:12px;
+                margin-top:26px;
+                padding-top:22px;
+                border-top:1px solid #edf0ee;
+            ">
+
+                <a
+                    href="{% url 'quan_ly_chinh_sach' %}"
+                    class="admin-secondary-btn"
+                >
+                    Hủy
+                </a>
+
+                <button
+                    type="submit"
+                    class="admin-primary-btn"
+                    style="border:none; cursor:pointer;"
+                >
+                    💾 Tạo chính sách
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+
+
+{% endblock %}

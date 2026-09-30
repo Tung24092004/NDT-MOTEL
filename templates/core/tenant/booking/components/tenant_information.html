@@ -1,0 +1,20 @@
+<dl class="booking-facts booking-contact-primary">
+    <div><dt>Họ tên</dt><dd>{{ nguoi_thue.ho_ten }}</dd></div>
+    <div><dt>Điện thoại</dt><dd>{{ nguoi_thue.so_dien_thoai }}</dd></div>
+    <div><dt>CCCD</dt><dd>{{ nguoi_thue.cccd }}</dd></div>
+    {% if nguoi_thue.email %}<div><dt>Email</dt><dd>{{ nguoi_thue.email }}</dd></div>{% endif %}
+</dl>
+<details class="booking-profile-details">
+    <summary>Xem đầy đủ thông tin hồ sơ</summary>
+    <dl class="booking-facts">
+        <div><dt>Ngày sinh</dt><dd>{{ nguoi_thue.ngay_sinh|date:'d/m/Y'|default:'Chưa cung cấp' }}</dd></div>
+        <div><dt>Giới tính</dt><dd>{{ nguoi_thue.get_gioi_tinh_display|default:'Chưa cung cấp' }}</dd></div>
+        <div><dt>Ngày cấp CCCD</dt><dd>{{ nguoi_thue.ngay_cap_cccd|date:'d/m/Y'|default:'Chưa cung cấp' }}</dd></div>
+        <div><dt>Nơi cấp CCCD</dt><dd>{{ nguoi_thue.noi_cap_cccd|default:'Chưa cung cấp' }}</dd></div>
+        {% if not nguoi_thue.email %}<div><dt>Email</dt><dd>Chưa cung cấp</dd></div>{% endif %}
+        <div><dt>Thường trú</dt><dd>{{ nguoi_thue.dia_chi_thuong_tru|default:'Chưa cung cấp' }}</dd></div>
+        <div><dt>Nghề nghiệp</dt><dd>{{ nguoi_thue.nghe_nghiep|default:'Chưa cung cấp' }}</dd></div>
+        <div><dt>Liên hệ khẩn cấp</dt><dd>{{ nguoi_thue.nguoi_lien_he|default:'Chưa cung cấp' }}{% if nguoi_thue.sdt_nguoi_lien_he %} · {{ nguoi_thue.sdt_nguoi_lien_he }}{% endif %}</dd></div>
+    </dl>
+</details>
+<p class="booking-profile-update"><a href="{% url 'cap_nhat_thong_tin' %}">Cập nhật hồ sơ tài khoản</a></p>

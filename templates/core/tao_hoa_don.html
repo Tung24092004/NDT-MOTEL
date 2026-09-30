@@ -1,0 +1,861 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Tạo hóa đơn - NDT Motel{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* =====================================================
+       TẠO HÓA ĐƠN
+       ===================================================== */
+
+    .invoice-create-page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding-bottom: 40px;
+    }
+
+    .invoice-create-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .invoice-create-header h1 {
+        margin: 0 0 6px;
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .invoice-create-header p {
+        margin: 0;
+        color: var(--text-light, #64756b);
+        font-size: 15px;
+    }
+
+    .invoice-create-card {
+        background: var(--surface, #ffffff);
+        border: 1px solid var(--border, #dfe9e3);
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 8px 24px rgba(23, 35, 29, 0.06);
+    }
+
+    .invoice-section {
+        margin-bottom: 28px;
+    }
+
+    .invoice-section:last-of-type {
+        margin-bottom: 0;
+    }
+
+    .invoice-section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 18px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border, #dfe9e3);
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text, #17231d);
+    }
+
+    .invoice-section-number {
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--primary-light, #e8f4ee);
+        color: var(--primary, #07859a);
+        font-size: 14px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .invoice-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px 20px;
+    }
+
+    .invoice-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .invoice-form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .invoice-form-group label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text, #17231d);
+    }
+
+    .invoice-form-group label .required {
+        color: #c0392b;
+    }
+
+    .invoice-form-control {
+        width: 100%;
+        min-height: 44px;
+        box-sizing: border-box;
+        padding: 10px 13px;
+        border: 1px solid var(--border, #dfe9e3);
+        border-radius: 9px;
+        background: #fff;
+        color: var(--text, #17231d);
+        font-family: inherit;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .invoice-form-control:focus {
+        border-color: var(--primary, #07859a);
+        box-shadow: 0 0 0 3px rgba(47, 125, 91, 0.10);
+    }
+
+    textarea.invoice-form-control {
+        min-height: 105px;
+        resize: vertical;
+    }
+
+    .invoice-help-text {
+        margin: 0;
+        font-size: 12px;
+        color: var(--text-muted, #89978f);
+    }
+
+    .contract-select-wrapper {
+        grid-column: 1 / -1;
+    }
+
+    .contract-select-wrapper .invoice-form-control {
+        min-height: 48px;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .money-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px 20px;
+    }
+
+    .money-input-wrapper {
+        position: relative;
+    }
+
+    .money-input-wrapper .invoice-form-control {
+        padding-right: 42px;
+    }
+
+    .money-unit {
+        position: absolute;
+        right: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted, #89978f);
+        font-size: 13px;
+        pointer-events: none;
+    }
+
+    .invoice-total-box {
+        margin-top: 24px;
+        padding: 20px 22px;
+        border-radius: 12px;
+        background: var(--primary-light, #e8f4ee);
+        border: 1px solid rgba(47, 125, 91, 0.16);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .invoice-total-label {
+        color: var(--text, #17231d);
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .invoice-total-value {
+        color: var(--primary-dark, #075b6a);
+        font-size: 25px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .invoice-note {
+        margin-top: 18px;
+        padding: 13px 15px;
+        border-radius: 9px;
+        background: #f8faf9;
+        border: 1px solid var(--border, #dfe9e3);
+        color: var(--text-light, #64756b);
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .invoice-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        margin-top: 30px;
+        padding-top: 22px;
+        border-top: 1px solid var(--border, #dfe9e3);
+    }
+
+    .invoice-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 20px;
+        border-radius: 9px;
+        text-decoration: none;
+        border: 1px solid transparent;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .invoice-btn-secondary {
+        background: #fff;
+        color: var(--text, #17231d);
+        border-color: var(--border, #dfe9e3);
+    }
+
+    .invoice-btn-secondary:hover {
+        background: #f5f8f6;
+    }
+
+    .invoice-btn-primary {
+        background: var(--primary, #07859a);
+        color: #fff;
+        border-color: var(--primary, #07859a);
+    }
+
+    .invoice-btn-primary:hover {
+        background: var(--primary-dark, #075b6a);
+        border-color: var(--primary-dark, #075b6a);
+    }
+
+    @media (max-width: 800px) {
+        .invoice-form-grid,
+        .money-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .invoice-create-card {
+            padding: 20px;
+        }
+
+        .invoice-create-header {
+            flex-direction: column;
+        }
+
+        .invoice-total-box {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .invoice-actions {
+            flex-direction: column-reverse;
+        }
+
+        .invoice-actions .invoice-btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 500px) {
+        .invoice-create-page {
+            padding: 0 10px 30px;
+        }
+
+        .invoice-create-header h1 {
+            font-size: 25px;
+        }
+
+        .invoice-create-card {
+            padding: 16px;
+            border-radius: 12px;
+        }
+    }
+</style>
+<link rel="stylesheet" href="{% static 'css/bill_smart_full_refresh.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="invoice-create-page">
+
+    <!-- HEADER -->
+    <div class="invoice-create-header">
+
+        <div>
+            <h1>Tạo hóa đơn</h1>
+            <p>Thêm hóa đơn mới cho hợp đồng thuê phòng</p>
+        </div>
+
+        <a
+            href="{% url 'quan_ly_hoa_don' %}"
+            class="invoice-btn invoice-btn-secondary"
+        >
+            ← Quay lại
+        </a>
+
+    </div>
+
+
+    <!-- FORM -->
+    <div class="invoice-create-card">
+
+        <form method="post">
+
+            {% csrf_token %}
+
+
+            <!-- =================================================
+                 THÔNG TIN HÓA ĐƠN
+                 ================================================= -->
+
+            <div class="invoice-section">
+
+                <h2 class="invoice-section-title">
+                    <span class="invoice-section-number">1</span>
+                    Thông tin hóa đơn
+                </h2>
+
+                <div class="invoice-form-grid">
+
+                    <!-- HỢP ĐỒNG -->
+                    <div class="invoice-form-group contract-select-wrapper">
+
+                        <label for="hop_dong">
+                            Hợp đồng <span class="required">*</span>
+                        </label>
+
+                        <select
+                            id="hop_dong"
+                            name="hop_dong"
+                            class="invoice-form-control"
+                            required
+                        >
+
+                            <option value="">
+                                -- Chọn hợp đồng --
+                            </option>
+
+                            {% for hd in hop_dongs %}
+
+                            <option
+                                value="{{ hd.id }}"
+                                {% if form_data.hop_dong == hd.id|stringformat:"s" %}selected{% endif %}
+                            >
+                                {{ hd.so_hop_dong }}
+                                -
+                                {{ hd.dat_phong.nguoi_thue.ho_ten }}
+                                -
+                                Phòng {{ hd.dat_phong.phong.so_phong }}
+                            </option>
+
+                            {% empty %}
+
+                            <option value="" disabled>
+                                Không có hợp đồng đang hiệu lực
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                        <p class="invoice-help-text">
+                            Chỉ hiển thị các hợp đồng đang hiệu lực hoặc sắp hết hạn.
+                        </p>
+
+                    </div>
+
+
+                    <!-- THÁNG -->
+                    <div class="invoice-form-group">
+
+                        <label for="thang">
+                            Tháng <span class="required">*</span>
+                        </label>
+
+                        <input
+                            id="thang"
+                            type="number"
+                            name="thang"
+                            min="1"
+                            max="12"
+                            class="invoice-form-control"
+                            value="{{ form_data.thang|default:'' }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- NĂM -->
+                    <div class="invoice-form-group">
+
+                        <label for="nam">
+                            Năm <span class="required">*</span>
+                        </label>
+
+                        <input
+                            id="nam"
+                            type="number"
+                            name="nam"
+                            min="2000"
+                            max="2100"
+                            class="invoice-form-control"
+                            value="{{ form_data.nam|default:'' }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- HẠN THANH TOÁN -->
+                    <div class="invoice-form-group">
+
+                        <label for="han_thanh_toan">
+                            Hạn thanh toán <span class="required">*</span>
+                        </label>
+
+                        <input
+                            id="han_thanh_toan"
+                            type="date"
+                            name="han_thanh_toan"
+                            class="invoice-form-control"
+                            value="{{ form_data.han_thanh_toan|default:'' }}"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CÁC KHOẢN TIỀN
+                 ================================================= -->
+
+            <div class="invoice-section">
+
+                <h2 class="invoice-section-title">
+                    <span class="invoice-section-number">2</span>
+                    Các khoản tiền
+                </h2>
+
+                <div class="money-grid">
+
+                    <!-- TIỀN PHÒNG -->
+                    <div class="invoice-form-group">
+
+                        <label for="tien_phong">
+                            Tiền phòng
+                        </label>
+
+                        <div class="money-input-wrapper">
+
+                            <input
+                                id="tien_phong"
+                                type="number"
+                                name="tien_phong"
+                                min="0"
+                                step="1000"
+                                value="{{ form_data.tien_phong|default:'' }}"
+                                class="invoice-form-control money-input"
+                                placeholder="Theo hợp đồng"
+                            >
+
+                            <span class="money-unit">đ</span>
+
+                        </div>
+
+                        <p class="invoice-help-text">
+                            Để trống sẽ lấy tiền thuê theo hợp đồng.
+                        </p>
+
+                    </div>
+
+
+                    <!-- TIỀN ĐIỆN -->
+                    <div class="invoice-form-group">
+
+                        <label for="tien_dien">
+                            Tiền điện
+                        </label>
+
+                        <div class="money-input-wrapper">
+
+                            <input
+                                id="tien_dien"
+                                type="number"
+                                name="tien_dien"
+                                min="0"
+                                step="1000"
+                                value="{{ form_data.tien_dien|default:'0' }}"
+                                class="invoice-form-control money-input"
+                            >
+
+                            <span class="money-unit">đ</span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- TIỀN NƯỚC -->
+                    <div class="invoice-form-group">
+
+                        <label for="tien_nuoc">
+                            Tiền nước
+                        </label>
+
+                        <div class="money-input-wrapper">
+
+                            <input
+                                id="tien_nuoc"
+                                type="number"
+                                name="tien_nuoc"
+                                min="0"
+                                step="1000"
+                                value="{{ form_data.tien_nuoc|default:'0' }}"
+                                class="invoice-form-control money-input"
+                            >
+
+                            <span class="money-unit">đ</span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PHÍ DỊCH VỤ -->
+                    <div class="invoice-form-group">
+
+                        <label for="tien_dich_vu">
+                            Phí dịch vụ
+                        </label>
+
+                        <div class="money-input-wrapper">
+
+                            <input
+                                id="tien_dich_vu"
+                                type="number"
+                                name="tien_dich_vu"
+                                min="0"
+                                step="1000"
+                                value="{{ form_data.tien_dich_vu|default:'0' }}"
+                                class="invoice-form-control money-input"
+                            >
+
+                            <span class="money-unit">đ</span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PHÍ KHÁC -->
+                    <div class="invoice-form-group">
+
+                        <label for="phi_khac">
+                            Phí khác
+                        </label>
+
+                        <div class="money-input-wrapper">
+
+                            <input
+                                id="phi_khac"
+                                type="number"
+                                name="phi_khac"
+                                min="0"
+                                step="1000"
+                                value="{{ form_data.phi_khac|default:'0' }}"
+                                class="invoice-form-control money-input"
+                            >
+
+                            <span class="money-unit">đ</span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- TỔNG TIỀN -->
+                <div class="invoice-total-box">
+
+                    <div class="invoice-total-label">
+                        Tổng tiền hóa đơn
+                    </div>
+
+                    <div
+                        id="tongTienHienThi"
+                        class="invoice-total-value"
+                    >
+                        0đ
+                    </div>
+
+                </div>
+
+
+                <div class="invoice-note">
+                    💡 Tổng tiền được tính tự động từ tiền phòng, điện,
+                    nước, phí dịch vụ và phí khác.
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CHI TIẾT & GHI CHÚ
+                 ================================================= -->
+
+            <div class="invoice-section">
+
+                <h2 class="invoice-section-title">
+                    <span class="invoice-section-number">3</span>
+                    Chi tiết & ghi chú
+                </h2>
+
+                <div class="invoice-form-grid">
+
+                    <!-- CHI TIẾT PHÍ -->
+                    <div class="invoice-form-group full-width">
+
+                        <label for="chi_tiet_phi">
+                            Chi tiết phí
+                        </label>
+
+                        <textarea
+                            id="chi_tiet_phi"
+                            name="chi_tiet_phi"
+                            rows="4"
+                            class="invoice-form-control"
+                            placeholder="Ví dụ: Điện 100.000đ, nước 50.000đ..."
+                        >{{ form_data.chi_tiet_phi|default:'' }}</textarea>
+
+                    </div>
+
+
+                    <!-- GHI CHÚ -->
+                    <div class="invoice-form-group full-width">
+
+                        <label for="ghi_chu">
+                            Ghi chú
+                        </label>
+
+                        <textarea
+                            id="ghi_chu"
+                            name="ghi_chu"
+                            rows="4"
+                            class="invoice-form-control"
+                            placeholder="Nhập ghi chú nếu cần..."
+                        >{{ form_data.ghi_chu|default:'' }}</textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 NÚT
+                 ================================================= -->
+
+            {% if not hop_dongs %}
+            <div class="invoice-note" role="alert">
+                Hiện không có hợp đồng đang hiệu lực hoặc sắp hết hạn để tạo hóa đơn.
+            </div>
+            {% endif %}
+
+            <div class="invoice-actions">
+
+                <a
+                    href="{% url 'quan_ly_hoa_don' %}"
+                    class="invoice-btn invoice-btn-secondary"
+                >
+                    Hủy
+                </a>
+
+                <button
+                    type="submit"
+                    class="invoice-btn invoice-btn-primary"
+                    {% if not hop_dongs %}disabled aria-disabled="true"{% endif %}
+                >
+                    Tạo hóa đơn
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+     ========================================================= -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const tienPhong = document.getElementById("tien_phong");
+    const tienDien = document.getElementById("tien_dien");
+    const tienNuoc = document.getElementById("tien_nuoc");
+    const tienDichVu = document.getElementById("tien_dich_vu");
+    const phiKhac = document.getElementById("phi_khac");
+
+    const tongTienHienThi = document.getElementById(
+        "tongTienHienThi"
+    );
+
+    function laySoTien(input) {
+        if (!input || input.value === "") {
+            return 0;
+        }
+
+        const giaTri = Number(input.value);
+
+        if (Number.isNaN(giaTri) || giaTri < 0) {
+            return 0;
+        }
+
+        return giaTri;
+    }
+
+    function dinhDangTien(soTien) {
+        return new Intl.NumberFormat("vi-VN").format(soTien);
+    }
+
+    function capNhatTongTien() {
+
+        const tongTien =
+            laySoTien(tienPhong)
+            + laySoTien(tienDien)
+            + laySoTien(tienNuoc)
+            + laySoTien(tienDichVu)
+            + laySoTien(phiKhac);
+
+        tongTienHienThi.textContent =
+            dinhDangTien(tongTien) + "đ";
+    }
+
+    [
+        tienPhong,
+        tienDien,
+        tienNuoc,
+        tienDichVu,
+        phiKhac
+    ].forEach(function (input) {
+
+        if (input) {
+            input.addEventListener(
+                "input",
+                capNhatTongTien
+            );
+        }
+
+    });
+
+
+    // =====================================================
+    // TỰ ĐIỀN THÁNG / NĂM HIỆN TẠI
+    // =====================================================
+
+    const thang = document.getElementById("thang");
+    const nam = document.getElementById("nam");
+    const hanThanhToan = document.getElementById(
+        "han_thanh_toan"
+    );
+
+    const ngayHienTai = new Date();
+
+    if (thang && !thang.value) {
+        thang.value = ngayHienTai.getMonth() + 1;
+    }
+
+    if (nam && !nam.value) {
+        nam.value = ngayHienTai.getFullYear();
+    }
+
+
+    // =====================================================
+    // MẶC ĐỊNH HẠN THANH TOÁN = NGÀY 5 THÁNG SAU
+    // =====================================================
+
+    if (hanThanhToan && !hanThanhToan.value) {
+
+        let thangThanhToan =
+            ngayHienTai.getMonth() + 2;
+
+        let namThanhToan =
+            ngayHienTai.getFullYear();
+
+        if (thangThanhToan > 12) {
+            thangThanhToan = 1;
+            namThanhToan++;
+        }
+
+        const thangText =
+            String(thangThanhToan).padStart(2, "0");
+
+        hanThanhToan.value =
+            namThanhToan
+            + "-"
+            + thangText
+            + "-05";
+    }
+
+
+    // Tính tổng ngay khi mở trang
+    capNhatTongTien();
+
+});
+</script>
+
+<!-- FOUNDATION V2: lớp đồng bộ giao diện Admin hóa đơn. Không đổi nghiệp vụ. -->
+<style id="invoice-create-foundation-v2-sync">
+    .invoice-create-page { max-width: 1040px; margin: 0 auto; padding: 24px 28px 48px; color: #17343b; }
+    .invoice-create-card { border: 1px solid #d7e3e5; border-radius: 14px; background: #fff; box-shadow: 0 8px 24px rgba(23, 52, 59, .06); }
+    .invoice-create-header { padding: 22px 26px; border-bottom: 1px solid #e1eaeb; }
+    .invoice-section { margin: 18px 0; padding: 20px; border: 1px solid #e1eaeb; border-radius: 10px; background: #fbfdfd; }
+    .invoice-form-grid, .money-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .invoice-form-group.full-width { grid-column: 1 / -1; }
+    .invoice-form-group label { display: block; margin-bottom: 7px; color: #49666d; font-size: 11px; font-weight: 800; }
+    .invoice-form-control { width: 100%; min-height: 42px; box-sizing: border-box; border: 1px solid #c9d9dc; border-radius: 8px; padding: 0 12px; background: #fff; color: #17343b; }
+    .invoice-form-control:focus { outline: 3px solid rgba(8, 121, 138, .16); border-color: #08798a; }
+    .invoice-help-text, .invoice-note { color: #71858a; font-size: 12px; line-height: 1.55; }
+    .invoice-total-box { margin-top: 18px; padding: 16px; border: 1px solid #b9dadd; border-radius: 10px; background: #eff9fa; }
+    .invoice-total-value { color: #08798a; font-size: 22px; font-weight: 850; }
+    .invoice-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .invoice-btn { min-height: 42px; border-radius: 8px; font-weight: 750; }
+    .invoice-btn:focus, button:focus, a:focus { outline: 3px solid rgba(8, 121, 138, .18); outline-offset: 2px; }
+    @media (max-width: 640px) { .invoice-create-page { padding: 14px 12px 30px; } .invoice-create-header { padding: 18px; } .invoice-form-grid, .money-grid { grid-template-columns: 1fr; } .invoice-form-group.full-width { grid-column: auto; } .invoice-actions { flex-direction: column-reverse; } .invoice-actions .invoice-btn { width: 100%; } }
+</style>
+
+{% endblock %}  

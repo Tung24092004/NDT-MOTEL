@@ -1,0 +1,27 @@
+.ndt-foundation {
+    color: var(--ndt-text);
+    font-family: var(--ndt-font-family);
+    font-size: var(--ndt-text-md);
+    line-height: 1.5;
+}
+
+.ndt-caption { color: var(--ndt-text-muted); font-size: var(--ndt-text-xs); line-height: 1.5; }
+.ndt-body-sm { font-size: var(--ndt-text-sm); line-height: 1.55; }
+.ndt-body { font-size: var(--ndt-text-md); line-height: 1.6; }
+.ndt-card-title { font-size: var(--ndt-text-lg); font-weight: 700; line-height: 1.3; }
+.ndt-section-title { font-size: var(--ndt-text-xl); font-weight: 700; line-height: 1.25; }
+.ndt-page-title { font-size: var(--ndt-text-2xl); font-weight: 700; line-height: 1.2; }
+.ndt-display { font-size: var(--ndt-text-display); font-weight: 700; line-height: 1.15; }
+
+.ndt-caption,
+.ndt-body-sm,
+.ndt-body,
+.ndt-card-title,
+.ndt-section-title,
+.ndt-page-title,
+.ndt-display { letter-spacing: 0; }
+
+@media (max-width: 767px) {
+    .ndt-page-title { font-size: var(--ndt-text-xl); }
+    .ndt-display { font-size: var(--ndt-text-2xl); }
+}

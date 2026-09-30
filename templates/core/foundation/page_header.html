@@ -1,0 +1,12 @@
+<header class="ndt-page-header">
+    <div class="ndt-page-header__content">
+        {% if breadcrumb %}<div class="ndt-breadcrumb">{{ breadcrumb }}</div>{% endif %}
+        <h1 class="ndt-page-header__title">{{ title }}</h1>
+        {% if subtitle %}<p class="ndt-page-header__subtitle">{{ subtitle }}</p>{% endif %}
+    </div>
+    {% if action_url and action_label %}
+    <div class="ndt-page-header__actions">
+        <a class="ndt-button ndt-button--primary" href="{{ action_url }}">{{ action_label }}</a>
+    </div>
+    {% endif %}
+</header>

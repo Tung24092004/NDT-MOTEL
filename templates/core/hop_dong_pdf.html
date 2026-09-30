@@ -1,0 +1,708 @@
+{% load bo_loc %}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+
+    <title>Hợp đồng {{ hop_dong.so_hop_dong }}</title>
+
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 18mm 20mm 18mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: DejaVu Sans, Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.55;
+            color: #111;
+            margin: 0;
+            padding: 0;
+        }
+
+        .document {
+            width: 100%;
+        }
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header .company {
+            font-size: 16pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .header .title {
+            font-size: 18pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 12px;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            font-size: 11pt;
+            font-style: italic;
+        }
+
+        .contract-number {
+            text-align: center;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+
+        /* =====================================================
+           SECTION
+        ===================================================== */
+
+        .section {
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 7px;
+        }
+
+        .section-title-center {
+            text-align: center;
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 8px;
+        }
+
+        /* =====================================================
+           TABLE
+        ===================================================== */
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-table td {
+            padding: 4px 6px;
+            vertical-align: top;
+        }
+
+        .info-table .label {
+            width: 35%;
+            font-weight: bold;
+        }
+
+        .detail-table {
+            margin-top: 5px;
+        }
+
+        .detail-table th,
+        .detail-table td {
+            border: 1px solid #444;
+            padding: 6px 7px;
+            vertical-align: top;
+        }
+
+        .detail-table th {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .detail-table .label {
+            width: 40%;
+            font-weight: bold;
+        }
+
+        /* =====================================================
+           TEXT
+        ===================================================== */
+
+        .paragraph {
+            text-align: justify;
+            margin: 7px 0;
+        }
+
+        .terms {
+            white-space: pre-line;
+            text-align: justify;
+            margin-top: 5px;
+        }
+
+        .note {
+            white-space: pre-line;
+            text-align: justify;
+            margin-top: 5px;
+        }
+
+        .money {
+            font-weight: bold;
+        }
+
+        /* =====================================================
+           SIGNATURE
+        ===================================================== */
+
+        .signature {
+            margin-top: 35px;
+        }
+
+        .signature-table td {
+            width: 50%;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .signature-title {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .signature-space {
+            height: 85px;
+        }
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+
+        .footer {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 9pt;
+            color: #555;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        .empty {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="document">
+
+    <!-- =====================================================
+         HEADER
+    ===================================================== -->
+
+    <div class="header">
+
+        <div class="company">
+            NDT MOTEL
+        </div>
+
+        <div>
+            HỆ THỐNG QUẢN LÝ PHÒNG TRỌ
+        </div>
+
+        <div class="title">
+            HỢP ĐỒNG THUÊ PHÒNG
+        </div>
+
+        <div class="subtitle">
+            Hợp đồng thuê phòng trọ
+        </div>
+
+        <div class="contract-number">
+            Số hợp đồng:
+            {{ hop_dong.so_hop_dong }}
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PHẦN 1 - THÔNG TIN HỢP ĐỒNG
+    ===================================================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+            I. THÔNG TIN HỢP ĐỒNG
+        </div>
+
+        <table class="info-table">
+
+            <tr>
+                <td class="label">
+                    Số hợp đồng:
+                </td>
+
+                <td>
+                    {{ hop_dong.so_hop_dong }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label">
+                    Trạng thái:
+                </td>
+
+                <td class="status">
+                    {% if hop_dong.trang_thai == "cho_hieu_luc" %}
+                        Chờ hiệu lực
+                    {% elif hop_dong.trang_thai == "dang_hieu_luc" %}
+                        Đang hiệu lực
+                    {% elif hop_dong.trang_thai == "sap_het_han" %}
+                        Sắp hết hạn
+                    {% elif hop_dong.trang_thai == "da_het_han" %}
+                        Đã hết hạn
+                    {% elif hop_dong.trang_thai == "da_huy" %}
+                        Đã thanh lý
+                    {% else %}
+                        {{ hop_dong.trang_thai }}
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label">
+                    Ngày bắt đầu:
+                </td>
+
+                <td>
+                    {{ hop_dong.ngay_bat_dau|date:"d/m/Y" }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label">
+                    Ngày kết thúc:
+                </td>
+
+                <td>
+                    {{ hop_dong.ngay_ket_thuc|date:"d/m/Y" }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label">
+                    Ngày tạo hợp đồng:
+                </td>
+
+                <td>
+                    {{ hop_dong.ngay_tao|date:"d/m/Y H:i" }}
+                </td>
+            </tr>
+
+        </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         PHẦN 2 - NGƯỜI THUÊ
+    ===================================================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+            II. THÔNG TIN NGƯỜI THUÊ
+        </div>
+
+        <table class="info-table">
+
+            <tr>
+                <td class="label">
+                    Họ và tên:
+                </td>
+
+                <td>
+                    {{ hop_dong.dat_phong.nguoi_thue.ho_ten }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label">
+                    Số điện thoại:
+                </td>
+
+                <td>
+                    {{ hop_dong.dat_phong.nguoi_thue.so_dien_thoai }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label">
+                    CCCD:
+                </td>
+
+                <td>
+                    {{ hop_dong.dat_phong.nguoi_thue.cccd }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label">
+                    Email:
+                </td>
+
+                <td>
+                    {% if hop_dong.dat_phong.nguoi_thue.user.email %}
+                        {{ hop_dong.dat_phong.nguoi_thue.user.email }}
+                    {% else %}
+                        <span class="empty">
+                            Chưa cập nhật
+                        </span>
+                    {% endif %}
+                </td>
+            </tr>
+
+        </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         PHẦN 3 - THÔNG TIN PHÒNG
+    ===================================================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+            III. THÔNG TIN PHÒNG THUÊ
+        </div>
+
+        <table class="info-table">
+
+            <tr>
+                <td class="label">
+                    Cơ sở:
+                </td>
+
+                <td>
+                    {{ hop_dong.dat_phong.phong.co_so.ten_co_so }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label">
+                    Số phòng:
+                </td>
+
+                <td>
+                    {{ hop_dong.dat_phong.phong.so_phong }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label">
+                    Tầng:
+                </td>
+
+                <td>
+                    {{ hop_dong.dat_phong.phong.tang }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label">
+                    Loại phòng:
+                </td>
+
+                <td>
+                    {{ hop_dong.dat_phong.phong.loai_phong }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label">
+                    Diện tích:
+                </td>
+
+                <td>
+                    {{ hop_dong.dat_phong.phong.dien_tich }} m²
+                </td>
+            </tr>
+
+        </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         PHẦN 4 - CHI PHÍ
+    ===================================================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+            IV. THÔNG TIN THANH TOÁN
+        </div>
+
+        <table class="detail-table">
+
+            <thead>
+                <tr>
+                    <th>
+                        Nội dung
+                    </th>
+
+                    <th>
+                        Giá trị
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td class="label">
+                        Tiền thuê phòng/tháng
+                    </td>
+
+                    <td class="money">
+                        {{ hop_dong.tien_thue_thang|vnd }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="label">
+                        Tiền cọc
+                    </td>
+
+                    <td class="money">
+                        {{ hop_dong.tien_coc|vnd }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="label">
+                        Ngày thanh toán hàng tháng
+                    </td>
+
+                    <td>
+                        Ngày {{ hop_dong.ngay_thanh_toan_hang_thang }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="label">
+                        Phương thức thanh toán
+                    </td>
+
+                    <td>
+                        {% if hop_dong.phuong_thuc_thanh_toan == "tien_mat" %}
+                            Tiền mặt
+                        {% elif hop_dong.phuong_thuc_thanh_toan == "chuyen_khoan" %}
+                            Chuyển khoản
+                        {% else %}
+                            {{ hop_dong.phuong_thuc_thanh_toan }}
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="label">
+                        Số người ở
+                    </td>
+
+                    <td>
+                        {{ hop_dong.so_nguoi_o }} người
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="label">
+                        Tiền phạt trễ hạn
+                    </td>
+
+                    <td class="money">
+                        {{ hop_dong.tien_phat_tre_han|vnd }}
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         PHẦN 5 - THỜI HẠN THUÊ
+    ===================================================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+            V. THỜI HẠN THUÊ
+        </div>
+
+        <p class="paragraph">
+            Hợp đồng có hiệu lực từ ngày
+            <strong>
+                {{ hop_dong.ngay_bat_dau|date:"d/m/Y" }}
+            </strong>
+            đến ngày
+            <strong>
+                {{ hop_dong.ngay_ket_thuc|date:"d/m/Y" }}
+            </strong>.
+        </p>
+
+        <p class="paragraph">
+            Trong thời gian hợp đồng còn hiệu lực, người thuê có trách nhiệm
+            sử dụng phòng đúng mục đích, tuân thủ các quy định của NDT MOTEL
+            và thực hiện đầy đủ các nghĩa vụ thanh toán theo thỏa thuận.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         PHẦN 6 - ĐIỀU KHOẢN
+    ===================================================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+            VI. ĐIỀU KHOẢN HỢP ĐỒNG
+        </div>
+
+        {% if hop_dong.dieu_khoan %}
+
+            <div class="terms">
+                {{ hop_dong.dieu_khoan }}
+            </div>
+
+        {% else %}
+
+            <div class="terms">
+                Hai bên có trách nhiệm thực hiện đúng các nội dung
+                đã thỏa thuận trong hợp đồng và các quy định của
+                NDT MOTEL.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         PHẦN 7 - GHI CHÚ
+    ===================================================== -->
+
+    {% if hop_dong.ghi_chu %}
+
+    <div class="section">
+
+        <div class="section-title">
+            VII. GHI CHÚ
+        </div>
+
+        <div class="note">
+            {{ hop_dong.ghi_chu }}
+        </div>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         CAM KẾT
+    ===================================================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+            CAM KẾT
+        </div>
+
+        <p class="paragraph">
+            Hai bên xác nhận các thông tin trong hợp đồng là chính xác
+            và đồng ý thực hiện các quyền, nghĩa vụ theo nội dung hợp đồng.
+        </p>
+
+        <p class="paragraph">
+            Hợp đồng được lập và quản lý trên hệ thống NDT MOTEL.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         CHỮ KÝ
+    ===================================================== -->
+
+    <div class="signature">
+
+        <table class="signature-table">
+
+            <tr>
+
+                <td>
+                    <div class="signature-title">
+                        BÊN CHO THUÊ
+                    </div>
+
+                    <div>
+                        (Ký và ghi rõ họ tên)
+                    </div>
+
+                    <div class="signature-space"></div>
+
+                    <strong>
+                        NDT MOTEL
+                    </strong>
+                </td>
+
+
+                <td>
+                    <div class="signature-title">
+                        BÊN THUÊ
+                    </div>
+
+                    <div>
+                        (Ký và ghi rõ họ tên)
+                    </div>
+
+                    <div class="signature-space"></div>
+
+                    <strong>
+                        {{ hop_dong.dat_phong.nguoi_thue.ho_ten }}
+                    </strong>
+                </td>
+
+            </tr>
+
+        </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         FOOTER
+    ===================================================== -->
+
+    <div class="footer">
+        NDT MOTEL - Hệ thống quản lý phòng trọ
+        <br>
+        Hợp đồng:
+        {{ hop_dong.so_hop_dong }}
+    </div>
+
+</div>
+
+</body>
+</html>

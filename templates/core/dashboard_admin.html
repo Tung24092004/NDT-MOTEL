@@ -1,0 +1,70 @@
+{% extends "core/base.html" %}{% load static bo_loc %}
+{% block title %}Tổng quan quản trị - NDT MOTEL{% endblock %}
+{% block page_title %}Trung tâm quản trị{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}"><link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}"><link rel="stylesheet" href="{% static 'css/foundation/components.css' %}"><link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}"><link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">{% endblock %}
+{% block content %}
+<div class="admin-dashboard ndt-foundation" data-dashboard-screen="admin-overview">
+    <header class="ndt-page-header dashboard-header">
+        <div class="ndt-page-header__content">
+            <p class="ndt-breadcrumb">Quản trị / Tổng quan</p>
+            <h1 class="ndt-page-header__title">Tình hình vận hành</h1>
+            <p class="ndt-page-header__subtitle">Số liệu hiện tại, công việc cần xử lý và hoạt động đặt phòng gần nhất.</p>
+        </div>
+        <div class="dashboard-account" aria-label="Tài khoản đang đăng nhập"><span aria-hidden="true">{{ request.user.username|slice:':1'|upper }}</span><div><small>Quản trị viên</small><strong>{{ request.user.username }}</strong></div></div>
+    </header>
+
+    <section class="dashboard-metrics" aria-label="Chỉ số vận hành chính">
+        <a class="ndt-surface dashboard-metric" href="{% url 'quan_ly_phong' %}"><span>Tổng số phòng</span><strong data-dashboard-metric="tong_phong">{{ tong_phong }}</strong><small>{{ phong_trong }} phòng đang trống</small></a>
+        <a class="ndt-surface dashboard-metric dashboard-metric--success" href="{% url 'quan_ly_phong' %}"><span>Phòng đang thuê</span><strong data-dashboard-metric="phong_dang_thue">{{ phong_dang_thue }}</strong><small>Đang có hợp đồng lưu trú</small></a>
+        <a class="ndt-surface dashboard-metric dashboard-metric--warning" href="{% url 'quan_ly_dat_phong' %}"><span>Đặt phòng chờ duyệt</span><strong data-dashboard-metric="dat_phong_cho_duyet">{{ dat_phong_cho_duyet }}</strong><small>Cần kiểm tra và xử lý</small></a>
+        <a class="ndt-surface dashboard-metric" href="{% url 'quan_ly_hop_dong' %}"><span>Hợp đồng đang hiệu lực</span><strong data-dashboard-metric="hop_dong_dang_hieu_luc">{{ hop_dong_dang_hieu_luc }}</strong><small>{{ hop_dong_sap_het_han }} hợp đồng sắp hết hạn</small></a>
+    </section>
+
+    <div class="dashboard-operations">
+        <section class="ndt-surface dashboard-panel" aria-labelledby="room-status-title">
+            <div class="dashboard-panel__heading"><div><span class="dashboard-eyebrow">Vận hành phòng</span><h2 id="room-status-title">Phân bổ trạng thái</h2><p>Mỗi nhóm được tính trực tiếp từ trạng thái phòng hiện tại.</p></div><a class="ndt-button ndt-button--secondary ndt-button--compact" href="{% url 'quan_ly_phong' %}">Quản lý phòng</a></div>
+            <div class="dashboard-room-status">
+                <div><span class="dashboard-status-mark dashboard-status-mark--empty"></span><span><strong>Phòng trống</strong><small>Sẵn sàng tiếp nhận đặt phòng</small></span><b data-dashboard-metric="phong_trong">{{ phong_trong }}</b></div>
+                <div><span class="dashboard-status-mark dashboard-status-mark--booked"></span><span><strong>Đã đặt</strong><small>Đang giữ cho booking</small></span><b data-dashboard-metric="phong_da_dat">{{ phong_da_dat }}</b></div>
+                <div><span class="dashboard-status-mark dashboard-status-mark--occupied"></span><span><strong>Đang thuê</strong><small>Đang có người lưu trú</small></span><b>{{ phong_dang_thue }}</b></div>
+                <div><span class="dashboard-status-mark dashboard-status-mark--maintenance"></span><span><strong>Bảo trì</strong><small>Chưa sẵn sàng khai thác</small></span><b data-dashboard-metric="phong_bao_tri">{{ phong_bao_tri }}</b></div>
+            </div>
+        </section>
+
+        <aside class="ndt-surface dashboard-panel dashboard-actions" aria-labelledby="action-center-title">
+            <div class="dashboard-panel__heading"><div><span class="dashboard-eyebrow">Ưu tiên hôm nay</span><h2 id="action-center-title">Việc cần theo dõi</h2><p>Đi thẳng tới màn nghiệp vụ tương ứng.</p></div></div>
+            <nav class="dashboard-action-list" aria-label="Các việc cần theo dõi">
+                <a href="{% url 'quan_ly_dat_phong' %}"{% if dat_phong_cho_duyet %} class="is-priority"{% endif %}><span><strong>Đặt phòng chờ duyệt</strong><small>Kiểm tra yêu cầu mới</small></span><b>{{ dat_phong_cho_duyet }}</b></a>
+                <a href="{% url 'quan_ly_hop_dong' %}"{% if hop_dong_sap_het_han %} class="is-warning"{% endif %}><span><strong>Hợp đồng sắp hết hạn</strong><small>Theo dõi nhu cầu gia hạn</small></span><b>{{ hop_dong_sap_het_han }}</b></a>
+                <a href="{% url 'quan_ly_hop_dong' %}"><span><strong>Hợp đồng chờ hiệu lực</strong><small>Chuẩn bị bắt đầu lưu trú</small></span><b>{{ hop_dong_cho_hieu_luc }}</b></a>
+                <a href="{% url 'quan_ly_phong' %}"{% if phong_bao_tri %} class="is-warning"{% endif %}><span><strong>Phòng đang bảo trì</strong><small>Theo dõi khả năng khai thác</small></span><b>{{ phong_bao_tri }}</b></a>
+            </nav>
+        </aside>
+    </div>
+
+    <section class="dashboard-secondary-metrics" aria-label="Quy mô dữ liệu vận hành">
+        <div><span>Người thuê</span><strong data-dashboard-metric="tong_nguoi_thue">{{ tong_nguoi_thue }}</strong></div>
+        <div><span>Tổng lượt đặt phòng</span><strong data-dashboard-metric="tong_dat_phong">{{ tong_dat_phong }}</strong></div>
+        <div><span>Tổng hợp đồng</span><strong data-dashboard-metric="tong_hop_dong">{{ tong_hop_dong }}</strong></div>
+        <div><span>Booking đã duyệt</span><strong data-dashboard-metric="dat_phong_da_duyet">{{ dat_phong_da_duyet }}</strong></div>
+    </section>
+
+    <section class="dashboard-bookings" aria-labelledby="recent-bookings-title">
+        <div class="dashboard-section-heading"><div><span class="dashboard-eyebrow">Hoạt động mới</span><h2 id="recent-bookings-title">Đặt phòng gần nhất</h2><p>5 yêu cầu mới nhất, sắp xếp theo bản ghi vừa tạo.</p></div><a class="ndt-button ndt-button--secondary ndt-button--compact" href="{% url 'quan_ly_dat_phong' %}">Xem tất cả</a></div>
+        {% if danh_sach_dat_phong %}<div class="ndt-table-wrap"><table class="ndt-table dashboard-booking-table"><thead><tr><th>Người thuê</th><th>Phòng</th><th>Ngày nhận</th><th>Tiền cọc dự kiến</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>
+        {% for dat_phong in danh_sach_dat_phong %}<tr data-booking-id="{{ dat_phong.id }}"><td><strong>{{ dat_phong.nguoi_thue.ho_ten }}</strong><span class="dashboard-meta">{{ dat_phong.nguoi_thue.so_dien_thoai|default:'Chưa cập nhật' }}</span></td><td><strong>Phòng {{ dat_phong.phong.so_phong }}</strong><span class="dashboard-meta">{{ dat_phong.phong.co_so.ten_co_so|default:'NDT MOTEL' }}</span></td><td>{{ dat_phong.ngay_nhan_phong|date:'d/m/Y' }}</td><td><strong>{{ dat_phong.tien_coc_du_kien|vnd }} đ</strong></td><td>{% if dat_phong.trang_thai == 'da_duyet' %}<span class="ndt-badge ndt-badge--success">{{ dat_phong.get_trang_thai_display }}</span>{% elif dat_phong.trang_thai == 'cho_duyet' %}<span class="ndt-badge ndt-badge--warning">{{ dat_phong.get_trang_thai_display }}</span>{% elif dat_phong.trang_thai == 'tu_choi' or dat_phong.trang_thai == 'da_huy' %}<span class="ndt-badge ndt-badge--danger">{{ dat_phong.get_trang_thai_display }}</span>{% else %}<span class="ndt-badge">{{ dat_phong.get_trang_thai_display }}</span>{% endif %}</td><td><a class="ndt-button ndt-button--secondary ndt-button--compact" href="{% url 'chi_tiet_dat_phong' dat_phong.id %}">Xem</a></td></tr>{% endfor %}
+        </tbody></table></div>{% else %}<div class="ndt-empty-state" role="status"><div class="ndt-empty-state__icon" aria-hidden="true">○</div><h2 class="ndt-empty-state__title">Chưa có dữ liệu đặt phòng</h2><p class="ndt-empty-state__description">Yêu cầu đặt phòng mới sẽ xuất hiện tại đây.</p></div>{% endif %}
+    </section>
+
+    <section class="dashboard-shortcuts" aria-labelledby="dashboard-shortcuts-title"><div class="dashboard-section-heading"><div><span class="dashboard-eyebrow">Lối tắt</span><h2 id="dashboard-shortcuts-title">Nghiệp vụ thường dùng</h2><p>Các màn quản trị có route đang hoạt động.</p></div></div><nav class="dashboard-shortcut-grid" aria-label="Nghiệp vụ quản trị thường dùng">
+        <a href="{% url 'quan_ly_phong' %}"><strong>Phòng</strong><span>Giá thuê và trạng thái</span></a>
+        <a href="{% url 'quan_ly_dat_phong' %}"><strong>Đặt phòng</strong><span>Duyệt và đối soát cọc</span></a>
+        <a href="{% url 'quan_ly_hop_dong' %}"><strong>Hợp đồng</strong><span>Hiệu lực và gia hạn</span></a>
+        <a href="{% url 'quan_ly_hoa_don' %}"><strong>Hóa đơn</strong><span>Chi phí và thanh toán</span></a>
+        <a href="{% url 'quan_ly_nguoi_thue' %}"><strong>Người thuê</strong><span>Hồ sơ lưu trú</span></a>
+        <a href="{% url 'quan_ly_sua_chua' %}"><strong>Sửa chữa</strong><span>Yêu cầu và tiến độ</span></a>
+        <a href="{% url 'quan_ly_thong_bao' %}"><strong>Thông báo</strong><span>Gửi và quản lý nội dung</span></a>
+        <a href="{% url 'smart_room_dashboard' %}"><strong>Smart Room</strong><span>Nhận diện và ra vào</span></a>
+    </nav></section>
+</div>
+{% endblock %}

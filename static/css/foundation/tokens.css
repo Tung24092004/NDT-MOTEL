@@ -1,0 +1,61 @@
+:root {
+    /* Brand */
+    --ndt-primary: #08798a;
+    --ndt-primary-hover: #075d68;
+    --ndt-primary-active: #064e59;
+    --ndt-primary-soft: #edf7f7;
+    --ndt-accent: #e7bd42;
+
+    /* Surfaces and text */
+    --ndt-bg: #f7fafa;
+    --ndt-surface: #ffffff;
+    --ndt-surface-muted: #f1f6f6;
+    --ndt-text: #123338;
+    --ndt-text-secondary: #435f65;
+    --ndt-text-muted: #61777c;
+    --ndt-border: #d6e3e5;
+    --ndt-border-strong: #aebfc4;
+
+    /* Semantic */
+    --ndt-success: #176a59;
+    --ndt-success-bg: #e8f6f2;
+    --ndt-warning: #805a16;
+    --ndt-warning-bg: #fff4da;
+    --ndt-danger: #a83c3c;
+    --ndt-danger-hover: #8f3030;
+    --ndt-danger-bg: #fff0f0;
+    --ndt-info: #24657a;
+    --ndt-info-bg: #e9f4f8;
+
+    /* Type */
+    --ndt-font-family: Arial, Helvetica, sans-serif;
+    --ndt-text-xs: 0.75rem;
+    --ndt-text-sm: 0.875rem;
+    --ndt-text-md: 1rem;
+    --ndt-text-lg: 1.25rem;
+    --ndt-text-xl: 1.5rem;
+    --ndt-text-2xl: 2rem;
+    --ndt-text-display: 2.5rem;
+
+    /* Space */
+    --ndt-space-1: 0.25rem;
+    --ndt-space-2: 0.5rem;
+    --ndt-space-3: 0.75rem;
+    --ndt-space-4: 1rem;
+    --ndt-space-6: 1.5rem;
+    --ndt-space-8: 2rem;
+    --ndt-space-12: 3rem;
+
+    /* Shape and elevation */
+    --ndt-radius-sm: 0.25rem;
+    --ndt-radius-md: 0.5rem;
+    --ndt-radius-lg: 0.75rem;
+    --ndt-radius-pill: 999px;
+    --ndt-shadow-surface: 0 1px 3px rgb(18 51 56 / 8%);
+    --ndt-shadow-dropdown: 0 8px 24px rgb(18 51 56 / 14%);
+    --ndt-shadow-modal: 0 20px 48px rgb(18 51 56 / 20%);
+    --ndt-focus-ring: 0 0 0 3px rgb(8 121 138 / 24%);
+    --ndt-control-height: 44px;
+    --ndt-touch-target: 44px;
+    --ndt-page-padding: clamp(1rem, 3vw, 2rem);
+}

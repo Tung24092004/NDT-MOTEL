@@ -1,0 +1,333 @@
+.tenant-ui .account-center {
+    width: 100%;
+    padding: var(--ndt-space-1) 0 var(--ndt-space-8);
+}
+
+.tenant-ui .account-hero {
+    margin-bottom: var(--ndt-space-6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ndt-space-6);
+}
+
+.tenant-ui .account-hero span,
+.tenant-ui .account-eyebrow {
+    color: var(--ndt-primary-hover);
+    font-size: var(--ndt-text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.tenant-ui .account-hero h2 {
+    margin: var(--ndt-space-1) 0 var(--ndt-space-2);
+    color: var(--ndt-text);
+    font-size: var(--ndt-text-xl);
+    line-height: 1.25;
+}
+
+.tenant-ui .account-hero p,
+.tenant-ui .account-section__header p,
+.tenant-ui .booking-card__top p,
+.tenant-ui .current-room p {
+    margin: 0;
+    color: var(--ndt-text-muted);
+    font-size: var(--ndt-text-sm);
+    line-height: 1.6;
+}
+
+.tenant-ui .account-hero__actions,
+.tenant-ui .account-inline-actions,
+.tenant-ui .booking-card__actions,
+.tenant-ui .current-room__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ndt-space-2);
+    flex-wrap: wrap;
+}
+
+.tenant-ui .account-stats {
+    margin-bottom: var(--ndt-space-6);
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--ndt-space-4);
+}
+
+.tenant-ui .account-stat {
+    min-height: 132px;
+    display: flex;
+    flex-direction: column;
+}
+
+.tenant-ui .account-stat span {
+    color: var(--ndt-text-muted);
+    font-size: var(--ndt-text-xs);
+    font-weight: 700;
+}
+
+.tenant-ui .account-stat strong {
+    margin-top: var(--ndt-space-2);
+    color: var(--ndt-text);
+    font-size: var(--ndt-text-xl);
+    line-height: 1.2;
+}
+
+.tenant-ui .account-stat p {
+    margin: auto 0 0;
+    padding-top: var(--ndt-space-3);
+    color: var(--ndt-text-muted);
+    font-size: var(--ndt-text-xs);
+    line-height: 1.5;
+}
+
+.tenant-ui .account-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(340px, .85fr);
+    gap: var(--ndt-space-6);
+    align-items: start;
+}
+
+.tenant-ui .account-main,
+.tenant-ui .account-sidebar {
+    display: grid;
+    gap: var(--ndt-space-6);
+}
+
+.tenant-ui .account-section__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ndt-space-4);
+}
+
+.tenant-ui .account-section h2,
+.tenant-ui .account-section h3 {
+    margin: 0;
+    color: var(--ndt-text);
+    line-height: 1.3;
+}
+
+.tenant-ui .account-section h2 {
+    font-size: var(--ndt-text-lg);
+}
+
+.tenant-ui .account-section h3 {
+    font-size: var(--ndt-text-md);
+}
+
+.tenant-ui .current-room {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--ndt-space-4);
+    align-items: center;
+}
+
+.tenant-ui .current-room h3 {
+    margin-top: var(--ndt-space-1);
+    font-size: var(--ndt-text-xl);
+}
+
+.tenant-ui .booking-list {
+    display: grid;
+    gap: var(--ndt-space-4);
+}
+
+.tenant-ui .booking-card {
+    padding: var(--ndt-space-4);
+    border: 1px solid var(--ndt-border);
+    border-radius: var(--ndt-radius-lg);
+    background: var(--ndt-surface);
+}
+
+.tenant-ui .booking-card__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ndt-space-4);
+}
+
+.tenant-ui .booking-facts,
+.tenant-ui .profile-grid {
+    display: grid;
+    gap: var(--ndt-space-3);
+}
+
+.tenant-ui .booking-facts {
+    margin: var(--ndt-space-4) 0 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.tenant-ui .booking-facts div {
+    padding: var(--ndt-space-3);
+    border-radius: var(--ndt-radius-md);
+    background: var(--ndt-surface-muted);
+}
+
+.tenant-ui .booking-facts dt,
+.tenant-ui .profile-grid dt {
+    color: var(--ndt-text-muted);
+    font-size: var(--ndt-text-xs);
+    font-weight: 600;
+}
+
+.tenant-ui .booking-facts dd,
+.tenant-ui .profile-grid dd {
+    margin: var(--ndt-space-1) 0 0;
+    color: var(--ndt-text);
+    font-size: var(--ndt-text-sm);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.tenant-ui .booking-card__actions {
+    margin-top: var(--ndt-space-4);
+    justify-content: flex-start;
+}
+
+.tenant-ui .booking-card__actions form {
+    margin: 0;
+}
+
+.tenant-ui .profile-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tenant-ui .account-inline-actions {
+    margin-top: var(--ndt-space-4);
+    justify-content: flex-start;
+}
+
+.tenant-ui .quick-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ndt-space-3);
+}
+
+.tenant-ui .quick-link,
+.tenant-ui .notice-item {
+    border: 1px solid var(--ndt-border);
+    border-radius: var(--ndt-radius-md);
+    background: var(--ndt-surface);
+    color: var(--ndt-text);
+    text-decoration: none;
+}
+
+.tenant-ui .quick-link {
+    min-height: 92px;
+    padding: var(--ndt-space-4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--ndt-space-1);
+}
+
+.tenant-ui .quick-link:hover,
+.tenant-ui .notice-item:hover {
+    border-color: var(--ndt-primary);
+    background: #fafdfe;
+}
+
+.tenant-ui .quick-link strong {
+    font-size: var(--ndt-text-sm);
+}
+
+.tenant-ui .quick-link span,
+.tenant-ui .notice-item span {
+    color: var(--ndt-text-muted);
+    font-size: var(--ndt-text-xs);
+    line-height: 1.5;
+}
+
+.tenant-ui .notice-list {
+    display: grid;
+    gap: var(--ndt-space-3);
+}
+
+.tenant-ui .notice-item {
+    padding: var(--ndt-space-3);
+    display: grid;
+    gap: var(--ndt-space-1);
+}
+
+.tenant-ui .notice-item.is-unread {
+    border-color: #cfe5d8;
+    background: var(--ndt-success-bg);
+}
+
+.tenant-ui .notice-item strong {
+    font-size: var(--ndt-text-sm);
+}
+
+.tenant-ui .account-alert {
+    margin: var(--ndt-space-4) 0 0;
+    padding: var(--ndt-space-3);
+    border-radius: var(--ndt-radius-md);
+    font-size: var(--ndt-text-sm);
+    line-height: 1.6;
+}
+
+.tenant-ui .account-alert--danger {
+    background: var(--ndt-danger-bg);
+    color: var(--ndt-danger);
+}
+
+.tenant-ui .account-alert--info {
+    background: var(--ndt-info-bg);
+    color: var(--ndt-info);
+}
+
+@media (max-width: 1100px) {
+    .tenant-ui .account-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tenant-ui .account-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .tenant-ui .account-hero,
+    .tenant-ui .account-section__header,
+    .tenant-ui .current-room,
+    .tenant-ui .booking-card__top {
+        align-items: stretch;
+        grid-template-columns: 1fr;
+        flex-direction: column;
+    }
+
+    .tenant-ui .account-hero__actions,
+    .tenant-ui .current-room__actions,
+    .tenant-ui .booking-card__actions,
+    .tenant-ui .account-inline-actions {
+        justify-content: stretch;
+    }
+
+    .tenant-ui .account-hero__actions > *,
+    .tenant-ui .current-room__actions > *,
+    .tenant-ui .booking-card__actions > *,
+    .tenant-ui .booking-card__actions form,
+    .tenant-ui .booking-card__actions form > *,
+    .tenant-ui .account-inline-actions > * {
+        width: 100%;
+    }
+
+    .tenant-ui .booking-facts,
+    .tenant-ui .profile-grid,
+    .tenant-ui .quick-links {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .tenant-ui .account-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ndt-space-3);
+    }
+
+    .tenant-ui .account-stat {
+        min-height: 124px;
+        padding: var(--ndt-space-4);
+    }
+}

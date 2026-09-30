@@ -1,0 +1,99 @@
+{% extends "core/base.html" %}
+{% load static bo_loc %}
+
+{% block title %}Quản lý hóa đơn - NDT MOTEL{% endblock %}
+{% block page_title %}Quản lý hóa đơn{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
+    <link rel="stylesheet" href="{% static 'css/invoice_management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="invoice-management ndt-foundation" data-invoice-screen="list">
+    <header class="ndt-page-header">
+        <div class="ndt-page-header__content">
+            <p class="ndt-breadcrumb">Quản trị / Hóa đơn</p>
+            <h1 class="ndt-page-header__title">Quản lý hóa đơn</h1>
+            <p class="ndt-page-header__subtitle">Theo dõi kỳ thu, hạn thanh toán, công nợ và trạng thái đối soát của từng hóa đơn.</p>
+        </div>
+        <div class="ndt-page-header__actions">
+            <a class="ndt-button ndt-button--secondary" href="{% url 'dashboard_admin' %}">Về dashboard</a>
+            <a class="ndt-button ndt-button--primary" href="{% url 'tao_hoa_don' %}">Tạo hóa đơn</a>
+        </div>
+    </header>
+
+    <section class="invoice-stats" aria-label="Thống kê hóa đơn">
+        <article class="ndt-surface invoice-stat"><span>Tổng hóa đơn</span><strong>{{ tong_hoa_don }}</strong></article>
+        <article class="ndt-surface invoice-stat invoice-stat--warning"><span>Chưa thanh toán</span><strong>{{ so_hoa_don_chua_thanh_toan }}</strong></article>
+        <article class="ndt-surface invoice-stat invoice-stat--info"><span>Chờ xác nhận</span><strong>{{ so_hoa_don_cho_xac_nhan }}</strong></article>
+        <article class="ndt-surface invoice-stat invoice-stat--success"><span>Đã thanh toán</span><strong>{{ so_hoa_don_da_thanh_toan }}</strong></article>
+        <article class="ndt-surface invoice-stat invoice-stat--danger"><span>Quá hạn</span><strong>{{ so_hoa_don_qua_han }}</strong></article>
+    </section>
+
+    <section class="ndt-filter-bar invoice-filter" aria-labelledby="invoice-filter-title">
+        <h2 class="ndt-filter-bar__title" id="invoice-filter-title">Tìm kiếm và lọc</h2>
+        <form class="ndt-filter-bar__form invoice-filter__form" method="get" action="{% url 'quan_ly_hoa_don' %}">
+            <div class="ndt-field">
+                <label class="ndt-label" for="invoice-query">Từ khóa</label>
+                <input class="ndt-control" id="invoice-query" type="search" name="q" value="{{ tu_khoa }}" placeholder="Hợp đồng, người thuê hoặc phòng">
+            </div>
+            <div class="ndt-field">
+                <label class="ndt-label" for="invoice-status">Trạng thái</label>
+                <select class="ndt-control" id="invoice-status" name="trang_thai">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="chua_thanh_toan" {% if trang_thai == 'chua_thanh_toan' %}selected{% endif %}>Chưa thanh toán</option>
+                    <option value="cho_xac_nhan" {% if trang_thai == 'cho_xac_nhan' %}selected{% endif %}>Chờ xác nhận</option>
+                    <option value="da_thanh_toan" {% if trang_thai == 'da_thanh_toan' %}selected{% endif %}>Đã thanh toán</option>
+                    <option value="qua_han" {% if trang_thai == 'qua_han' %}selected{% endif %}>Quá hạn</option>
+                </select>
+            </div>
+            <div class="invoice-filter__actions">
+                <button class="ndt-button ndt-button--primary" type="submit">Áp dụng</button>
+                {% if tu_khoa or trang_thai %}<a class="ndt-button ndt-button--ghost" href="{% url 'quan_ly_hoa_don' %}">Đặt lại</a>{% endif %}
+            </div>
+        </form>
+    </section>
+
+    <div class="invoice-result"><div><h2>Danh sách hóa đơn</h2><p>{{ hoa_don|length }} bản ghi theo bộ lọc hiện tại</p></div></div>
+
+    {% if hoa_don %}
+        <div class="ndt-table-wrap invoice-table-wrap">
+            <table class="ndt-table invoice-table">
+                <thead><tr><th>Hóa đơn</th><th>Hợp đồng / người thuê</th><th>Phòng</th><th>Kỳ thu</th><th>Tổng tiền</th><th>Hạn thanh toán</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                <tbody>
+                    {% for item in hoa_don %}
+                        <tr>
+                            <td data-label="Hóa đơn"><a class="invoice-code" href="{% url 'chi_tiet_hoa_don' item.id %}">HĐ-{{ item.id }}</a><span class="invoice-note">Tạo {{ item.ngay_tao|date:'d/m/Y' }}</span></td>
+                            <td data-label="Hợp đồng / người thuê">
+                                {% if item.hop_dong %}<strong>{{ item.hop_dong.so_hop_dong }}</strong><span class="invoice-note">{{ item.hop_dong.dat_phong.nguoi_thue.ho_ten }}</span>{% else %}<span class="invoice-note">Chưa liên kết hợp đồng</span>{% endif %}
+                            </td>
+                            <td data-label="Phòng">{% if item.hop_dong.dat_phong.phong %}<strong>Phòng {{ item.hop_dong.dat_phong.phong.so_phong }}</strong><span class="invoice-note">{{ item.hop_dong.dat_phong.phong.co_so.ten_co_so }}</span>{% else %}—{% endif %}</td>
+                            <td data-label="Kỳ thu"><strong>{{ item.thang|stringformat:'02d' }}/{{ item.nam }}</strong></td>
+                            <td data-label="Tổng tiền"><strong class="invoice-money">{{ item.tong_tien_hien_thi|vnd }} VNĐ</strong></td>
+                            <td data-label="Hạn thanh toán">{{ item.han_thanh_toan|date:'d/m/Y'|default:'—' }}</td>
+                            <td data-label="Trạng thái">
+                                {% if item.trang_thai == 'da_thanh_toan' %}<span class="ndt-badge ndt-badge--success">Đã thanh toán</span>
+                                {% elif item.trang_thai == 'qua_han' %}<span class="ndt-badge ndt-badge--danger">Quá hạn</span>
+                                {% elif item.trang_thai == 'cho_xac_nhan' %}<span class="ndt-badge ndt-badge--info">Chờ xác nhận</span>
+                                {% else %}<span class="ndt-badge ndt-badge--warning">Chưa thanh toán</span>{% endif %}
+                            </td>
+                            <td data-label="Thao tác"><a class="ndt-button ndt-button--secondary ndt-button--compact" href="{% url 'chi_tiet_hoa_don' item.id %}">Chi tiết</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <section class="ndt-empty-state" role="status">
+            <div class="ndt-empty-state__icon" aria-hidden="true">□</div>
+            <h2 class="ndt-empty-state__title">Chưa có hóa đơn phù hợp</h2>
+            <p class="ndt-empty-state__description">Thử thay đổi bộ lọc hoặc tạo hóa đơn mới cho kỳ thu cần quản lý.</p>
+            <a class="ndt-button ndt-button--primary ndt-empty-state__action" href="{% url 'tao_hoa_don' %}">Tạo hóa đơn</a>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,1487 @@
+
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Smart Access Control{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/smart_room.css' %}">
+<style>
+:root{
+    --sa-primary:#07859a;
+    --sa-deep:#075b6a;
+    --sa-soft:#e9f7f9;
+    --sa-text:#12343b;
+    --sa-muted:#6d7d82;
+    --sa-line:#e3eaec;
+}
+
+.smart-access-page{
+    width:100%;
+    max-width:1480px;
+    margin:0 auto;
+    padding:2px 0 45px;
+    color:var(--sa-text);
+}
+
+.smart-access-page *,
+.smart-access-page *::before,
+.smart-access-page *::after{
+    box-sizing:border-box;
+}
+
+/* ================= HERO ================= */
+
+.smart-access-header{
+    position:relative;
+    overflow:hidden;
+    margin-bottom:16px;
+    padding:24px;
+    border-radius:18px;
+    background:linear-gradient(110deg,#075b6a 0%,#07859a 58%,#24a6b6 100%);
+    box-shadow:0 12px 30px rgba(7,91,106,.14);
+    color:#fff;
+}
+
+.smart-access-header::after{
+    content:"";
+    position:absolute;
+    right:-55px;
+    bottom:-95px;
+    width:230px;
+    height:230px;
+    border-radius:50%;
+    background:rgba(255,255,255,.07);
+}
+
+.smart-access-badge{
+    position:relative;
+    z-index:1;
+    display:inline-flex;
+    align-items:center;
+    min-height:28px;
+    padding:0 10px;
+    margin-bottom:8px;
+    border:1px solid rgba(255,255,255,.28);
+    border-radius:999px;
+    background:rgba(255,255,255,.10);
+    color:#fff;
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:.07em;
+}
+
+.smart-access-header h1{
+    position:relative;
+    z-index:1;
+    margin:0;
+    color:#fff;
+    font-size:27px;
+    line-height:1.2;
+    font-weight:850;
+    letter-spacing:-.03em;
+}
+
+.smart-access-header > p{
+    position:relative;
+    z-index:1;
+    max-width:760px;
+    margin:6px 0 0;
+    color:rgba(255,255,255,.80);
+    font-size:10px;
+    line-height:1.55;
+}
+
+.smart-access-header-actions{
+    position:absolute;
+    z-index:2;
+    top:50%;
+    right:24px;
+    display:flex;
+    gap:9px;
+    transform:translateY(-50%);
+}
+
+.smart-access-nav-btn{
+    min-height:42px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 14px;
+    border:1px solid rgba(255,255,255,.42);
+    border-radius:10px;
+    background:rgba(255,255,255,.10);
+    color:#fff;
+    font-size:9px;
+    font-weight:850;
+    text-decoration:none;
+    transition:.16s ease;
+}
+
+.smart-access-nav-btn:hover{
+    transform:translateY(-1px);
+    background:rgba(255,255,255,.18);
+}
+
+.smart-access-nav-btn.primary{
+    border-color:#fff;
+    background:#fff;
+    color:var(--sa-deep);
+    box-shadow:0 8px 18px rgba(0,0,0,.13);
+}
+
+/* ================= MAIN LAYOUT ================= */
+
+.smart-access-layout{
+    display:grid;
+    grid-template-columns:minmax(340px,.72fr) minmax(0,1.28fr);
+    gap:16px;
+    align-items:start;
+}
+
+.smart-access-card,
+.smart-access-result-card{
+    border:1px solid var(--sa-line);
+    border-radius:18px;
+    background:#fff;
+    box-shadow:0 10px 30px rgba(19,59,67,.05);
+}
+
+.smart-access-card{
+    padding:18px;
+}
+
+.smart-access-result-card{
+    min-height:100%;
+    padding:18px;
+}
+
+.smart-access-card-header{
+    margin-bottom:16px;
+    padding-bottom:13px;
+    border-bottom:1px solid var(--sa-line);
+}
+
+.smart-access-card-header h3{
+    margin:0;
+    color:var(--sa-text);
+    font-size:15px;
+    font-weight:850;
+}
+
+.smart-access-card-header p{
+    margin:5px 0 0;
+    color:var(--sa-muted);
+    font-size:9px;
+    line-height:1.5;
+}
+
+/* ================= FORM ================= */
+
+.smart-access-field{
+    margin-bottom:13px;
+}
+
+.smart-access-field label{
+    display:block;
+    margin-bottom:5px;
+    color:var(--sa-text);
+    font-size:9px;
+    font-weight:850;
+}
+
+.smart-access-field select{
+    width:100%;
+    min-height:41px;
+    padding:0 11px;
+    border:1px solid #cfdee1;
+    border-radius:9px;
+    outline:none;
+    background:#fff;
+    color:var(--sa-text);
+    font-family:inherit;
+    font-size:10px;
+}
+
+.smart-access-field select:focus{
+    border-color:#75b9c2;
+    box-shadow:0 0 0 3px rgba(7,133,154,.08);
+}
+
+.smart-access-method{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:14px;
+    padding:11px 12px;
+    border:1px solid #d4e9eb;
+    border-radius:11px;
+    background:var(--sa-soft);
+}
+
+.smart-access-method-icon{
+    font-size:18px;
+}
+
+.smart-access-method-info{
+    flex:1;
+}
+
+.smart-access-method-info strong{
+    display:block;
+    color:var(--sa-text);
+    font-size:10px;
+    font-weight:850;
+}
+
+.smart-access-method-info span{
+    display:block;
+    margin-top:2px;
+    color:var(--sa-muted);
+    font-size:8px;
+}
+
+.smart-access-method-status{
+    min-height:24px;
+    display:inline-flex;
+    align-items:center;
+    padding:0 8px;
+    border-radius:999px;
+    background:var(--sa-primary);
+    color:#fff;
+    font-size:7px;
+    font-weight:900;
+    letter-spacing:.06em;
+}
+
+.camera-section{
+    margin-top:14px;
+}
+
+/* ================= CAMERA ================= */
+
+.camera-box{
+    position:relative;
+    overflow:hidden;
+    aspect-ratio:16 / 10;
+    margin-bottom:10px;
+    border:1px solid #1f3438;
+    border-radius:14px;
+    background:#0e1719;
+}
+
+.camera-box video{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.camera-overlay{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(to bottom,rgba(0,0,0,.08),transparent 28%,transparent 72%,rgba(0,0,0,.12));
+}
+
+.camera-face-frame{
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:170px;
+    height:215px;
+    transform:translate(-50%,-50%);
+    border:2px solid rgba(255,255,255,.82);
+    border-radius:45% 45% 42% 42%;
+    box-shadow:0 0 0 999px rgba(0,0,0,.07);
+}
+
+.camera-live{
+    position:absolute;
+    top:11px;
+    right:11px;
+    min-height:24px;
+    display:flex;
+    align-items:center;
+    padding:0 8px;
+    border-radius:999px;
+    background:#c94a4a;
+    color:#fff;
+    font-size:7px;
+    font-weight:900;
+}
+
+.camera-status{
+    min-height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 0 9px;
+    padding:7px 9px;
+    border-radius:8px;
+    background:#f5f8f9;
+    color:var(--sa-muted);
+    text-align:center;
+    font-size:8px;
+}
+
+.camera-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.camera-actions button{
+    min-height:38px;
+    padding:0 10px;
+    border:1px solid #d5e2e4;
+    border-radius:9px;
+    background:#fff;
+    color:#536a6f;
+    font-family:inherit;
+    font-size:9px;
+    font-weight:850;
+    cursor:pointer;
+    transition:.15s ease;
+}
+
+.camera-actions button:hover{
+    border-color:#bdd5d9;
+    background:#f5f9f9;
+}
+
+.camera-actions button.primary{
+    border-color:var(--sa-primary);
+    background:var(--sa-primary);
+    color:#fff;
+}
+
+.smart-access-check-btn{
+    width:100%;
+    min-height:43px;
+    margin-top:11px;
+    border:1px solid var(--sa-primary);
+    border-radius:10px;
+    background:var(--sa-primary);
+    color:#fff;
+    font-family:inherit;
+    font-size:9px;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow:0 6px 16px rgba(7,133,154,.15);
+}
+
+.smart-access-check-btn:hover{
+    background:var(--sa-deep);
+    border-color:var(--sa-deep);
+}
+
+.smart-access-check-btn:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+}
+
+/* ================= RESULT ================= */
+
+.access-result-empty{
+    min-height:515px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:var(--sa-muted);
+}
+
+.access-empty-icon{
+    width:64px;
+    height:64px;
+    display:grid;
+    place-items:center;
+    margin-bottom:12px;
+    border-radius:18px;
+    background:var(--sa-soft);
+    color:var(--sa-primary);
+    font-size:25px;
+}
+
+.access-result-empty h3{
+    margin:0;
+    color:var(--sa-text);
+    font-size:16px;
+    font-weight:850;
+}
+
+.access-result-empty p{
+    max-width:430px;
+    margin:7px 0 0;
+    font-size:9px;
+    line-height:1.65;
+}
+
+.access-result{
+    padding:20px 16px;
+    margin-bottom:14px;
+    border:1px solid transparent;
+    border-radius:14px;
+    text-align:center;
+}
+
+.access-result.granted{
+    border-color:#cce8d8;
+    background:#ecf9f2;
+}
+
+.access-result.denied{
+    border-color:#efcccc;
+    background:#fff1f1;
+}
+
+.access-result-icon{
+    width:52px;
+    height:52px;
+    display:grid;
+    place-items:center;
+    margin:0 auto 9px;
+    border-radius:50%;
+    background:#fff;
+    font-size:25px;
+    font-weight:900;
+}
+
+.access-result-title{
+    color:var(--sa-text);
+    font-size:20px;
+    font-weight:900;
+}
+
+.access-result-subtitle{
+    margin-top:4px;
+    color:var(--sa-muted);
+    font-size:9px;
+}
+
+.access-result-info{
+    margin-top:12px;
+}
+
+.access-person{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px;
+    border:1px solid var(--sa-line);
+    border-radius:11px;
+    background:#f8fbfb;
+    text-align:left;
+}
+
+.access-person-avatar{
+    width:40px;
+    height:40px;
+    display:grid;
+    place-items:center;
+    flex:0 0 40px;
+    border-radius:10px;
+    background:var(--sa-soft);
+    font-size:18px;
+}
+
+.access-person strong{
+    display:block;
+    color:var(--sa-text);
+    font-size:12px;
+}
+
+.access-person span{
+    display:block;
+    margin-top:2px;
+    color:var(--sa-muted);
+    font-size:9px;
+}
+
+.access-check-list{
+    margin-top:11px;
+}
+
+.access-check-row{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    padding:10px 2px;
+    border-bottom:1px solid var(--sa-line);
+    color:#536a6f;
+    font-size:9px;
+}
+
+.check-ok{
+    color:#168058;
+}
+
+.check-no{
+    color:#b64141;
+}
+
+.access-reason{
+    margin-top:13px;
+    padding:11px 12px;
+    border:1px solid var(--sa-line);
+    border-radius:10px;
+    background:#f8fbfb;
+    color:#536a6f;
+    text-align:left;
+    font-size:9px;
+}
+
+.access-reason p{
+    margin:5px 0 0;
+    line-height:1.55;
+}
+
+.access-door-status{
+    margin-top:12px;
+    padding:11px;
+    border:1px solid #c9e7d6;
+    border-radius:9px;
+    background:#eaf8f1;
+    color:#13704d;
+    font-size:9px;
+    font-weight:900;
+    text-align:center;
+}
+
+.access-door-status.door-locked{
+    border-color:#efcccc;
+    background:#fff0f0;
+    color:#b64141;
+}
+
+.face-score{
+    margin-top:10px;
+    padding:9px;
+    border-radius:8px;
+    background:var(--sa-soft);
+    color:var(--sa-deep);
+    font-size:9px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:980px){
+    .smart-access-header-actions{
+        position:relative;
+        top:auto;
+        right:auto;
+        margin-top:14px;
+        transform:none;
+    }
+
+    .smart-access-layout{
+        grid-template-columns:1fr;
+    }
+
+    .access-result-empty{
+        min-height:320px;
+    }
+}
+
+@media(max-width:620px){
+    .smart-access-header{
+        padding:18px;
+    }
+
+    .smart-access-header h1{
+        font-size:23px;
+    }
+
+    .smart-access-header-actions{
+        flex-direction:column;
+    }
+
+    .smart-access-nav-btn{
+        width:100%;
+    }
+
+    .camera-face-frame{
+        width:140px;
+        height:180px;
+    }
+}
+</style>
+<link rel="stylesheet" href="{% static 'css/bill_smart_full_refresh.css' %}">
+{% endblock %}
+
+{% block content %}
+
+
+<div class="smart-access-page">
+
+    <!-- HEADER -->
+    <div class="smart-access-header">
+
+        <div class="smart-access-badge">
+            🔐 SMART ACCESS CONTROL
+        </div>
+
+        <h1>Kiểm soát ra vào thông minh</h1>
+
+        <p>
+            Nhận diện khuôn mặt bằng camera và kiểm tra quyền truy cập phòng theo thời gian thực.
+        </p>
+
+        <div class="smart-access-header-actions">
+            <a href="{% url 'smart_room_dashboard' %}" class="smart-access-nav-btn">
+                ← Tổng quan Smart Room
+            </a>
+            <a href="{% url 'quan_ly_lich_su_ra_vao' %}" class="smart-access-nav-btn primary">
+                Lịch sử ra vào
+            </a>
+        </div>
+
+    </div>
+
+
+    <div class="smart-access-layout">
+
+        <!-- =====================================================
+             BÊN TRÁI
+             ===================================================== -->
+
+        <div class="smart-access-card">
+
+            <div class="smart-access-card-header">
+
+                <h3>🔍 Kiểm tra quyền truy cập</h3>
+
+                <p>
+                    Chọn phòng và sự kiện, sau đó sử dụng camera để xác thực.
+                </p>
+
+            </div>
+
+
+            <!-- PHÒNG -->
+
+            <div class="smart-access-field">
+
+                <label for="phong">
+                    🏠 Phòng
+                </label>
+
+                <select id="phong" required>
+
+                    <option value="">
+                        -- Chọn phòng --
+                    </option>
+
+                    {% for phong in phong_ds %}
+
+                    <option value="{{ phong.id }}">
+                        P{{ phong.so_phong }}
+                        -
+                        {{ phong.co_so.ten_co_so }}
+
+                        {% if phong.tang %}
+                            - Tầng {{ phong.tang }}
+                        {% endif %}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- SỰ KIỆN -->
+
+            <div class="smart-access-field">
+
+                <label for="loaiSuKien">
+                    🚪 Sự kiện
+                </label>
+
+                <select id="loaiSuKien" required>
+
+                    <option value="vao">
+                        Vào phòng
+                    </option>
+
+                    <option value="ra">
+                        Ra khỏi phòng
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- PHƯƠNG THỨC -->
+
+            <div class="smart-access-method">
+
+                <div class="smart-access-method-icon">
+                    📷
+                </div>
+
+                <div class="smart-access-method-info">
+
+                    <strong>
+                        Nhận diện khuôn mặt
+                    </strong>
+
+                    <span>
+                        YuNet + SFace • Camera trực tiếp
+                    </span>
+
+                </div>
+
+                <div class="smart-access-method-status">
+                    LIVE
+                </div>
+
+            </div>
+
+
+            <!-- CAMERA -->
+
+            <div class="camera-section">
+
+                <div class="camera-box">
+
+                    <video
+                        id="faceVideo"
+                        autoplay
+                        playsinline
+                        muted>
+                    </video>
+
+                    <div class="camera-overlay"></div>
+
+                    <div class="camera-face-frame"></div>
+
+                    <div class="camera-live">
+                        ● LIVE
+                    </div>
+
+                </div>
+
+                <div id="cameraStatus" class="camera-status">
+                    Camera chưa được khởi động.
+                </div>
+
+
+                <div class="camera-actions">
+
+                    <button
+                        type="button"
+                        id="startCameraBtn"
+                        class="primary">
+                        📷 Bật camera
+                    </button>
+
+                    <button
+                        type="button"
+                        id="stopCameraBtn">
+                        ⏹ Tắt camera
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- SCAN -->
+
+            <button
+                type="button"
+                id="scanBtn"
+                class="smart-access-check-btn">
+
+                🔍 QUÉT & KIỂM TRA QUYỀN
+
+            </button>
+
+        </div>
+
+
+        <!-- =====================================================
+             BÊN PHẢI
+             ===================================================== -->
+
+        <div class="smart-access-result-card">
+
+            <div id="resultContainer">
+
+                <div class="access-result-empty">
+
+                    <div class="access-empty-icon">
+                        📷
+                    </div>
+
+                    <h3>
+                        Sẵn sàng kiểm tra
+                    </h3>
+
+                    <p>
+                        Chọn phòng, chọn sự kiện và bật camera.
+                        Hệ thống sẽ tự nhận diện người trước camera
+                        và kiểm tra quyền ra vào.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const video = document.getElementById("faceVideo");
+
+    const phong = document.getElementById("phong");
+
+    const loaiSuKien = document.getElementById("loaiSuKien");
+
+    const startCameraBtn =
+        document.getElementById("startCameraBtn");
+
+    const stopCameraBtn =
+        document.getElementById("stopCameraBtn");
+
+    const scanBtn =
+        document.getElementById("scanBtn");
+
+    const cameraStatus =
+        document.getElementById("cameraStatus");
+
+    const resultContainer =
+        document.getElementById("resultContainer");
+
+    let cameraStream = null;
+    let processing = false;
+
+    function frameReady() {
+        return cameraStream &&
+            cameraStream.getVideoTracks().some(function (track) {
+                return track.readyState === "live";
+            }) &&
+            video.readyState >= 2 &&
+            video.videoWidth > 0 &&
+            video.videoHeight > 0;
+    }
+
+    function updateScanState() {
+        scanBtn.disabled = processing || !phong.value || !frameReady();
+    }
+
+    function setCameraStatus(message, type) {
+        cameraStatus.textContent = message;
+        cameraStatus.className = "camera-status";
+
+        if (type) {
+            cameraStatus.classList.add(type);
+        }
+    }
+
+
+    /* =========================================================
+       CSRF
+       ========================================================= */
+
+    function getCookie(name) {
+
+        let cookieValue = null;
+
+        if (document.cookie && document.cookie !== "") {
+
+            const cookies = document.cookie.split(";");
+
+            for (let cookie of cookies) {
+
+                cookie = cookie.trim();
+
+                if (cookie.substring(0, name.length + 1) ===
+                    (name + "=")) {
+
+                    cookieValue =
+                        decodeURIComponent(
+                            cookie.substring(name.length + 1)
+                        );
+
+                    break;
+                }
+            }
+        }
+
+        return cookieValue;
+    }
+
+
+    /* =========================================================
+       BẬT CAMERA
+       ========================================================= */
+
+    async function startCamera() {
+
+        try {
+
+            if (cameraStream || processing) {
+                return;
+            }
+
+            startCameraBtn.disabled = true;
+            setCameraStatus(
+                "Đang yêu cầu quyền sử dụng camera...",
+                "processing"
+            );
+
+            cameraStream =
+                await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: "user",
+                        width: {
+                            ideal: 640
+                        },
+                        height: {
+                            ideal: 480
+                        }
+                    },
+                    audio: false
+                });
+
+            video.srcObject = cameraStream;
+
+            cameraStream.getVideoTracks().forEach(function (track) {
+                track.addEventListener("ended", function () {
+                    stopCamera();
+                    setCameraStatus(
+                        "Camera đã ngắt kết nối. Hãy kiểm tra thiết bị và bật lại camera.",
+                        "error"
+                    );
+                });
+            });
+
+            await video.play();
+
+            setCameraStatus(
+                "Camera đang hoạt động. Đưa khuôn mặt vào khung.",
+                "success"
+            );
+
+            startCameraBtn.disabled = true;
+            stopCameraBtn.disabled = false;
+            updateScanState();
+
+        } catch (error) {
+
+            console.error(error);
+            stopCamera();
+
+            setCameraStatus(
+                "Không thể mở camera. Hãy cấp quyền camera cho trình duyệt.",
+                "error"
+            );
+
+            alert(
+                "Không thể mở camera.\n\n" +
+                "Hãy kiểm tra quyền Camera của trình duyệt."
+            );
+        }
+    }
+
+
+    /* =========================================================
+       TAT CAMERA
+       ========================================================= */
+
+    function stopCamera() {
+
+        if (cameraStream) {
+
+            cameraStream.getTracks().forEach(function (track) {
+                track.stop();
+            });
+
+            cameraStream = null;
+        }
+
+        video.srcObject = null;
+
+        startCameraBtn.disabled = processing;
+        stopCameraBtn.disabled = true;
+
+        if (!processing) {
+            setCameraStatus("Camera đã tắt.");
+        }
+
+        updateScanState();
+    }
+
+
+    /* =========================================================
+       CHUP FRAME TU WEBCAM
+       ========================================================= */
+
+    function captureFrame() {
+
+        if (!frameReady()) {
+            return null;
+        }
+
+        const canvas =
+            document.createElement("canvas");
+
+        canvas.width = video.videoWidth;
+
+        canvas.height = video.videoHeight;
+
+        const context =
+            canvas.getContext("2d");
+
+        context.drawImage(
+            video,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        return canvas.toDataURL(
+            "image/jpeg",
+            0.90
+        );
+    }
+
+
+    /* =========================================================
+       HIEN THI KET QUA
+       ========================================================= */
+    function showResult(data) {
+
+        const granted =
+            data.duoc_phep === true;
+
+        const title =
+            granted
+                ? "ACCESS GRANTED"
+                : "ACCESS DENIED";
+
+        const subtitle =
+            granted
+                ? "Có thể mở cửa"
+                : "Truy cập bị từ chối";
+
+        const icon =
+            granted
+                ? "✓"
+                : "×";
+
+        const name =
+            data.nguoi || data.ho_ten || "Không xác định";
+
+        const room =
+            data.phong || "";
+
+        const quyen =
+            data.loai_quyen || "Không xác định";
+
+        const score =
+            typeof data.score === "number"
+                ? data.score.toFixed(3)
+                : null;
+
+        const lyDo =
+            data.ly_do ||
+            data.message ||
+            (
+                granted
+                    ? "Xác thực thành công."
+                    : "Khuôn mặt không có quyền truy cập phòng."
+            );
+
+
+        resultContainer.innerHTML = `
+
+            <div class="access-result ${granted ? "granted" : "denied"}">
+
+                <div class="access-result-icon">
+                    ${icon}
+                </div>
+
+                <div class="access-result-title">
+                    ${title}
+                </div>
+
+                <div class="access-result-subtitle">
+                    ${subtitle}
+                </div>
+
+            </div>
+
+
+            <div class="access-result-info">
+
+                <div class="access-person">
+
+                    <div class="access-person-avatar">
+                        👤
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            ${name}
+                        </strong>
+
+                        <span>
+                            ${room}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="access-check-list">
+
+                    <div class="access-check-row">
+
+                        <span>
+                            📷 Face Profile
+                        </span>
+
+                        <strong class="${data.face ? "check-ok" : "check-no"}">
+                            ${data.face ? "✓ Đã xác thực" : "✕ Không hợp lệ"}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="access-check-row">
+
+                        <span>
+                            🔐 Quyền ra vào
+                        </span>
+
+                        <strong class="${data.quyen ? "check-ok" : "check-no"}">
+                            ${data.quyen ? "✓ Đang hoạt động" : "✕ Không hợp lệ"}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="access-check-row">
+
+                        <span>
+                            🏠 Phòng
+                        </span>
+
+                        <strong class="${data.dung_phong ? "check-ok" : "check-no"}">
+                            ${data.dung_phong ? "✓ Hợp lệ" : "✕ Không hợp lệ"}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="access-check-row">
+
+                        <span>
+                            🪪 Loại quyền
+                        </span>
+
+                        <strong>
+                            ${quyen}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                ${
+                    score
+                    ? `
+                        <div class="face-score">
+                            📊 Độ tương đồng khuôn mặt:
+                            <strong>${score}</strong>
+                        </div>
+                    `
+                    : ""
+                }
+
+
+                <div class="access-reason">
+
+                    <strong>
+                        Kết quả kiểm tra
+                    </strong>
+
+                    <p>
+                        ${lyDo}
+                    </p>
+
+                </div>
+
+
+                <div class="access-door-status ${granted ? "" : "door-locked"}">
+
+                    ${
+                        granted
+                        ? "🔓 CỬA ĐÃ ĐƯỢC MỞ"
+                        : "🔒 CỬA ĐANG KHÓA"
+                    }
+
+                </div>
+
+            </div>
+        `;
+    }
+
+
+    /* =========================================================
+       QUÉT FACE ID
+       ========================================================= */
+
+    async function scanFace() {
+
+        if (processing) {
+            return;
+        }
+
+        if (!phong.value) {
+
+            alert("Vui lòng chọn phòng.");
+
+            phong.focus();
+
+            return;
+        }
+
+        if (!frameReady()) {
+
+            alert(
+                "Vui lòng bật camera và chờ camera có khung hình trước khi quét Face ID."
+            );
+
+            return;
+        }
+
+        const image =
+            captureFrame();
+
+        if (!image) {
+
+            alert(
+                "Chưa lấy được hình ảnh từ camera. " +
+                "Vui lòng thử lại."
+            );
+
+            return;
+        }
+
+        processing = true;
+        scanBtn.disabled = true;
+        startCameraBtn.disabled = true;
+        stopCameraBtn.disabled = true;
+        phong.disabled = true;
+        loaiSuKien.disabled = true;
+
+        scanBtn.textContent =
+            "ĐANG NHẬN DIỆN...";
+
+        setCameraStatus(
+            "Đang nhận diện khuôn mặt và kiểm tra quyền...",
+            "processing"
+        );
+
+        const controller = new AbortController();
+        const timeout = window.setTimeout(function () {
+            controller.abort();
+        }, 30000);
+
+        try {
+
+            const response =
+                await fetch(
+                    "{% url 'face_id_xac_thuc' %}",
+                    {
+                        method: "POST",
+                        signal: controller.signal,
+
+                        headers: {
+                            "Content-Type":
+                                "application/x-www-form-urlencoded; charset=UTF-8",
+
+                            "X-CSRFToken":
+                                getCookie("csrftoken"),
+
+                            "X-Requested-With":
+                                "XMLHttpRequest"
+                        },
+
+                        body:
+                            new URLSearchParams({
+                                image: image,
+                                phong: phong.value,
+                                loai_su_kien:
+                                    loaiSuKien.value
+                            })
+                    }
+                );
+
+
+            let data = {};
+
+            try {
+                data = await response.json();
+            } catch (e) {
+
+                data = {
+                    duoc_phep: false,
+                    ly_do:
+                        "Máy chủ trả về dữ liệu không hợp lệ."
+                };
+            }
+
+
+            showResult(data);
+
+
+            if (data.duoc_phep) {
+
+                setCameraStatus(
+                    "Xác thực thành công. Quyền truy cập hợp lệ.",
+                    "success"
+                );
+
+            } else {
+
+                setCameraStatus(
+                    "Xác thực không thành công hoặc không có quyền.",
+                    "error"
+                );
+            }
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            const errorMessage = error.name === "AbortError"
+                ? "Máy chủ chưa phản hồi sau 30 giây. Chưa xác định kết quả; hãy kiểm tra lịch sử truy cập trước khi thử lại."
+                : "Không thể gửi dữ liệu nhận diện đến máy chủ. Hãy kiểm tra Django server và thử lại.";
+
+            resultContainer.innerHTML = `
+
+                <div class="access-result denied">
+
+                    <div class="access-result-icon">
+                        X
+                    </div>
+
+                    <div class="access-result-title">
+                        SYSTEM ERROR
+                    </div>
+
+                    <div class="access-result-subtitle">
+                        Không thể kết nối hệ thống Face ID
+                    </div>
+
+                </div>
+
+                <div class="access-reason">
+
+                    <strong>
+                        Chi tiết
+                    </strong>
+
+                    <p>
+                        ${errorMessage}
+                    </p>
+
+                </div>
+            `;
+
+            setCameraStatus(errorMessage, "error");
+        }
+
+        finally {
+            window.clearTimeout(timeout);
+            processing = false;
+            phong.disabled = false;
+            loaiSuKien.disabled = false;
+            startCameraBtn.disabled = Boolean(cameraStream);
+            stopCameraBtn.disabled = !cameraStream;
+            scanBtn.textContent =
+                "QUÉT & KIỂM TRA QUYỀN";
+            updateScanState();
+        }
+    }
+
+
+    /* =========================================================
+       EVENTS
+       ========================================================= */
+    startCameraBtn.addEventListener(
+        "click",
+        startCamera
+    );
+
+    stopCameraBtn.addEventListener(
+        "click",
+        stopCamera
+    );
+
+    scanBtn.addEventListener(
+        "click",
+        scanFace
+    );
+
+    phong.addEventListener("change", updateScanState);
+    loaiSuKien.addEventListener("change", updateScanState);
+
+    ["loadeddata", "playing", "resize", "emptied"].forEach(function (event) {
+        video.addEventListener(event, updateScanState);
+    });
+
+    window.addEventListener("beforeunload", function () {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(function (track) {
+                track.stop();
+            });
+        }
+    });
+
+
+    /* =========================================================
+       KIỂM TRA CAMERA
+       ========================================================= */
+
+    if (!navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia) {
+
+        cameraStatus.textContent =
+            "Trình duyệt không hỗ trợ truy cập camera.";
+    }
+
+
+    updateScanState();
+
+});
+
+</script>
+
+
+{% endblock %}

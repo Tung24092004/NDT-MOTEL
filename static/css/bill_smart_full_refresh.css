@@ -1,0 +1,417 @@
+/* Shared refresh for the Invoice/Payment and Smart Room domains. */
+.invoice-page,
+.invoice-create-page,
+.invoice-detail-page,
+.detail-page,
+.tenant-ui .billing-page,
+.tenant-ui .invoice-detail-page,
+.tenant-ui .payment-page,
+.smart-ui,
+.smart-dashboard,
+.smart-access-page,
+.face-profile-page,
+.fp4-page,
+.access-page,
+.access-create-page,
+.access-detail-page,
+.access-log-page,
+.log-detail-page,
+.log-create-page,
+.face-terminal-page,
+.face-intro-page {
+    box-sizing: border-box;
+    width: min(100%, 1480px);
+    max-width: 1480px;
+    margin-inline: auto;
+    padding-inline: clamp(18px, 2.2vw, 32px);
+    color: #123338;
+}
+
+.invoice-page *,
+.invoice-create-page *,
+.invoice-detail-page *,
+.detail-page *,
+.tenant-ui .billing-page *,
+.tenant-ui .payment-page *,
+.smart-ui *,
+.smart-dashboard *,
+.smart-access-page *,
+.face-profile-page *,
+.fp4-page *,
+.access-page *,
+.access-create-page *,
+.access-detail-page *,
+.access-log-page *,
+.log-detail-page *,
+.log-create-page *,
+.face-terminal-page *,
+.face-intro-page * {
+    box-sizing: border-box;
+}
+
+.invoice-page-header,
+.invoice-create-header,
+.invoice-detail-hero,
+.detail-header,
+.tenant-ui .billing-heading,
+.tenant-ui .payment-hero,
+.smart-hero,
+.smart-access-hero,
+.face-page-header,
+.fp4-hero,
+.access-page-header,
+.log-header,
+.log-detail-hero,
+.log-create-header,
+.face-terminal-hero,
+.face-intro-hero {
+    min-height: 132px;
+    align-items: center;
+    padding: clamp(24px, 2.3vw, 34px);
+}
+
+.invoice-page-header h1,
+.invoice-create-header h1,
+.invoice-detail-hero h1,
+.detail-header h1,
+.tenant-ui .billing-heading h1,
+.tenant-ui .payment-hero h1,
+.smart-hero .hero-title,
+.smart-access-title,
+.face-page-header h1,
+.fp4-hero-title,
+.access-title,
+.log-header h1,
+.log-detail-hero h1,
+.log-create-header h1,
+.face-terminal-title,
+.face-intro-title {
+    font-size: clamp(30px, 2.35vw, 38px);
+    line-height: 1.12;
+    letter-spacing: 0;
+}
+
+.invoice-page-header p,
+.invoice-create-header p,
+.invoice-detail-hero p,
+.detail-header p,
+.tenant-ui .billing-heading p,
+.tenant-ui .payment-hero p,
+.smart-hero p,
+.smart-access-hero p,
+.face-page-header p,
+.fp4-hero p,
+.access-description,
+.log-header p,
+.log-detail-hero p,
+.log-create-header p,
+.face-terminal-hero p,
+.face-intro-hero p {
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.invoice-btn,
+.invoice-action-btn,
+.tenant-ui .billing-page .ndt-button,
+.tenant-ui .invoice-detail-page .ndt-button,
+.tenant-ui .payment-btn,
+.smart-ui .ndt-button,
+.smart-hero .ndt-button,
+.smart-access-nav-btn,
+.smart-access-btn,
+.face-action-btn,
+.fp4-btn,
+.access-back-btn,
+.access-btn,
+.log-btn,
+.face-terminal-btn {
+    min-height: 44px;
+    padding: 11px 17px;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.tenant-ui .billing-breadcrumb a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+}
+
+.tenant-ui .billing-page,
+.tenant-ui .invoice-page,
+.tenant-ui .payment-page {
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+.tenant-ui .billing-page > *,
+.tenant-ui .invoice-page > *,
+.tenant-ui .payment-page > *,
+.tenant-ui .invoice-row,
+.tenant-ui .billing-overview,
+.tenant-ui .overview-stats {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.tenant-ui .invoice-breadcrumb a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+}
+
+.invoice-filter-form input,
+.invoice-filter-form select,
+.invoice-create-page input,
+.detail-page input,
+.invoice-create-page select,
+.detail-page select,
+.invoice-create-page textarea,
+.detail-page textarea,
+.tenant-ui .payment-page input,
+.tenant-ui .payment-page select,
+.tenant-ui .payment-page textarea,
+.smart-form input,
+.smart-form select,
+.smart-form textarea,
+.access-input,
+.access-select,
+.access-textarea,
+.log-input,
+.log-select,
+.log-textarea {
+    min-height: 44px;
+    font-size: 15px;
+}
+
+.invoice-field label,
+.invoice-form-group label,
+.detail-page label,
+.tenant-ui .payment-page label,
+.smart-form label,
+.access-label,
+.log-label,
+.form-group label {
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.invoice-help-text,
+.invoice-note,
+.detail-page .note,
+.access-help,
+.log-help,
+.helper-line,
+.smart-muted {
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.invoice-stats,
+.smart-grid,
+.smart-quick-links,
+.smart-room-grid {
+    gap: 16px;
+}
+
+.invoice-stat-card,
+.smart-metric,
+.smart-quick-links a,
+.smart-room {
+    min-height: 132px;
+    padding: 20px;
+}
+
+.invoice-stat-label,
+.smart-metric span,
+.smart-metric small,
+.smart-quick-links span,
+.smart-room small {
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.invoice-stat-number,
+.smart-metric strong,
+.smart-room__count,
+.tenant-ui .overview-primary strong {
+    font-size: clamp(30px, 2.5vw, 38px);
+    line-height: 1.05;
+}
+
+.invoice-table th,
+.cost-table th,
+.payment-table th,
+.smart-ui table th,
+.access-log-table th {
+    padding: 15px 18px;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.invoice-table td,
+.cost-table td,
+.payment-table td,
+.smart-ui table td,
+.access-log-table td {
+    padding: 16px 18px;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.invoice-status,
+.status,
+.smart-status,
+.access-status,
+.log-status,
+.fp4-status {
+    min-height: 28px;
+    padding: 6px 11px;
+    font-size: 13px;
+    line-height: 1.2;
+}
+
+.tenant-ui .invoice-row {
+    grid-template-columns: 170px minmax(190px, .9fr) minmax(190px, .9fr) minmax(240px, 1fr) minmax(190px, .72fr);
+    padding: 22px 24px;
+}
+
+.tenant-ui .invoice-identity h3,
+.tenant-ui .register-head h2,
+.smart-section-head h2,
+.smart-panel h2,
+.smart-panel h3,
+.access-card-header-title,
+.log-card-title {
+    font-size: 21px;
+    line-height: 1.25;
+}
+
+.tenant-ui .invoice-identity p,
+.tenant-ui .invoice-priority span,
+.tenant-ui .invoice-next-step > span,
+.tenant-ui .invoice-context dt {
+    font-size: 13px;
+}
+
+.tenant-ui .invoice-context dd,
+.tenant-ui .invoice-next-step p,
+.tenant-ui .invoice-due strong {
+    font-size: 15px;
+}
+
+.smart-camera {
+    min-height: 360px;
+}
+
+.smart-camera__state,
+.smart-camera-status,
+.smart-alert,
+.smart-readiness span,
+.smart-readiness strong,
+.smart-result-grid span,
+.smart-result-grid strong {
+    font-size: 14px;
+}
+
+@media (max-width: 1180px) {
+    .tenant-ui .invoice-row {
+        grid-template-columns: minmax(0, 1fr) minmax(260px, .72fr);
+    }
+}
+
+@media (max-width: 767px) {
+    .invoice-page,
+    .invoice-create-page,
+    .invoice-detail-page,
+.detail-page,
+    .tenant-ui .billing-page,
+    .tenant-ui .invoice-detail-page,
+    .tenant-ui .payment-page,
+    .smart-ui,
+    .smart-dashboard,
+    .smart-access-page,
+    .face-profile-page,
+    .fp4-page,
+    .access-page,
+    .access-create-page,
+    .access-detail-page,
+    .access-log-page,
+    .log-detail-page,
+    .log-create-page,
+    .face-terminal-page,
+    .face-intro-page {
+        padding-inline: 14px;
+    }
+
+    .invoice-page-header,
+    .invoice-create-header,
+    .invoice-detail-hero,
+.detail-header,
+    .tenant-ui .billing-heading,
+    .tenant-ui .payment-hero,
+    .smart-hero,
+    .smart-access-hero,
+    .face-page-header,
+    .fp4-hero,
+    .access-page-header,
+    .log-header,
+    .log-detail-hero,
+    .log-create-header,
+    .face-terminal-hero,
+    .face-intro-hero {
+        min-height: 0;
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .invoice-page-header h1,
+    .invoice-create-header h1,
+    .invoice-detail-hero h1,
+.detail-header h1,
+    .tenant-ui .billing-heading h1,
+    .tenant-ui .payment-hero h1,
+    .smart-hero .hero-title,
+    .smart-access-title,
+    .face-page-header h1,
+    .fp4-hero-title,
+    .access-title,
+    .log-header h1,
+    .log-detail-hero h1,
+    .log-create-header h1,
+    .face-terminal-title,
+    .face-intro-title {
+        font-size: 29px;
+    }
+
+    .invoice-btn,
+    .invoice-action-btn,
+    .tenant-ui .billing-page .ndt-button,
+    .tenant-ui .invoice-detail-page .ndt-button,
+    .tenant-ui .payment-btn,
+    .smart-ui .ndt-button,
+    .smart-hero .ndt-button,
+    .smart-access-nav-btn,
+    .smart-access-btn,
+    .face-action-btn,
+    .fp4-btn,
+    .access-back-btn,
+    .access-btn,
+    .log-btn,
+    .face-terminal-btn {
+        width: 100%;
+    }
+
+    .tenant-ui .invoice-row {
+        grid-template-columns: 1fr;
+    }
+
+    .smart-camera {
+        min-height: 260px;
+    }
+}

@@ -1,0 +1,16 @@
+{% extends 'core/tenant_base.html' %}
+{% load static %}
+{% block title %}Đặt phòng của tôi - NDT MOTEL{% endblock %}
+{% block tenant_styles %}
+<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
+<link rel="stylesheet" href="{% static 'css/tenant/booking.css' %}">
+{% endblock %}
+{% block tenant_content %}
+<div class="tenant-booking ndt-foundation" data-tenant-booking-ui="v1">{% block booking_content %}{% endblock %}</div>
+{% include 'core/foundation/dialog_root.html' %}
+<script src="{% static 'js/foundation/dialog.js' %}" defer></script>
+<script src="{% static 'js/tenant/booking.js' %}" defer></script>
+{% endblock %}

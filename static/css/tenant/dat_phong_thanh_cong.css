@@ -1,0 +1,203 @@
+/* Page layout retained from dat_phong_thanh_cong; shared components in components.css. */
+.tenant-ui * {
+            box-sizing: border-box;
+        }.tenant-ui {
+            margin: 0;
+            background: #f5f9fa;
+            color: #123338;
+            font-family: Arial, Helvetica, sans-serif;
+        }.tenant-ui .success-page {
+            min-height: calc(100vh - 160px);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 55px 20px 70px;
+        }.tenant-ui .success-container {
+            width: 100%;
+            max-width: 820px;
+        }.tenant-ui .success-card {
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid #dbe7e8;
+            border-radius: 24px;
+            box-shadow: 0 18px 55px rgba(31, 41, 51, 0.09);
+        }.tenant-ui .success-header {
+            padding: 38px 30px 32px;
+            text-align: center;
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(47, 125, 91, 0.08),
+                    rgba(79, 169, 130, 0.04)
+                ),
+                #ffffff;
+            border-bottom: 1px solid #e5eee9;
+        }.tenant-ui .success-icon {
+            width: 78px;
+            height: 78px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #08798a;
+            color: #ffffff;
+            font-size: 38px;
+            font-weight: 900;
+            box-shadow: 0 12px 28px rgba(47, 125, 91, 0.22);
+        }.tenant-ui .success-header h1 {
+            margin: 0 0 10px;
+            color: #123338;
+            font-size: 30px;
+            font-weight: 900;
+        }.tenant-ui .success-header p {
+            max-width: 610px;
+            margin: 0 auto;
+            color: #68766d;
+            font-size: 14px;
+            line-height: 1.7;
+        }.tenant-ui .success-body {
+            padding: 30px;
+        }.tenant-ui .success-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 26px;
+            padding: 16px 18px;
+            border: 1px solid #eadba9;
+            border-radius: 14px;
+            background: #fff9e9;
+        }.tenant-ui .success-status-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }.tenant-ui .success-status-icon {
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #f2df9a;
+            color: #755a00;
+            font-size: 18px;
+        }.tenant-ui .success-status-title {
+            color: #493c14;
+            font-size: 14px;
+            font-weight: 800;
+        }.tenant-ui .success-status-text {
+            margin-top: 3px;
+            color: #74683e;
+            font-size: 12px;
+        }.tenant-ui .success-badge {
+            flex-shrink: 0;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: #f0d979;
+            color: #5e4b00;
+            font-size: 12px;
+            font-weight: 800;
+        }.tenant-ui .success-section-title {
+            margin: 0 0 14px;
+            color: #08798a;
+            font-size: 15px;
+            font-weight: 900;
+        }.tenant-ui .success-info {
+            margin-bottom: 26px;
+            border: 1px solid #e4ece7;
+            border-radius: 16px;
+            overflow: hidden;
+        }.tenant-ui .success-row {
+            display: grid;
+            grid-template-columns: 190px 1fr;
+            gap: 20px;
+            padding: 15px 18px;
+            border-bottom: 1px solid #edf2ef;
+        }.tenant-ui .success-row:last-child {
+            border-bottom: none;
+        }.tenant-ui .success-label {
+            color: #748279;
+            font-size: 13px;
+        }.tenant-ui .success-value {
+            color: #123338;
+            font-size: 14px;
+            font-weight: 700;
+        }.tenant-ui .success-value-money {
+            color: #08798a;
+            font-size: 15px;
+            font-weight: 900;
+        }.tenant-ui .success-process {
+            padding: 18px;
+            border: 1px solid #d9e8e0;
+            border-radius: 14px;
+            background: #f6faf8;
+            color: #53665a;
+            font-size: 13px;
+            line-height: 1.7;
+        }.tenant-ui .success-process strong {
+            color: #08798a;
+        }.tenant-ui .success-process ol {
+            margin: 10px 0 0;
+            padding-left: 20px;
+        }.tenant-ui .success-process li {
+            margin: 5px 0;
+        }.tenant-ui .success-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }.tenant-ui .success-btn {
+            min-height: 46px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            border-radius: 11px;
+            font-size: 14px;
+            font-weight: 800;
+            text-decoration: none;
+            transition: 0.2s ease;
+        }.tenant-ui .success-btn-secondary {
+            border: 1px solid #d8e4dd;
+            background: #ffffff;
+            color: #53635a;
+        }.tenant-ui .success-btn-secondary:hover {
+            background: #f5f9fa;
+        }.tenant-ui .success-btn-primary {
+            border: 1px solid #08798a;
+            background: linear-gradient(
+                135deg,
+                #08798a,
+                #08798a
+            );
+            color: #ffffff;
+            box-shadow: 0 8px 22px rgba(47, 125, 91, 0.18);
+        }.tenant-ui .success-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 11px 28px rgba(47, 125, 91, 0.23);
+        }
+
+        @media (max-width: 640px) {.tenant-ui .success-page {
+                padding: 32px 14px 50px;
+            }.tenant-ui .success-header {
+                padding: 30px 20px 26px;
+            }.tenant-ui .success-header h1 {
+                font-size: 25px;
+            }.tenant-ui .success-body {
+                padding: 22px 16px;
+            }.tenant-ui .success-status {
+                align-items: flex-start;
+                flex-direction: column;
+            }.tenant-ui .success-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }.tenant-ui .success-actions {
+                flex-direction: column;
+            }.tenant-ui .success-btn {
+                width: 100%;
+            }
+        }
+    

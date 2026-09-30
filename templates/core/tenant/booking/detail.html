@@ -1,0 +1,248 @@
+{% extends 'core/tenant/booking/base.html' %}
+{% load bo_loc %}
+
+{% block title %}Chi tiết {{ booking.ma_yeu_cau }} - NDT MOTEL{% endblock %}
+
+{% block booking_content %}
+<div class="booking-page" data-booking-screen="detail">
+    <header class="ndt-page-header">
+        <div class="ndt-page-header__content">
+            <div class="ndt-breadcrumb">
+                <a href="{% url 'dat_phong_cua_toi' %}">Đặt phòng của tôi</a> / {{ booking.ma_yeu_cau }}
+            </div>
+            <h1 class="ndt-page-header__title">Chi tiết yêu cầu</h1>
+            <p class="ndt-page-header__subtitle">Thông tin phòng, tiền cọc và tiến trình xử lý yêu cầu.</p>
+        </div>
+        <div class="ndt-page-header__actions">
+            {% if can_pay or can_view_qr %}
+                <a class="ndt-button ndt-button--primary" href="{% url 'thanh_toan_coc_cua_toi' booking.pk %}">
+                    {% if can_pay %}Chuyển khoản cọc{% else %}Xem thông tin cọc{% endif %}
+                </a>
+            {% endif %}
+            {% if contract %}
+                <a class="ndt-button ndt-button--secondary" href="{% url 'chi_tiet_hop_dong_cua_toi' contract.pk %}">Xem hợp đồng</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <section class="booking-status-overview ndt-surface" aria-labelledby="status-title">
+        <div class="booking-status-overview__content">
+            <span class="booking-eyebrow">{{ booking.ma_yeu_cau }}</span>
+            <h2 id="status-title">Trạng thái hiện tại</h2>
+            <p>Hạn thanh toán: <strong>{{ booking.han_thanh_toan_coc|date:'d/m/Y H:i'|default:'Đơn cũ chưa có hạn cọc' }}</strong></p>
+        </div>
+        <div class="booking-status-overview__badges" aria-label="Trạng thái đặt phòng và tiền cọc">
+            <div class="booking-state-item">
+                <span class="booking-state-item__label">Yêu cầu đặt phòng</span>
+                {% if booking.trang_thai == 'da_duyet' %}
+                    <span class="ndt-badge ndt-badge--success">{{ booking.get_trang_thai_display }}</span>
+                {% elif booking.trang_thai == 'tu_choi' or booking.trang_thai == 'da_huy' %}
+                    <span class="ndt-badge ndt-badge--danger">{{ booking.get_trang_thai_display }}</span>
+                {% else %}
+                    <span class="ndt-badge ndt-badge--warning">{{ booking.get_trang_thai_display }}</span>
+                {% endif %}
+            </div>
+
+            <div class="booking-state-item">
+                <span class="booking-state-item__label">Giao dịch tiền cọc</span>
+                {% if payment and payment.trang_thai == 'da_xac_nhan' %}
+                    <span class="ndt-badge ndt-badge--success">{{ payment_status }}</span>
+                {% elif payment and payment.trang_thai == 'tu_choi' %}
+                    <span class="ndt-badge ndt-badge--danger">{{ payment_status }}</span>
+                {% elif payment and payment.trang_thai == 'cho_xac_nhan' %}
+                    <span class="ndt-badge ndt-badge--warning">{{ payment_status }}</span>
+                {% else %}
+                    <span class="ndt-badge ndt-badge--info">{{ payment_status }}</span>
+                {% endif %}
+            </div>
+
+            {% if expired %}
+                <span class="ndt-badge ndt-badge--danger">Hết hạn thanh toán</span>
+            {% endif %}
+        </div>
+
+        {% if booking.ly_do_tu_choi %}
+            <p class="booking-feedback booking-feedback--danger">{{ booking.ly_do_tu_choi }}</p>
+        {% endif %}
+        {% if payment.ly_do_tu_choi %}
+            <p class="booking-feedback booking-feedback--danger">{{ payment.ly_do_tu_choi }}</p>
+        {% endif %}
+    </section>
+
+    <section class="booking-timeline ndt-surface" aria-labelledby="booking-progress-title">
+        <div class="booking-timeline__head">
+            <span class="booking-eyebrow">Tiến trình</span>
+            <h2 id="booking-progress-title">Quy trình đặt phòng</h2>
+        </div>
+        <ol class="booking-timeline__steps">
+            <li class="is-complete">
+                <span>1</span>
+                <strong>Gửi yêu cầu</strong>
+                <small>{{ booking.ngay_dat|date:'d/m/Y H:i' }}</small>
+            </li>
+            <li class="{% if payment and payment.trang_thai == 'da_xac_nhan' %}is-complete{% elif payment and payment.trang_thai == 'cho_xac_nhan' or can_pay or can_view_qr %}is-current{% endif %}">
+                <span>2</span>
+                <strong>{% if payment and payment.trang_thai == 'cho_xac_nhan' %}Đã báo chuyển khoản{% else %}Tiền cọc{% endif %}</strong>
+                <small>{% if payment and payment.trang_thai == 'cho_xac_nhan' %}Đang chờ quản lý đối soát{% else %}{{ payment_status }}{% endif %}</small>
+            </li>
+            <li class="{% if booking.trang_thai == 'da_duyet' %}is-complete{% elif payment and payment.trang_thai == 'da_xac_nhan' %}is-current{% endif %}">
+                <span>3</span>
+                <strong>Duyệt yêu cầu</strong>
+                <small>{% if booking.trang_thai == 'da_duyet' %}Quản lý đã duyệt{% elif payment and payment.trang_thai == 'da_xac_nhan' %}Chờ quản lý duyệt{% else %}Chưa thực hiện{% endif %}</small>
+            </li>
+            <li class="{% if contract %}is-complete{% endif %}">
+                <span>4</span>
+                <strong>Hợp đồng</strong>
+                <small>{% if contract %}Đã tạo{% else %}Chưa tạo{% endif %}</small>
+            </li>
+        </ol>
+    </section>
+
+    <div class="booking-detail-grid">
+        <div class="booking-detail-main">
+            <section class="booking-section ndt-surface">
+                <span class="booking-eyebrow">Phòng</span>
+                <h2>{{ booking.phong.co_so.ten_co_so }} / Phòng {{ booking.phong.so_phong }}</h2>
+                <p>{{ booking.phong.get_loai_phong_display }}</p>
+                <dl class="booking-facts">
+                    <div>
+                        <dt>Nhận phòng</dt>
+                        <dd>{{ booking.ngay_nhan_phong|date:'d/m/Y' }}</dd>
+                    </div>
+                    <div>
+                        <dt>Trả dự kiến</dt>
+                        <dd>{{ booking.ngay_tra_du_kien|date:'d/m/Y' }}</dd>
+                    </div>
+                    <div>
+                        <dt>Thời hạn</dt>
+                        <dd>{{ booking.so_thang_thue|default:'Chưa xác định' }} tháng</dd>
+                    </div>
+                    <div>
+                        <dt>Số người</dt>
+                        <dd>{{ booking.so_nguoi_o }}</dd>
+                    </div>
+                    <div>
+                        <dt>Nhận yêu cầu ghép</dt>
+                        <dd>{{ booking.dong_y_nhan_yeu_cau_ghep|yesno:'Có,Không' }}</dd>
+                    </div>
+                    <div>
+                        <dt>Ghi chú</dt>
+                        <dd>{{ booking.ghi_chu|default:'Không' }}</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="booking-section ndt-surface">
+                <span class="booking-eyebrow">Người đặt</span>
+                <h2>Thông tin liên hệ</h2>
+                {% include 'core/tenant/booking/components/tenant_information.html' with nguoi_thue=booking.nguoi_thue %}
+            </section>
+
+            <section class="booking-section ndt-surface">
+                <span class="booking-eyebrow">Lưu trú</span>
+                <h2>Người đi cùng đã khai báo</h2>
+                {% for person in booking.nguoi_di_cung_khai_bao.all %}
+                    <div class="booking-person">
+                        <strong>{{ person.ho_ten }}</strong>
+                        <span>{{ person.cccd }} · {{ person.ngay_sinh|date:'d/m/Y' }} · {{ person.get_gioi_tinh_display }}</span>
+                        <span>{{ person.so_dien_thoai }} {{ person.email }} · {{ person.quan_he }}</span>
+                        <span>{{ person.trang_thai_xac_minh|status_label }} {{ person.ly_do_tu_choi }}</span>
+                    </div>
+                {% empty %}
+                    <p>Không có người đi cùng được khai báo.</p>
+                {% endfor %}
+            </section>
+        </div>
+
+        <aside class="booking-detail-side">
+            <section class="booking-section ndt-surface booking-side-summary">
+                <span class="booking-eyebrow">Bước tiếp theo</span>
+                <h2>
+                    {% if can_pay %}
+                        Chuyển khoản tiền cọc
+                    {% elif payment and payment.trang_thai == 'cho_xac_nhan' %}
+                        Chờ quản lý xác nhận
+                    {% elif contract %}
+                        Theo dõi hợp đồng
+                    {% else %}
+                        Theo dõi thông tin yêu cầu
+                    {% endif %}
+                </h2>
+                <p>
+                    {% if can_pay %}
+                        Thanh toán theo đúng thông tin cọc của yêu cầu này, sau đó báo đã chuyển khoản.
+                    {% elif payment and payment.trang_thai == 'cho_xac_nhan' %}
+                        Bạn đã báo chuyển khoản. Quản lý cần đối soát trước khi duyệt và tạo hợp đồng.
+                    {% elif contract %}
+                        Yêu cầu đã có hợp đồng liên quan để tiếp tục theo dõi lưu trú.
+                    {% else %}
+                        Không có thao tác bắt buộc ngay trên yêu cầu này.
+                    {% endif %}
+                </p>
+            </section>
+
+            <section class="booking-section ndt-surface">
+                <span class="booking-eyebrow">Tiền cọc</span>
+                <h2>Chi phí đã lưu</h2>
+                <dl class="booking-facts booking-facts--stack">
+                    <div>
+                        <dt>Giá thuê tháng</dt>
+                        <dd>
+                            {% if booking.gia_thue_thang_tai_thoi_diem_dat != None %}
+                                {{ booking.gia_thue_thang_tai_thoi_diem_dat|vnd }} VNĐ
+                            {% else %}
+                                Chưa có
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>Số tiền cọc</dt>
+                        <dd class="booking-money">{{ booking.tien_coc_du_kien|vnd }} VNĐ</dd>
+                    </div>
+                    <div>
+                        <dt>Tỷ lệ hoàn mặc định</dt>
+                        <dd>{{ booking.ty_le_hoan_coc_snapshot|default_if_none:'Chưa có' }}%</dd>
+                    </div>
+                </dl>
+                {% if booking.snapshot_gia_la_backfill %}
+                    <p class="booking-feedback">Giá đơn cũ được backfill từ giá phòng, không phải bằng chứng giá tại ngày đặt.</p>
+                {% endif %}
+            </section>
+
+            <section class="booking-section ndt-surface">
+                <span class="booking-eyebrow">Điều khoản đặt cọc</span>
+                <h2>Chính sách đã chấp thuận</h2>
+                {% if booking.da_dong_y_dieu_khoan %}
+                    <p>Đồng ý lúc {{ booking.thoi_diem_dong_y_dieu_khoan|date:'d/m/Y H:i' }}</p>
+                    <details class="booking-policy">
+                        <summary>Xem điều khoản đã lưu</summary>
+                        <div>{{ booking.noi_dung_dieu_khoan_snapshot|linebreaksbr }}</div>
+                    </details>
+                {% else %}
+                    <p>Đơn cũ chưa có bằng chứng chấp thuận điều khoản; không phát sinh giao dịch cọc tự động.</p>
+                {% endif %}
+            </section>
+        </aside>
+    </div>
+
+    {% if can_cancel or can_request_cancel %}
+        <section class="booking-section booking-cancel ndt-surface" id="cancel-booking">
+            <span class="booking-eyebrow">Hành động cần cân nhắc</span>
+            <h2>{% if can_request_cancel %}Yêu cầu quản lý xử lý hủy{% else %}Hủy yêu cầu chưa thanh toán{% endif %}</h2>
+            {% if can_request_cancel %}
+                <p>Cọc đã báo chuyển hoặc xác nhận. Quản lý sẽ kiểm tra chính sách đã lưu; hệ thống không tự hoàn tiền hay tự hủy giao dịch.</p>
+            {% endif %}
+            <form method="post" action="{% url 'huy_dat_phong_cua_toi' booking.pk %}" data-cancel-booking-form data-confirm-title="Xác nhận yêu cầu hủy" data-confirm-message="{% if can_request_cancel %}Yêu cầu sẽ được gửi cho quản lý xử lý. Tiền cọc và trạng thái hiện tại chưa tự động thay đổi.{% else %}Yêu cầu đặt phòng chưa thanh toán này sẽ được hủy và vẫn giữ lịch sử.{% endif %}">
+                {% csrf_token %}
+                <div class="ndt-field">
+                    <label class="ndt-label" for="cancel-reason">Lý do <span class="ndt-required">*</span></label>
+                    <textarea class="ndt-control" name="ly_do_huy" id="cancel-reason" required maxlength="2000" rows="3"></textarea>
+                </div>
+                <button class="ndt-button ndt-button--danger" type="submit">
+                    {% if can_request_cancel %}Gửi yêu cầu xử lý hủy{% else %}Hủy yêu cầu{% endif %}
+                </button>
+            </form>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}

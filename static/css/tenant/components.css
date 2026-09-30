@@ -1,0 +1,273 @@
+/* Tenant components share the Home V8 / room discovery palette.
+   Scoped to .tenant-ui: public discovery and Admin are not restyled. */
+.tenant-ui {
+    --primary: #08798a; --primary-dark: #075d68; --primary-light: #edf7f7;
+    --secondary: #08798a; --text: #123338; --text-light: #6d8083;
+    --text-muted: #6d8083; --border: #dbe7e8; --bg: #f5f9fa;
+    color: var(--text); max-width: 1380px; margin: auto; padding: 24px 28px 64px;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.6;
+}
+.tenant-ui *, .tenant-ui *::before, .tenant-ui *::after {box-sizing: border-box;}
+.tenant-ui .tenant-policy-card {padding:24px; margin:20px 0; background:#fff; border:1px solid #dbe7e8; border-radius:16px;}
+.tenant-ui .qr-panel {grid-template-columns:minmax(0,1fr);}
+.tenant-ui .bank-row {grid-template-columns:minmax(100px,1fr) minmax(0,1.5fr);}
+.tenant-ui .payment-instructions li strong, .tenant-ui .payment-warning p strong {display:inline;}
+.tenant-ui .notification-page .tenant-inline-2 {grid-template-columns:repeat(auto-fit,minmax(150px,1fr));}
+.tenant-breadcrumb {display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; margin-bottom:16px; font-size:13px; color:#6d8083; overflow-wrap:anywhere;}
+.tenant-breadcrumb a {color:#08798a;}
+.tenant-navigation-shell {margin-bottom:22px;}
+.tenant-navigation-shell > summary {display:none;}
+.tenant-ui :is(.page,.page-container,.booking-page,.success-page,.account-edit-page,.password-page,.contract-detail-page,.notification-page,.notify-page,.my-repair-page,.repair-request-page,.repair-detail-page,.co-living-page,.ghep-page,.ghep-detail-page,.face-page,.ndt-billing,.payment-page,.container) {max-width:100%; margin:0 auto; padding:0; min-width:0;}
+.tenant-ui h1 {font-size:clamp(25px,3vw,36px); line-height:1.2; letter-spacing:-.7px; color:#123338;}
+.tenant-ui h2 {font-size:20px; line-height:1.35;}
+.tenant-ui :is(.welcome,.contract-header,.booking-room-header,.notify-hero,.ghep-header,.face-hero) {background:#edf7f7; color:#123338; border:1px solid #dbe7e8; box-shadow:none; border-radius:16px;}
+.tenant-ui :is(.welcome,.contract-header,.booking-room-header,.notify-hero,.ghep-header,.face-hero) :is(h1,h2,h3,p,a,span,div) {color:inherit;}
+.tenant-ui :is(.panel,.contract-card,.booking-card,.edit-card,.password-card,.stat,.stat-card,.form-card,.info-card,.ghep-card,.face-card,.notify-panel,.payment-card,.invoice-card,.my-repair-table-card,.repair-form-card,.repair-content-card,.repair-info-card) {border:1px solid #dbe7e8; border-radius:16px; box-shadow:0 6px 24px rgba(18,51,56,.045); background:white; min-width:0;}
+.tenant-ui :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),select,textarea) {max-width:100%; min-height:44px; border:1px solid #cbdcde; border-radius:10px; background:#fff; color:#123338; font:inherit; padding:10px 12px;}
+.tenant-ui :is(input,select,textarea,button,a):focus-visible {outline:3px solid #b6dee3; outline-offset:3px;}
+.tenant-ui :is(button,[class*="btn"],.auth-submit,.invoice-action,.empty-action) {font-family:inherit; border-radius:10px; min-height:42px; line-height:1.4; cursor:pointer;}
+.tenant-ui :is(.btn-primary,.btn-green,.booking-btn-primary,.payment-btn-primary,.action-primary,.auth-submit,.my-repair-create-btn,.my-repair-filter-btn,.repair-submit-btn,.notify-btn-primary,.ghep-btn-approve,.invoice-action) {background:#08798a; color:white; border:1px solid #08798a; box-shadow:none;}
+.tenant-ui :is(.btn-secondary,.btn-soft,.btn-white,.btn-outline-white,.booking-btn-secondary,.payment-btn-secondary,.action-secondary,.repair-back-btn,.repair-cancel-btn,.notification-back) {background:#fff; color:#075d68; border:1px solid #cbdcde;}
+.tenant-ui button:disabled {opacity:.55; cursor:wait;}
+.tenant-ui :is(.badge,.status-badge,[class*="status-badge"],.my-repair-status,.payment-status) {border-radius:999px; font-size:12px; font-weight:700; padding:5px 10px; white-space:normal;}
+.tenant-ui :is(.empty,.empty-state,.billing-empty,.notification-empty,.my-repair-empty,.ghep-empty) {padding:36px 20px; text-align:center; background:#f5f9fa; border:1px dashed #cbdcde; border-radius:14px; color:#6d8083;}
+.tenant-ui table {width:100%; border-collapse:collapse; font-size:14px;}
+.tenant-ui th {background:#edf7f7; color:#123338; font-weight:700;}
+.tenant-ui :is(th,td) {padding:14px 12px; border-bottom:1px solid #dbe7e8;}
+.tenant-ui .tenant-table-scroll {overflow-x:auto; max-width:100%; border-radius:12px;}
+.tenant-ui .tenant-pending {padding:16px 20px; margin:20px 0; background:#fff7e5; color:#805900; border:1px solid #eed8a8; border-radius:12px;}
+.tenant-ui .status-pending {background:#fff7e5; color:#805900; border:1px solid #eed8a8;}
+.tenant-ui .auth-page {min-height:0; padding:24px 0; background:transparent;}
+.tenant-ui .auth-card {margin:auto; width:100%; border:1px solid #dbe7e8; box-shadow:0 10px 35px rgba(18,51,56,.06);}
+.tenant-ui .auth-logo {background:#08798a; box-shadow:none;}
+.tenant-ui .auth-input-wrap {position:relative;}
+.tenant-ui .password-toggle {min-width:46px; font-size:12px;}
+.tenant-ui .tenant-camera-note {padding:14px; background:#edf7f7; border:1px solid #dbe7e8; border-radius:10px; margin-bottom:16px;}
+.tenant-ui .page-container > .page-header,
+.tenant-ui .ghep-page > .ghep-header {padding:22px 24px; min-height:0;}
+.tenant-ui .ghep-page > .ghep-header .ghep-title {line-height:1.2; color:#123338;}
+.tenant-ui .account-edit-header :is(.account-edit-kicker,h1,p) {position:relative; z-index:1; color:#fff !important;}
+.tenant-policy-header {display:flex; align-items:flex-start; justify-content:space-between; gap:24px; margin-bottom:18px; padding:24px; border:1px solid #dbe7e8; border-radius:8px; background:#fff;}
+.tenant-policy-header h1 {margin:2px 0 6px;}
+.tenant-policy-header p {margin:0; color:#52696e;}
+.tenant-policy-kicker {color:#08798a !important; font-size:12px; font-weight:800; text-transform:uppercase;}
+.tenant-policy-back,.tenant-action-primary,.tenant-action-secondary {display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:9px 14px; border-radius:8px; font-weight:700; text-decoration:none;}
+.tenant-policy-back,.tenant-action-secondary {border:1px solid #cbdcde; background:#fff; color:#075d68;}
+.tenant-ui .tenant-policy-card {padding:0; overflow:hidden; border-radius:8px;}
+.tenant-policy-title {display:flex; align-items:flex-start; justify-content:space-between; gap:20px; padding:20px 22px; border-bottom:1px solid #dbe7e8;}
+.tenant-policy-title span {color:#6d8083; font-size:12px; font-weight:700; text-transform:uppercase;}
+.tenant-policy-title h2 {margin:3px 0 0;}
+.tenant-policy-title > strong {flex:0 0 auto; padding:7px 11px; border-radius:999px; background:#e8f6f3; color:#075d68;}
+.tenant-policy-meta {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); margin:0; padding:18px 22px; background:#f7fafb;}
+.tenant-policy-meta div {min-width:0;}
+.tenant-policy-meta dt {color:#6d8083; font-size:12px;}
+.tenant-policy-meta dd {margin:3px 0 0; font-weight:700; overflow-wrap:anywhere;}
+.tenant-policy-copy {padding:18px 22px 0;}
+.tenant-policy-copy:last-child {padding-bottom:20px;}
+.tenant-policy-copy h3,.tenant-policy-copy p {margin-top:0;}
+.tenant-info-page {max-width:900px; margin:0 auto;}
+.tenant-info-header {padding:24px; border:1px solid #dbe7e8; border-radius:8px; background:#fff;}
+.tenant-info-header > p {margin:0; color:#08798a; font-size:12px; font-weight:800; text-transform:uppercase;}
+.tenant-info-header h1 {margin:4px 0 6px;}
+.tenant-info-header span {color:#52696e;}
+.tenant-info-state {display:flex; gap:16px; margin-top:18px; padding:24px; border:1px solid #d6e7e9; border-radius:8px; background:#edf7f7;}
+.tenant-info-state-icon {display:grid; place-items:center; flex:0 0 38px; width:38px; height:38px; border-radius:50%; background:#08798a; color:#fff; font-weight:800;}
+.tenant-info-state h2 {margin:0 0 8px;}
+.tenant-info-state p {margin:5px 0; color:#52696e;}
+.tenant-info-actions {display:flex; flex-wrap:wrap; gap:10px; margin-top:18px;}
+.tenant-action-primary {border:1px solid #08798a; background:#08798a; color:#fff;}
+@media(max-width:700px) {
+    .tenant-ui {padding:16px 14px 40px;}
+    .tenant-ui :is(.layout,.booking-layout,.contract-info-grid,.info-grid,.money-grid,.stats,.stats-grid,.form-grid,.booking-form-grid,.contracts-grid,.invoice-grid,.payment-layout,.repair-detail-grid,.repair-form-grid,.co-living-layout,.ghep-detail-grid,.ghep-info-grid,.face-grid,.notify-detail-grid) {grid-template-columns:minmax(0,1fr);}
+    .tenant-ui :is(.page-header,.booking-actions,.action-row,.payment-header,.billing-header,.repair-detail-header,.ghep-detail-header,.face-hero,.welcome) {flex-direction:column; align-items:stretch; gap:14px;}
+    .tenant-ui :is(.auth-card,.password-card,.edit-card) {padding:22px 16px;}
+    .tenant-ui .full, .tenant-ui .full-width {grid-column:auto;}
+    .tenant-ui :is(.form-group,.booking-form-group,.info-item,.payment-summary) {min-width:0;}
+    .tenant-ui :is(p,.info-value,.detail-value,.bank-row) {overflow-wrap:anywhere;}
+    .tenant-ui :is(video,canvas,img) {max-width:100%;}
+    .tenant-ui .page-container > .page-header,
+    .tenant-ui .ghep-page > .ghep-header,
+    .tenant-policy-header {padding:18px;}
+    .tenant-policy-header,.tenant-policy-title {flex-direction:column; align-items:stretch;}
+    .tenant-policy-meta {grid-template-columns:minmax(0,1fr); gap:14px;}
+    .tenant-policy-back,.tenant-info-actions a {width:100%;}
+    .tenant-info-state {align-items:flex-start; padding:18px;}
+}
+/* =========================================================
+   TENANT NAVIGATION - PHASE 1
+   ========================================================= */
+
+.tenant-navigation-shell {
+    margin: 0 0 22px;
+    border: 1px solid #dbe7e8;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 6px 22px rgba(18, 51, 56, 0.04);
+    overflow: hidden;
+}
+
+.tenant-navigation-shell > summary {
+    display: none;
+}
+
+.tenant-navigation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 12px;
+}
+
+.tenant-navigation__group {
+    display: contents;
+}
+
+.tenant-navigation__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.tenant-navigation__group a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 9px 13px;
+    border: 1px solid #d7e5e7;
+    border-radius: 999px;
+    background: #fff;
+    color: #31565b;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.tenant-navigation__group a:hover {
+    background: #edf7f7;
+    color: #075d68;
+}
+
+.tenant-navigation__group a[aria-current="page"] {
+    background: #08798a;
+    border-color: #08798a;
+    color: #fff;
+}
+
+@media (max-width: 900px) {
+    .tenant-navigation {
+        gap: 7px;
+    }
+
+    .tenant-navigation__group a {
+        flex: 1 1 190px;
+    }
+}
+
+@media (max-width: 700px) {
+    .tenant-navigation-shell {
+        margin-bottom: 18px;
+        border-radius: 12px;
+    }
+
+    .tenant-navigation-shell > summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        min-height: 58px;
+        padding: 12px 14px;
+        cursor: pointer;
+        list-style: none;
+    }
+
+    .tenant-navigation-shell > summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .tenant-navigation-shell > summary strong,
+    .tenant-navigation-shell > summary small {
+        display: block;
+    }
+
+    .tenant-navigation-shell > summary strong {
+        color: #123338;
+        font-size: 14px;
+    }
+
+    .tenant-navigation-shell > summary small {
+        margin-top: 2px;
+        color: #6d8083;
+        font-size: 12px;
+        line-height: 1.35;
+    }
+
+    .tenant-navigation-shell__toggle {
+        position: relative;
+        flex: 0 0 18px;
+        width: 18px;
+        height: 18px;
+        border-right: 2px solid #08798a;
+        border-bottom: 2px solid #08798a;
+        transform: rotate(45deg) translateY(-3px);
+        transition: transform .2s ease;
+    }
+
+    .tenant-navigation-shell[open] .tenant-navigation-shell__toggle {
+        transform: rotate(225deg) translate(-2px, -2px);
+    }
+
+    .tenant-navigation {
+        display: block;
+        padding: 0;
+        border-top: 1px solid #e5eeee;
+    }
+
+    .tenant-navigation__group {
+        display: block;
+        padding: 12px 14px;
+        border-bottom: 1px solid #e5eeee;
+    }
+
+    .tenant-navigation__group:last-child {
+        border-bottom: 0;
+    }
+
+    .tenant-navigation__label {
+        position: static;
+        width: auto;
+        height: auto;
+        margin: 0 0 5px;
+        overflow: visible;
+        clip: auto;
+        white-space: normal;
+        border: 0;
+        display: block;
+        margin-bottom: 5px;
+        font-size: 10px;
+        color: #6d8083;
+        font-weight: 800;
+        letter-spacing: .04em;
+        line-height: 1.3;
+        text-transform: uppercase;
+    }
+
+    .tenant-navigation__group a {
+        display: flex;
+        justify-content: flex-start;
+        width: 100%;
+        border: 0;
+        border-radius: 8px;
+        min-height: 40px;
+        padding: 10px 9px;
+        font-size: 13px;
+    }
+}

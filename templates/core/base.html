@@ -1,0 +1,2299 @@
+<!DOCTYPE html>
+
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+            NDT MOTEL
+        {% endblock %}
+    </title>
+
+    {% load static %}
+
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/style.css' %}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/components/toast.css' %}"
+    >
+
+    {% block extra_css %}
+    {% endblock %}
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/ui-system.css' %}"
+    >
+
+    <style>
+
+        /* =========================================================
+           ADMIN MEGA MENU
+           ========================================================= */
+
+        .admin-menu-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .admin-menu-button {
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            white-space: nowrap;
+            position: relative;
+            z-index: 100001;
+        }
+
+        .admin-menu-arrow {
+            font-size: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .admin-menu-button.active .admin-menu-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* =========================================================
+           OVERLAY
+           ========================================================= */
+
+        .admin-menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(23, 35, 29, 0.08);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition:
+                opacity 0.2s ease,
+                visibility 0.2s ease;
+            z-index: 99998;
+        }
+
+        .admin-menu-overlay.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        /* =========================================================
+           MEGA MENU
+           ========================================================= */
+
+        .admin-mega-menu {
+            position: fixed;
+            top: 76px;
+            left: 50%;
+            width: min(980px, calc(100vw - 30px));
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            box-sizing: border-box;
+            padding: 22px;
+            background: #ffffff;
+            border: 1px solid #dfe9e3;
+            border-radius: 18px;
+            box-shadow:
+                0 20px 55px
+                rgba(23, 35, 29, 0.20);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform:
+                translateX(-50%)
+                translateY(-12px);
+            transition:
+                opacity 0.2s ease,
+                visibility 0.2s ease,
+                transform 0.2s ease;
+            z-index: 100001;
+        }
+
+        .admin-mega-menu.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform:
+                translateX(-50%)
+                translateY(0);
+        }
+
+        /* =========================================================
+           MENU HEADER
+           ========================================================= */
+
+        .admin-menu-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 18px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #dfe9e3;
+        }
+
+        .admin-menu-heading-left {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .admin-menu-heading-icon {
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e8f4ee;
+            border-radius: 12px;
+            font-size: 21px;
+        }
+
+        .admin-menu-heading strong {
+            display: block;
+            color: #17231d;
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .admin-menu-heading span {
+            display: block;
+            margin-top: 3px;
+            color: #89978f;
+            font-size: 12px;
+        }
+
+        /* =========================================================
+           CLOSE BUTTON
+           ========================================================= */
+
+        .admin-menu-close {
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 9px;
+            background: #f5f8f6;
+            color: #64756b;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            transition:
+                background 0.2s ease,
+                color 0.2s ease;
+        }
+
+        .admin-menu-close:hover {
+            background: #e8f4ee;
+            color: #215b42;
+        }
+
+        /* =========================================================
+           GRID
+           ========================================================= */
+
+        .admin-menu-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        /* =========================================================
+           MENU CARD
+           ========================================================= */
+
+        .admin-menu-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 70px;
+            box-sizing: border-box;
+            padding: 13px;
+            text-decoration: none !important;
+            background: #ffffff;
+            border: 1px solid #e3ebe6;
+            border-radius: 12px;
+            transition:
+                transform 0.18s ease,
+                border-color 0.18s ease,
+                background 0.18s ease,
+                box-shadow 0.18s ease;
+            cursor: pointer;
+            position: relative;
+            z-index: 100002;
+            pointer-events: auto;
+        }
+
+        .admin-menu-card:hover {
+            transform: translateY(-2px);
+            background: #f7fbf8;
+            border-color: #4fa982;
+            box-shadow:
+                0 7px 18px
+                rgba(47, 125, 91, 0.10);
+        }
+
+        .admin-menu-card:active {
+            transform: translateY(0);
+        }
+
+        /* =========================================================
+           MENU ICON
+           ========================================================= */
+
+        .admin-menu-icon {
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f8f6;
+            border-radius: 11px;
+            font-size: 20px;
+            transition:
+                background 0.18s ease;
+        }
+
+        .admin-menu-card:hover .admin-menu-icon {
+            background: #e8f4ee;
+        }
+
+        /* =========================================================
+           MENU TEXT
+           ========================================================= */
+
+        .admin-menu-card-title {
+            display: block;
+            color: #17231d;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .admin-menu-card-description {
+            display: block;
+            margin-top: 3px;
+            color: #89978f;
+            font-size: 11px;
+            line-height: 1.35;
+        }
+
+        /* =========================================================
+           SMART ROOM SECTION
+           ========================================================= */
+
+        .admin-menu-section {
+            margin-top: 22px;
+        }
+
+        .admin-menu-section-title {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 11px;
+            color: #215b42;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .admin-menu-section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #dfe9e3;
+        }
+
+        /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+
+        @media (max-width: 1050px) {
+
+            .admin-mega-menu {
+                width:
+                    min(
+                        900px,
+                        calc(100vw - 25px)
+                    );
+            }
+        }
+
+        @media (max-width: 800px) {
+
+            .admin-mega-menu {
+                top: 70px;
+                width:
+                    calc(100vw - 20px);
+                padding: 16px;
+                max-height:
+                    calc(100vh - 85px);
+            }
+
+            .admin-menu-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 520px) {
+
+            .admin-menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-menu-card {
+                min-height: 62px;
+            }
+        }
+
+
+        /* =========================================================
+           HEADER - THÔNG BÁO / TÌNH TRẠNG ĐẶT PHÒNG
+           ========================================================= */
+
+        .header-status-link {
+            min-height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 0 13px;
+            border: 1px solid #dfe9e3;
+            border-radius: 11px;
+            background: #ffffff;
+            color: #215b42;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 750;
+            white-space: nowrap;
+            transition:
+                background 0.18s ease,
+                border-color 0.18s ease,
+                transform 0.18s ease,
+                box-shadow 0.18s ease;
+        }
+
+        .header-status-link:hover {
+            background: #f7fbf8;
+            border-color: #4fa982;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(47, 125, 91, 0.08);
+        }
+
+        .header-status-icon {
+            font-size: 17px;
+            line-height: 1;
+        }
+
+
+        .header-status-link {
+            position: relative;
+        }
+
+        .header-notification-badge {
+            position: absolute;
+            top: -7px;
+            right: -7px;
+            min-width: 20px;
+            height: 20px;
+            box-sizing: border-box;
+            padding: 0 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ffffff;
+            border-radius: 999px;
+            background: #d9534f;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            line-height: 1;
+            box-shadow: 0 3px 8px rgba(185, 46, 46, 0.18);
+        }
+
+        @media (max-width: 980px) {
+            .header-status-link {
+                width: 42px;
+                padding: 0;
+            }
+
+            .header-status-text {
+                display: none;
+            }
+        }
+
+
+        /* =========================================================
+           HEADER / NAV - CHỐT BỐ CỤC
+           ========================================================= */
+
+        .main-nav .nav-link {
+            white-space: nowrap;
+        }
+
+        .main-nav .nav-link.is-active {
+            color: #215b42;
+            background: #e8f4ee;
+            border-radius: 9px;
+        }
+
+        .header-status-link.is-active {
+            background: #e8f4ee;
+            border-color: #b9d9c8;
+            color: #215b42;
+        }
+
+        .admin-menu-section-title:first-child {
+            margin-top: 0;
+        }
+
+        @media (max-width: 1180px) {
+            .main-nav {
+                gap: 4px;
+            }
+
+            .main-nav .nav-link {
+                padding-left: 8px;
+                padding-right: 8px;
+                font-size: 13px;
+            }
+        }
+
+    </style>
+
+
+<style>
+/* Public footer only: preserve the shared navigation and authentication shell. */
+.ndt-premium-ui .ndt-public-footer{margin-top:32px;padding:0;background:#edf5f6;color:#16333a;border-top:1px solid #d3e3e6;box-shadow:none}
+.ndt-premium-ui .ndt-public-footer .footer-container{width:100%;max-width:none;box-sizing:border-box;padding:48px 32px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.8fr) minmax(0,1fr) minmax(0,1fr);gap:32px}
+.ndt-public-footer .footer-logo{font-size:24px;font-weight:800;letter-spacing:.04em;color:#066b7b}
+.ndt-public-footer .footer-brand p{max-width:340px;font-size:14px;line-height:1.8;color:#536e76;margin-top:16px}
+.ndt-public-footer .footer-column{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.ndt-public-footer .footer-column h4{font-size:15px;margin:0 0 12px;color:#16333a}
+.ndt-public-footer .footer-column a,.ndt-public-footer .footer-column>span{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px;line-height:1.6;color:#47666f;text-decoration:none;overflow-wrap:anywhere;max-width:100%;box-sizing:border-box}
+.ndt-public-footer .footer-column a:hover{color:#066b7b;text-decoration:underline;text-underline-offset:4px}
+.ndt-public-footer svg{width:20px;height:20px;flex:0 0 20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ndt-public-footer a:focus-visible{outline:3px solid #087f91;outline-offset:4px;border-radius:4px}
+.ndt-public-footer .footer-bottom{padding:20px 32px;margin:0;border-top:1px solid #d3e3e6;background:transparent;color:#536e76;font-size:13px;text-align:left}
+@media(max-width:1439px){.ndt-premium-ui .ndt-public-footer .footer-container{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:767px){.ndt-premium-ui .ndt-public-footer .footer-container{padding:32px 16px;grid-template-columns:1fr;gap:24px}.ndt-public-footer .footer-bottom{padding:20px 16px}}
+</style>
+
+<style>
+/* NDT shell: topbar gọn — bỏ nội dung/search trùng với từng trang */
+.ndt-shell-topbar{
+    justify-content:flex-end;
+}
+.ndt-shell-topbar .ndt-mobile-menu{
+    margin-right:auto;
+}
+.ndt-topbar-actions{
+    margin-left:auto;
+}
+</style>
+</head>
+
+
+<body class="ndt-premium-ui{% if request.user.is_staff or request.user.is_superuser %} ndt-role-admin{% elif request.user.is_authenticated %} ndt-role-tenant{% else %} ndt-role-public{% endif %}">
+
+    {% include "core/components/toast_container.html" %}
+
+    <!-- =========================================================
+         NDT APP SHELL V4 — SIDEBAR / CONTEXTUAL FLYOUT / TOPBAR
+         Giữ nguyên header cũ phía dưới làm fallback logic; CSS sẽ ẩn nó.
+         ========================================================= -->
+    <div id="ndtShellOverlay" class="ndt-shell-overlay" aria-hidden="true"></div>
+
+    <aside id="ndtSidebar" class="ndt-sidebar" aria-label="Điều hướng chính">
+        <div class="ndt-sidebar-brand">
+            <a href="{% url 'home' %}" class="ndt-shell-brand" aria-label="NDT MOTEL - Trang chủ">
+                <span class="ndt-shell-brand-mark ndt-brand-emblem" aria-hidden="true">
+                    <svg viewBox="0 0 92 70" role="img">
+                        <path class="ndt-logo-petal ndt-logo-petal-center" d="M46 6c9 10 12 20 0 31C34 26 37 16 46 6Z"/>
+                        <path class="ndt-logo-petal" d="M29 12c11 5 17 13 13 25-13-4-18-12-13-25Z"/>
+                        <path class="ndt-logo-petal" d="M63 12c-11 5-17 13-13 25 13-4 18-12 13-25Z"/>
+                        <path class="ndt-logo-wing" d="M15 25c12 0 21 4 27 14-14 3-23-1-27-14Z"/>
+                        <path class="ndt-logo-wing" d="M77 25c-12 0-21 4-27 14 14 3 23-1 27-14Z"/>
+                        <path class="ndt-logo-home" d="M30 48 46 37l16 11v15H30Z"/>
+                        <path class="ndt-logo-door" d="M42 63V51h8v12"/>
+                    </svg>
+                </span>
+                <span class="ndt-shell-brand-copy"><strong>NDT MOTEL</strong><small>SMART LIVING</small></span>
+            </a>
+            <button id="ndtSidebarCollapse" class="ndt-sidebar-collapse" type="button" aria-label="Thu gọn thanh điều hướng" title="Thu gọn / mở rộng">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+        </div>
+
+        <nav class="ndt-sidebar-nav">
+            <a href="{% url 'home' %}" class="ndt-side-link{% if request.resolver_match.url_name == 'home' %} is-active{% endif %}">
+                <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span class="ndt-side-label">Trang chủ</span>
+            </a>
+
+            <a href="{% url 'danh_sach_phong' %}" class="ndt-side-link{% if request.resolver_match.url_name == 'danh_sach_phong' or request.resolver_match.url_name == 'chi_tiet_phong' or request.resolver_match.url_name == 'dat_phong' %} is-active{% endif %}">
+                <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 20V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13M2 20h20M8 9h3M8 13h3M15 9h1M15 13h1"/></svg></span><span class="ndt-side-label">Tìm phòng</span>
+            </a>
+
+            {% if request.user.is_authenticated %}
+                {% if request.user.is_staff or request.user.is_superuser %}
+                    <a href="{% url 'dashboard_admin' %}" class="ndt-side-link{% if request.resolver_match.url_name == 'dashboard_admin' %} is-active{% endif %}">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-3H4zM14 7h6V4h-6z"/></svg></span><span class="ndt-side-label">Tổng quan</span>
+                    </a>
+
+                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="admin-operations" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 12h2M9 16h2M15 12h1M15 16h1"/></svg></span><span class="ndt-side-label">Vận hành</span>
+                    </button>
+                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="admin-finance" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 10h16M8 15h3"/></svg></span><span class="ndt-side-label">Tài chính</span>
+                    </button>
+                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="admin-service" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5 5L4 17l3 3 5.7-5.7a4 4 0 0 0 5-5l-2.4 2.4-3-3z"/></svg></span><span class="ndt-side-label">Dịch vụ</span>
+                    </button>
+                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="admin-smart" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M5 11a7 7 0 0 1 14 0v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3zM9 14h.01M15 14h.01M9 7l-2-2M15 7l2-2"/></svg></span><span class="ndt-side-label">Smart Room</span>
+                    </button>
+                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="admin-system" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="4"/></svg></span><span class="ndt-side-label">Hệ thống</span>
+                    </button>
+                {% else %}
+                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="tenant-stay" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11M8 20v-6h8v6"/></svg></span><span class="ndt-side-label">Lưu trú</span>
+                    </button>
+                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="tenant-payment" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 10h16M8 15h4"/></svg></span><span class="ndt-side-label">Thanh toán</span>
+                    </button>
+                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="tenant-support" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0-9-9M8 12h8M12 8v8"/></svg></span><span class="ndt-side-label">Hỗ trợ</span>
+                    </button>
+                {% endif %}
+            {% else %}
+                <a href="/#features" class="ndt-side-link"><span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="m12 3 2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.3-4.5 2.3.9-5L4.8 8.2l5-.7z"/></svg></span><span class="ndt-side-label">Tiện ích</span></a>
+                <a href="/#contact" class="ndt-side-link"><span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 7l8 6 8-6"/></svg></span><span class="ndt-side-label">Liên hệ</span></a>
+            {% endif %}
+        </nav>
+
+        <div class="ndt-sidebar-bottom">
+            {% if request.user.is_authenticated %}
+                <div class="ndt-member-card ndt-member-card-auth">
+                    <button type="button" class="ndt-member-identity ndt-panel-trigger" data-panel="account-panel" aria-expanded="false">
+                        <span class="ndt-member-wordmark">NDT MEMBER</span>
+                        <span class="ndt-member-name">{{ request.user.username }}</span>
+                        <span class="ndt-member-role">{% if request.user.is_staff or request.user.is_superuser %}Quản trị viên{% else %}Khách thuê NDT MOTEL{% endif %}</span>
+                    </button>
+                    <div class="ndt-member-actions">
+                        {% if request.user.is_staff or request.user.is_superuser %}
+                        <a href="{% url 'dashboard_admin' %}" class="ndt-sidebar-account">Quản trị</a>
+                        {% else %}
+                        <a href="{% url 'tai_khoan' %}" class="ndt-sidebar-account">Tài khoản</a>
+                        {% endif %}
+                        <a href="{% url 'dang_xuat' %}" class="ndt-sidebar-logout">Đăng xuất</a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="ndt-member-card ndt-member-card-guest">
+                    <div class="ndt-guest-title"><strong>NDT MEMBER</strong><span>SMART LIVING</span></div>
+                    <button type="button" class="ndt-sidebar-login ndt-auth-open" data-auth-mode="login">Đăng nhập</button>
+                    <button type="button" class="ndt-sidebar-register ndt-auth-open" data-auth-mode="register">Đăng ký</button>
+                </div>
+            {% endif %}
+        </div>
+    </aside>
+
+    <header class="ndt-shell-topbar">
+        <button id="ndtMobileMenu" type="button" class="ndt-mobile-menu" aria-label="Mở menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <div class="ndt-topbar-actions">
+            {% if request.user.is_authenticated %}
+                {% if request.user.is_staff or request.user.is_superuser %}<a href="{% url 'thong_bao_admin' %}" class="ndt-topbar-action ndt-topbar-icon" title="Thông báo" aria-label="Thông báo"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>{% if so_thong_bao_admin_chua_doc|default:0 > 0 %}<span class="ndt-topbar-badge" data-notification-badge>{% if so_thong_bao_admin_chua_doc > 99 %}99+{% else %}{{ so_thong_bao_admin_chua_doc }}{% endif %}</span>{% else %}<span class="ndt-topbar-badge" data-notification-badge hidden></span>{% endif %}</a>{% else %}<a href="{% url 'thong_bao_cua_toi' %}" class="ndt-topbar-action ndt-topbar-icon" title="Thông báo" aria-label="Thông báo"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>{% if so_thong_bao_chua_doc|default:0 > 0 %}<span class="ndt-topbar-badge" data-notification-badge>{% if so_thong_bao_chua_doc > 99 %}99+{% else %}{{ so_thong_bao_chua_doc }}{% endif %}</span>{% else %}<span class="ndt-topbar-badge" data-notification-badge hidden></span>{% endif %}</a>{% endif %}
+                <button type="button" class="ndt-topbar-user ndt-panel-trigger ndt-topbar-icon" data-panel="account-panel" aria-expanded="false" title="Tài khoản" aria-label="Tài khoản"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 21a7.5 7.5 0 0 1 15 0"/></svg></button>
+            {% else %}
+                <button type="button" class="ndt-topbar-action ndt-auth-open" data-auth-mode="login" aria-label="Đăng nhập"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 21a7.5 7.5 0 0 1 15 0"/></svg></button>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- FLYOUT: ACCOUNT -->
+    {% if request.user.is_authenticated %}
+    <section class="ndt-flyout ndt-account-flyout" data-panel-id="account-panel" aria-hidden="true">
+        <div class="ndt-flyout-head">
+            <div><small>NDT MEMBER</small><h2>{{ request.user.username }}</h2><p>{% if request.user.is_staff or request.user.is_superuser %}Trung tâm tài khoản quản trị viên.{% else %}Tài khoản và dịch vụ lưu trú của bạn.{% endif %}</p></div>
+            <button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button>
+        </div>
+        <div class="ndt-account-summary"><span class="ndt-account-emblem">NDT</span><div><strong>{{ request.user.username }}</strong><span>{% if request.user.is_staff or request.user.is_superuser %}Quản trị viên NDT MOTEL{% else %}Khách thuê NDT MOTEL{% endif %}</span></div></div>
+        <div class="ndt-flyout-links">
+            {% if request.user.is_staff or request.user.is_superuser %}<a href="{% url 'dashboard_admin' %}"><strong>Dashboard quản trị</strong><span>Quay về trung tâm vận hành.</span></a><a href="{% url 'doi_mat_khau' %}"><strong>Đổi mật khẩu</strong><span>Cập nhật bảo mật tài khoản quản trị.</span></a>{% else %}<a href="{% url 'tai_khoan' %}"><strong>Trung tâm tài khoản</strong><span>Hồ sơ và tổng hợp hoạt động.</span></a><a href="{% url 'hop_dong_cua_toi' %}"><strong>Hợp đồng của tôi</strong><span>Theo dõi thông tin lưu trú.</span></a><a href="{% url 'hoa_don_cua_toi' %}"><strong>Hóa đơn của tôi</strong><span>Kiểm tra phí và thanh toán.</span></a>{% endif %}
+            <a href="{% url 'dang_xuat' %}"><strong>Đăng xuất</strong><span>Kết thúc phiên đăng nhập hiện tại.</span></a>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if request.user.is_authenticated and not request.user.is_staff and not request.user.is_superuser %}
+    <!-- FLYOUT: TENANT -->
+<section class="ndt-flyout" data-panel-id="tenant-stay" aria-hidden="true"><div class="ndt-flyout-head"><div><small>NDT MOTEL</small><h2>Lưu trú</h2><p>Đặt phòng, hợp đồng và nhu cầu ở ghép của bạn.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'dat_phong_cua_toi' %}"><strong>Đặt phòng của tôi</strong><span>Theo dõi yêu cầu và trạng thái tiền cọc.</span></a><a href="{% url 'hop_dong_cua_toi' %}"><strong>Hợp đồng của tôi</strong><span>Xem thông tin, thời hạn và các thao tác liên quan.</span></a>{% if not an_menu_ghep_phong %}<a href="{% url 'yeu_cau_ghep_cua_toi' %}"><strong>Yêu cầu ở ghép</strong><span>Theo dõi và quản lý nhu cầu ở ghép.</span></a>{% endif %}<a href="{% url 'danh_sach_phong' %}"><strong>Khám phá phòng</strong><span>Xem phòng và thông tin lưu trú đang có.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="tenant-payment" aria-hidden="true"><div class="ndt-flyout-head"><div><small>NDT MOTEL</small><h2>Thanh toán</h2><p>Theo dõi hóa đơn và trạng thái thanh toán.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'hoa_don_cua_toi' %}"><strong>Hóa đơn của tôi</strong><span>Xem chi tiết hóa đơn, hạn thanh toán và lịch sử.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="tenant-support" aria-hidden="true"><div class="ndt-flyout-head"><div><small>NDT MOTEL</small><h2>Hỗ trợ</h2><p>Các dịch vụ hỗ trợ trong quá trình lưu trú.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'yeu_cau_sua_chua_cua_toi' %}"><strong>Yêu cầu sửa chữa</strong><span>Gửi và theo dõi tình trạng xử lý sự cố.</span></a><a href="{% url 'nhan_dien_su_dung_phong' %}"><strong>FaceProfile của tôi</strong><span>Đăng ký nhận diện theo hợp đồng hiện có.</span></a><a href="{% url 'thong_bao_cua_toi' %}"><strong>Thông báo</strong><span>Cập nhật thông tin từ hệ thống và quản lý.</span></a><a href="{% url 'tai_khoan' %}"><strong>Trung tâm tài khoản</strong><span>Xem hồ sơ và tổng hợp hoạt động của bạn.</span></a></div></section>
+
+    {% endif %}
+
+    {% if request.user.is_staff or request.user.is_superuser %}
+    <!-- FLYOUT: ADMIN -->
+    <section class="ndt-flyout" data-panel-id="admin-operations" aria-hidden="true"><div class="ndt-flyout-head"><div><small>QUẢN TRỊ</small><h2>Vận hành</h2><p>Quản lý cơ sở, phòng, đặt phòng và hợp đồng.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'quan_ly_co_so' %}"><strong>Cơ sở</strong><span>Địa chỉ và trạng thái vận hành.</span></a><a href="{% url 'quan_ly_phong' %}"><strong>Phòng</strong><span>Giá, sức chứa và tình trạng phòng.</span></a><a href="{% url 'quan_ly_dat_phong' %}"><strong>Đặt phòng</strong><span>Tiếp nhận và xử lý yêu cầu.</span></a><a href="{% url 'quan_ly_hop_dong' %}"><strong>Hợp đồng</strong><span>Thời hạn, hiệu lực và gia hạn.</span></a><a href="{% url 'quan_ly_yeu_cau_ghep' %}"><strong>Yêu cầu ở ghép</strong><span>Theo dõi và xét duyệt yêu cầu.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="admin-finance" aria-hidden="true"><div class="ndt-flyout-head"><div><small>QUẢN TRỊ</small><h2>Tài chính</h2><p>Hóa đơn, thanh toán và công nợ.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'quan_ly_hoa_don' %}"><strong>Quản lý hóa đơn</strong><span>Tạo, theo dõi và xác nhận thanh toán.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="admin-service" aria-hidden="true"><div class="ndt-flyout-head"><div><small>QUẢN TRỊ</small><h2>Dịch vụ</h2><p>Hỗ trợ khách thuê và truyền thông vận hành.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'quan_ly_nguoi_thue' %}"><strong>Người thuê</strong><span>Tra cứu hồ sơ, hợp đồng và hóa đơn.</span></a><a href="{% url 'quan_ly_sua_chua' %}"><strong>Sửa chữa</strong><span>Tiếp nhận và theo dõi yêu cầu sửa chữa.</span></a><a href="{% url 'quan_ly_chinh_sach' %}"><strong>Chính sách hỗ trợ</strong><span>Quản lý chính sách dành cho người thuê.</span></a><a href="{% url 'quan_ly_thong_bao' %}"><strong>Thông báo</strong><span>Gửi và quản lý thông tin hệ thống.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="admin-smart" aria-hidden="true"><div class="ndt-flyout-head"><div><small>SMART LIVING</small><h2>Smart Room</h2><p>Nhận diện và kiểm soát quyền ra vào.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'smart_room_dashboard' %}"><strong>Smart Room Dashboard</strong><span>Tổng quan vận hành phòng thông minh.</span></a><a href="{% url 'smart_access_control' %}"><strong>Kiểm soát ra vào</strong><span>Trung tâm kiểm soát truy cập.</span></a><a href="{% url 'quan_ly_nguoi_o_cung' %}"><strong>Người ở cùng</strong><span>Quản lý người đang lưu trú cùng phòng.</span></a><a href="{% url 'quan_ly_face_profile' %}"><strong>Face Profile</strong><span>Quản lý hồ sơ nhận diện khuôn mặt.</span></a><a href="{% url 'quan_ly_quyen_ra_vao' %}"><strong>Quyền ra vào</strong><span>Phân quyền truy cập theo phòng.</span></a><a href="{% url 'quan_ly_lich_su_ra_vao' %}"><strong>Lịch sử ra vào</strong><span>Tra cứu kết quả và thời điểm truy cập.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="admin-system" aria-hidden="true"><div class="ndt-flyout-head"><div><small>QUẢN TRỊ</small><h2>Hệ thống</h2><p>Theo dõi hoạt động và truy vết thao tác.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'nhat_ky_thao_tac' %}"><strong>Nhật ký thao tác</strong><span>Truy vết các hành động quan trọng trong hệ thống.</span></a><a href="{% url 'dashboard_admin' %}"><strong>Dashboard quản trị</strong><span>Quay về tổng quan vận hành.</span></a></div></section>
+    {% endif %}
+
+
+    {% comment %}
+    Legacy header and mega-menu are intentionally excluded from rendered HTML.
+    The role-aware NDT shell above is the single navigation source.
+    <!-- =========================================================
+         ADMIN MENU OVERLAY
+         ========================================================= -->
+
+    <div
+        id="adminMenuOverlay"
+        class="admin-menu-overlay"
+    ></div>
+
+
+    <!-- =========================================================
+         HEADER
+         ========================================================= -->
+
+    <header class="site-header">
+
+        <div class="header-container">
+
+            <!-- LOGO -->
+
+            <a
+                href="{% url 'home' %}"
+                class="brand"
+            >
+
+                <div class="brand-mark">
+                    N
+                </div>
+
+                <div class="brand-text">
+
+                    <strong>
+                        NDT MOTEL
+                    </strong>
+
+                    <span>
+                        Không gian sống tiện nghi
+                    </span>
+
+                </div>
+
+            </a>
+
+
+            <!-- =================================================
+                 NAVIGATION
+                 ================================================= -->
+
+            <nav class="main-nav">
+
+                <!-- TRANG CHỦ -->
+
+                <a
+                    href="{% url 'home' %}"
+                    class="nav-link{% if request.resolver_match.url_name == 'home' %} is-active{% endif %}"
+                >
+                    Trang chủ
+                </a>
+
+
+                {% if request.user.is_authenticated %}
+
+
+                    <!-- =================================================
+                         TENANT NAV
+                         ================================================= -->
+
+                    {% if not request.user.is_staff and not request.user.is_superuser %}
+
+                        <!-- PHÒNG -->
+                        <a
+                            href="{% url 'danh_sach_phong' %}"
+                            class="nav-link{% if request.resolver_match.url_name == 'danh_sach_phong' or request.resolver_match.url_name == 'chi_tiet_phong' or request.resolver_match.url_name == 'dat_phong' %} is-active{% endif %}"
+                        >
+                            Phòng
+                        </a>
+
+                        <!-- HỢP ĐỒNG -->
+                        <a
+                            href="{% url 'hop_dong_cua_toi' %}"
+                            class="nav-link{% if request.resolver_match.url_name == 'hop_dong_cua_toi' or request.resolver_match.url_name == 'chi_tiet_hop_dong_cua_toi' or request.resolver_match.url_name == 'gui_yeu_cau_gia_han' or request.resolver_match.url_name == 'huy_yeu_cau_gia_han' %} is-active{% endif %}"
+                        >
+                            Hợp đồng
+                        </a>
+
+                        <!-- HÓA ĐƠN / THANH TOÁN -->
+                        <a
+                            href="{% url 'hoa_don_cua_toi' %}"
+                            class="nav-link{% if request.resolver_match.url_name == 'hoa_don_cua_toi' or request.resolver_match.url_name == 'chi_tiet_hoa_don_cua_toi' or request.resolver_match.url_name == 'thanh_toan_hoa_don_cua_toi' %} is-active{% endif %}"
+                        >
+                            Hóa đơn
+                        </a>
+
+                        <!-- SỬA CHỮA -->
+                        <a
+                            href="{% url 'yeu_cau_sua_chua_cua_toi' %}"
+                            class="nav-link{% if request.resolver_match.url_name == 'yeu_cau_sua_chua_cua_toi' or request.resolver_match.url_name == 'tao_yeu_cau_sua_chua' or request.resolver_match.url_name == 'chi_tiet_yeu_cau_sua_chua_cua_toi' %} is-active{% endif %}"
+                        >
+                            Sửa chữa
+                        </a>
+
+                        <!-- Ở GHÉP -->
+                        <a
+                            href="{% url 'yeu_cau_ghep_cua_toi' %}"
+                            class="nav-link{% if request.resolver_match.url_name == 'yeu_cau_ghep_cua_toi' or request.resolver_match.url_name == 'chi_tiet_yeu_cau_ghep' or request.resolver_match.url_name == 'dang_ky_ghep_phong' %} is-active{% endif %}"
+                        >
+                            Ở ghép
+                        </a>
+
+                    {% endif %}
+
+
+                    <!-- =================================================
+                         ADMIN NAV
+                         ================================================= -->
+
+                    {% if request.user.is_staff or request.user.is_superuser %}
+
+                        <div class="admin-menu-wrapper">
+
+                            <!-- NÚT QUẢN LÝ -->
+
+                            <button
+                                type="button"
+                                id="adminMenuButton"
+                                class="nav-link admin-menu-button"
+                                aria-expanded="false"
+                                aria-controls="adminMegaMenu"
+                            >
+
+                                ⚙️ Quản lý
+
+                                <span
+                                    class="admin-menu-arrow"
+                                >
+                                    ▼
+                                </span>
+
+                            </button>
+
+
+                            <!-- =================================================
+                                 MEGA MENU
+                                 ================================================= -->
+
+                            <div
+                                id="adminMegaMenu"
+                                class="admin-mega-menu"
+                                role="menu"
+                            >
+
+                                <!-- MENU HEADER -->
+
+                                <div
+                                    class="admin-menu-heading"
+                                >
+
+                                    <div
+                                        class="admin-menu-heading-left"
+                                    >
+
+                                        <div
+                                            class="admin-menu-heading-icon"
+                                        >
+                                            ⚙️
+                                        </div>
+
+                                        <div>
+
+                                            <strong>
+                                                Quản lý hệ thống
+                                            </strong>
+
+                                            <span>
+                                                Vận hành, quản trị và Smart Room
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <button
+                                        type="button"
+                                        id="adminMenuClose"
+                                        class="admin-menu-close"
+                                        aria-label="Đóng menu"
+                                    >
+                                        ×
+                                    </button>
+
+                                </div>
+
+
+                                <!-- =================================================
+                                     QUẢN LÝ CHÍNH
+                                     ================================================= -->
+
+                                <div class="admin-menu-section-title">
+                                    Vận hành & quản lý
+                                </div>
+
+                                <div
+                                    class="admin-menu-grid"
+                                >
+
+                                    <!-- DASHBOARD -->
+
+                                    <a
+                                        href="{% url 'dashboard_admin' %}"
+                                        class="admin-menu-card"
+                                        role="menuitem"
+                                    >
+
+                                        <div
+                                            class="admin-menu-icon"
+                                        >
+                                            📊
+                                        </div>
+
+                                        <div>
+
+                                            <span
+                                                class="admin-menu-card-title"
+                                            >
+                                                Dashboard
+                                            </span>
+
+                                            <span
+                                                class="admin-menu-card-description"
+                                            >
+                                                Tổng quan vận hành và số liệu
+                                            </span>
+
+                                        </div>
+
+                                    </a>
+
+
+                                    <!-- CƠ SỞ -->
+
+                                    <a
+                                        href="{% url 'quan_ly_co_so' %}"
+                                        class="admin-menu-card"
+                                        role="menuitem"
+                                    >
+
+                                        <div
+                                            class="admin-menu-icon"
+                                        >
+                                            🏢
+                                        </div>
+
+                                        <div>
+
+                                            <span
+                                                class="admin-menu-card-title"
+                                            >
+                                                Quản lý cơ sở
+                                            </span>
+
+                                            <span
+                                                class="admin-menu-card-description"
+                                            >
+                                                Cơ sở, địa chỉ và trạng thái
+                                            </span>
+
+                                        </div>
+
+                                    </a>
+
+
+                                    <!-- PHÒNG -->
+
+                                    <a
+                                        href="{% url 'quan_ly_phong' %}"
+                                        class="admin-menu-card"
+                                        role="menuitem"
+                                    >
+
+                                        <div
+                                            class="admin-menu-icon"
+                                        >
+                                            🚪
+                                        </div>
+
+                                        <div>
+
+                                            <span
+                                                class="admin-menu-card-title"
+                                            >
+                                                Quản lý phòng
+                                            </span>
+
+                                            <span
+                                                class="admin-menu-card-description"
+                                            >
+                                                Danh sách, giá và tình trạng phòng
+                                            </span>
+
+                                        </div>
+
+                                    </a>
+
+
+                                    <!-- ĐẶT PHÒNG -->
+
+                                    <a
+                                        href="{% url 'quan_ly_dat_phong' %}"
+                                        class="admin-menu-card"
+                                        role="menuitem"
+                                    >
+
+                                        <div
+                                            class="admin-menu-icon"
+                                        >
+                                            📅
+                                        </div>
+
+                                        <div>
+
+                                            <span
+                                                class="admin-menu-card-title"
+                                            >
+                                                Quản lý đặt phòng
+                                            </span>
+
+                                            <span
+                                                class="admin-menu-card-description"
+                                            >
+                                                Tiếp nhận và xử lý yêu cầu đặt phòng
+                                            </span>
+
+                                        </div>
+
+                                    </a>
+
+
+                                    <!-- =================================================
+                                         YÊU CẦU Ở GHÉP
+                                         ================================================= -->
+
+                                    <a
+                                        href="{% url 'quan_ly_yeu_cau_ghep' %}"
+                                        class="admin-menu-card"
+                                        role="menuitem"
+                                    >
+
+                                        <div
+                                            class="admin-menu-icon"
+                                        >
+                                            👥
+                                        </div>
+
+                                        <div>
+
+                                            <span
+                                                class="admin-menu-card-title"
+                                            >
+                                                Yêu cầu ở ghép
+                                            </span>
+
+                                            <span
+                                                class="admin-menu-card-description"
+                                            >
+                                                Theo dõi và xét duyệt yêu cầu
+                                            </span>
+
+                                        </div>
+
+                                    </a>
+
+
+                                    <!-- HỢP ĐỒNG -->
+
+                                    <a
+                                        href="{% url 'quan_ly_hop_dong' %}"
+                                        class="admin-menu-card"
+                                        role="menuitem"
+                                    >
+
+                                        <div
+                                            class="admin-menu-icon"
+                                        >
+                                            📄
+                                        </div>
+
+                                        <div>
+
+                                            <span
+                                                class="admin-menu-card-title"
+                                            >
+                                                Quản lý hợp đồng
+                                            </span>
+
+                                            <span
+                                                class="admin-menu-card-description"
+                                            >
+                                                Hợp đồng, thời hạn và gia hạn
+                                            </span>
+
+                                        </div>
+
+                                    </a>
+
+
+                                    <!-- HÓA ĐƠN -->
+
+                                    <a
+                                        href="{% url 'quan_ly_hoa_don' %}"
+                                        class="admin-menu-card"
+                                        role="menuitem"
+                                    >
+
+                                        <div
+                                            class="admin-menu-icon"
+                                        >
+                                            💰
+                                        </div>
+
+                                        <div>
+
+                                            <span
+                                                class="admin-menu-card-title"
+                                            >
+                                                Quản lý hóa đơn
+                                            </span>
+
+                                            <span
+                                                class="admin-menu-card-description"
+                                            >
+                                                Hóa đơn, thanh toán và công nợ
+                                            </span>
+
+                                        </div>
+
+                                    </a>
+
+
+                                    <!-- SỬA CHỮA -->
+
+                                    <a
+                                        href="{% url 'quan_ly_nguoi_thue' %}"
+                                        class="admin-menu-card"
+                                        role="menuitem"
+                                    >
+
+                                        <div class="admin-menu-icon">
+                                            &#128100;
+                                        </div>
+
+                                        <div>
+
+                                            <span class="admin-menu-card-title">
+                                                Quản lý người thuê
+                                            </span>
+
+                                            <span class="admin-menu-card-description">
+                                                Hồ sơ, hợp đồng và hóa đơn theo người thuê
+                                            </span>
+
+                                        </div>
+
+                                    </a>
+
+
+                                    <a
+                                        href="{% url 'quan_ly_sua_chua' %}"
+                                        class="admin-menu-card"
+                                        role="menuitem"
+                                    >
+
+                                        <div
+                                            class="admin-menu-icon"
+                                        >
+                                            🔧
+                                        </div>
+
+                                        <div>
+
+                                            <span
+                                                class="admin-menu-card-title"
+                                            >
+                                                Quản lý sửa chữa
+                                            </span>
+
+                                            <span
+                                                class="admin-menu-card-description"
+                                            >
+                                                Tiếp nhận và theo dõi sửa chữa
+                                            </span>
+
+                                        </div>
+
+                                    </a>
+
+
+                                    <!-- CHÍNH SÁCH -->
+
+                                    <a
+                                        href="{% url 'quan_ly_chinh_sach' %}"
+                                        class="admin-menu-card"
+                                        role="menuitem"
+                                    >
+
+                                        <div
+                                            class="admin-menu-icon"
+                                        >
+                                            🤝
+                                        </div>
+
+                                        <div>
+
+                                            <span
+                                                class="admin-menu-card-title"
+                                            >
+                                                Chính sách hỗ trợ
+                                            </span>
+
+                                            <span
+                                                class="admin-menu-card-description"
+                                            >
+                                                Chính sách và hỗ trợ người thuê
+                                            </span>
+
+                                        </div>
+
+                                    </a>
+
+
+                                    <!-- THÔNG BÁO -->
+
+                                    <a
+                                        href="{% url 'quan_ly_thong_bao' %}"
+                                        class="admin-menu-card"
+                                        role="menuitem"
+                                    >
+
+                                        <div
+                                            class="admin-menu-icon"
+                                        >
+                                            📢
+                                        </div>
+
+                                        <div>
+
+                                            <span
+                                                class="admin-menu-card-title"
+                                            >
+                                                Quản lý thông báo
+                                            </span>
+
+                                            <span
+                                                class="admin-menu-card-description"
+                                            >
+                                                Gửi và quản lý thông tin người thuê
+                                            </span>
+
+                                        </div>
+
+                                    </a>
+
+
+                                    <!-- =================================================
+                                         NHẬT KÝ THAO TÁC
+                                         ================================================= -->
+
+                                    <a
+                                        href="{% url 'nhat_ky_thao_tac' %}"
+                                        class="admin-menu-card"
+                                        role="menuitem"
+                                    >
+
+                                        <div
+                                            class="admin-menu-icon"
+                                        >
+                                            📋
+                                        </div>
+
+                                        <div>
+
+                                            <span
+                                                class="admin-menu-card-title"
+                                            >
+                                                Nhật ký thao tác
+                                            </span>
+
+                                            <span
+                                                class="admin-menu-card-description"
+                                            >
+                                                Truy vết thao tác trong hệ thống
+                                            </span>
+
+                                        </div>
+
+                                    </a>
+
+                                </div>
+
+
+                                <!-- =================================================
+                                     SMART ROOM
+                                     ================================================= -->
+
+                                <div
+                                    class="admin-menu-section"
+                                >
+
+                                    <div
+                                        class="admin-menu-section-title"
+                                    >
+                                        🏠 Smart Room
+                                    </div>
+
+
+                                    <div
+                                        class="admin-menu-grid"
+                                    >
+
+                                        <!-- SMART ROOM DASHBOARD -->
+
+                                        <a
+                                            href="{% url 'smart_room_dashboard' %}"
+                                            class="admin-menu-card"
+                                            role="menuitem"
+                                        >
+
+                                            <div
+                                                class="admin-menu-icon"
+                                            >
+                                                🏠
+                                            </div>
+
+                                            <div>
+
+                                                <span
+                                                    class="admin-menu-card-title"
+                                                >
+                                                    Smart Room Dashboard
+                                                </span>
+
+                                                <span
+                                                    class="admin-menu-card-description"
+                                                >
+                                                    Tổng quan phòng thông minh
+                                                </span>
+
+                                            </div>
+
+                                        </a>
+
+
+                                        <!-- ACCESS CONTROL -->
+
+                                        <a
+                                            href="{% url 'smart_access_control' %}"
+                                            class="admin-menu-card"
+                                            role="menuitem"
+                                        >
+
+                                            <div
+                                                class="admin-menu-icon"
+                                            >
+                                                🔐
+                                            </div>
+
+                                            <div>
+
+                                                <span
+                                                    class="admin-menu-card-title"
+                                                >
+                                                    Kiểm soát ra vào
+                                                </span>
+
+                                                <span
+                                                    class="admin-menu-card-description"
+                                                >
+                                                    Kiểm soát truy cập
+                                                </span>
+
+                                            </div>
+
+                                        </a>
+
+
+                                        <!-- NGƯỜI Ở CÙNG -->
+
+                                        <a
+                                            href="{% url 'quan_ly_nguoi_o_cung' %}"
+                                            class="admin-menu-card"
+                                            role="menuitem"
+                                        >
+
+                                            <div
+                                                class="admin-menu-icon"
+                                            >
+                                                👥
+                                            </div>
+
+                                            <div>
+
+                                                <span
+                                                    class="admin-menu-card-title"
+                                                >
+                                                    Người ở cùng
+                                                </span>
+
+                                                <span
+                                                    class="admin-menu-card-description"
+                                                >
+                                                    Quản lý người ở cùng phòng
+                                                </span>
+
+                                            </div>
+
+                                        </a>
+
+
+                                        <!-- FACE PROFILE -->
+
+                                        <a
+                                            href="{% url 'quan_ly_face_profile' %}"
+                                            class="admin-menu-card"
+                                            role="menuitem"
+                                        >
+
+                                            <div
+                                                class="admin-menu-icon"
+                                            >
+                                                👤
+                                            </div>
+
+                                            <div>
+
+                                                <span
+                                                    class="admin-menu-card-title"
+                                                >
+                                                    Face Profile
+                                                </span>
+
+                                                <span
+                                                    class="admin-menu-card-description"
+                                                >
+                                                    Hồ sơ nhận diện khuôn mặt
+                                                </span>
+
+                                            </div>
+
+                                        </a>
+
+
+                                        <!-- QUYỀN RA VÀO -->
+
+                                        <a
+                                            href="{% url 'quan_ly_quyen_ra_vao' %}"
+                                            class="admin-menu-card"
+                                            role="menuitem"
+                                        >
+
+                                            <div
+                                                class="admin-menu-icon"
+                                            >
+                                                🪪
+                                            </div>
+
+                                            <div>
+
+                                                <span
+                                                    class="admin-menu-card-title"
+                                                >
+                                                    Quyền ra vào
+                                                </span>
+
+                                                <span
+                                                    class="admin-menu-card-description"
+                                                >
+                                                    Phân quyền truy cập
+                                                </span>
+
+                                            </div>
+
+                                        </a>
+
+
+                                        <!-- LỊCH SỬ RA VÀO -->
+
+                                        <a
+                                            href="{% url 'quan_ly_lich_su_ra_vao' %}"
+                                            class="admin-menu-card"
+                                            role="menuitem"
+                                        >
+
+                                            <div
+                                                class="admin-menu-icon"
+                                            >
+                                                📋
+                                            </div>
+
+                                            <div>
+
+                                                <span
+                                                    class="admin-menu-card-title"
+                                                >
+                                                    Lịch sử ra vào
+                                                </span>
+
+                                                <span
+                                                    class="admin-menu-card-description"
+                                                >
+                                                    Theo dõi lịch sử truy cập
+                                                </span>
+
+                                            </div>
+
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+
+                {% else %}
+
+                    <!-- =================================================
+                         CHƯA ĐĂNG NHẬP
+                         ================================================= -->
+
+                    <a
+                        href="{% url 'danh_sach_phong' %}"
+                        class="nav-link"
+                    >
+                        Phòng
+                    </a>
+
+                    <a
+                        href="/#features"
+                        class="nav-link"
+                    >
+                        Tiện ích
+                    </a>
+
+                    <a
+                        href="/#contact"
+                        class="nav-link"
+                    >
+                        Liên hệ
+                    </a>
+
+                {% endif %}
+
+            </nav>
+
+
+            <!-- =================================================
+                 HEADER ACTIONS
+                 ================================================= -->
+
+            <div class="header-actions">
+
+                <!-- =================================================
+                     THÔNG BÁO / TÌNH TRẠNG ĐẶT PHÒNG
+                     ================================================= -->
+
+                {% if request.user.is_authenticated %}
+
+                    {% if request.user.is_staff or request.user.is_superuser %}
+
+                        <a
+                            href="{% url 'thong_bao_admin' %}"
+                            class="header-status-link{% if request.resolver_match.url_name == 'thong_bao_admin' or request.resolver_match.url_name == 'chi_tiet_thong_bao_admin' %} is-active{% endif %}"
+                            title="Quản lý thông báo"
+                            aria-label="Quản lý thông báo"
+                        >
+                            <span class="header-status-icon">🔔</span>
+                            <span class="header-status-text">
+                                Thông báo
+                            </span>
+                            {% if so_thong_bao_admin_chua_doc|default:0 > 0 %}
+                                <span class="header-notification-badge" data-notification-badge>
+                                    {% if so_thong_bao_admin_chua_doc > 99 %}
+                                        99+
+                                    {% else %}
+                                        {{ so_thong_bao_admin_chua_doc }}
+                                    {% endif %}
+                                </span>
+                            {% else %}
+                                <span class="header-notification-badge" data-notification-badge hidden></span>
+                            {% endif %}
+                        </a>
+
+                    {% else %}
+
+                        <a
+                            href="{% url 'thong_bao_cua_toi' %}"
+                            class="header-status-link{% if request.resolver_match.url_name == 'thong_bao_cua_toi' or request.resolver_match.url_name == 'chi_tiet_thong_bao_cua_toi' %} is-active{% endif %}"
+                            title="Xem thông báo và tình trạng đặt phòng"
+                            aria-label="Xem thông báo và tình trạng đặt phòng"
+                        >
+                            <span class="header-status-icon">🔔</span>
+
+                            <span class="header-status-text">
+                                Thông báo
+                            </span>
+
+                            {% if so_thong_bao_chua_doc|default:0 > 0 %}
+                                <span
+                                    class="header-notification-badge"
+                                    data-notification-badge
+                                    aria-label="{{ so_thong_bao_chua_doc }} thông báo chưa đọc"
+                                >
+                                    {% if so_thong_bao_chua_doc > 99 %}
+                                        99+
+                                    {% else %}
+                                        {{ so_thong_bao_chua_doc }}
+                                    {% endif %}
+                                </span>
+                            {% endif %}
+                        </a>
+
+                    {% endif %}
+
+                {% else %}
+
+                    <a
+                        href="{% url 'dang_nhap' %}"
+                        class="header-status-link"
+                        title="Đăng nhập để xem tình trạng đặt phòng"
+                        aria-label="Đăng nhập để xem tình trạng đặt phòng"
+                    >
+                        <span class="header-status-icon">🔔</span>
+                        <span class="header-status-text">
+                            Tình trạng đặt phòng
+                        </span>
+                    </a>
+
+                {% endif %}
+
+
+                {% if request.user.is_authenticated %}
+
+                    {% if request.user.is_staff or request.user.is_superuser %}
+
+                        <a
+                            href="{% url 'dashboard_admin' %}"
+                            class="header-login"
+                        >
+                            Dashboard
+                        </a>
+
+                    {% endif %}
+
+
+                    <!-- USER -->
+
+                    <a
+                        href="{% url 'tai_khoan' %}"
+                        class="user-mini"
+                    >
+                    
+
+                        <div
+                            class="user-mini-avatar"
+                        >
+                            {{ request.user.username|slice:":1"|upper }}
+                        </div>
+
+                        <span>
+                            {{ request.user.username }}
+                        </span>
+
+                    </a>
+                    <!-- ĐĂNG XUẤT -->
+
+                    <a  
+                        href="{% url 'dang_xuat' %}"  
+                        class="header-login" 
+                    > 
+                        Đăng xuất 
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'dang_nhap' %}"
+                        class="header-login"
+                    >
+                        Đăng nhập
+                    </a>
+
+                    <a
+                        href="{% url 'dang_ky' %}"
+                        class="header-register"
+                    >
+                        Đăng ký
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </header>
+    {% endcomment %}
+
+
+    {% if not request.user.is_authenticated %}
+    <div id="ndtAuthModal" class="ndt-auth-modal" aria-hidden="true">
+        <div class="ndt-auth-backdrop" data-auth-close></div>
+        <section class="ndt-auth-dialog" role="dialog" aria-modal="true" aria-labelledby="ndtAuthTitle">
+            <button type="button" class="ndt-auth-close" data-auth-close aria-label="Đóng">×</button>
+            <div class="ndt-auth-brand"><span class="ndt-auth-brand-mark">NDT</span><div><strong>NDT MOTEL</strong><small>SMART LIVING MEMBER</small></div></div>
+            <div class="ndt-auth-tabs"><button type="button" class="is-active" data-auth-tab="login">Đăng nhập</button><button type="button" data-auth-tab="register">Đăng ký</button></div>
+            <div class="ndt-auth-pane is-active" data-auth-pane="login">
+                <h2 id="ndtAuthTitle">Đăng nhập NDT MOTEL</h2><p>Tiếp tục quản lý đặt phòng và hành trình lưu trú của bạn.</p>
+                <form method="post" action="{% url 'dang_nhap' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <label>Tên đăng nhập<input type="text" name="username" autocomplete="username" required placeholder="Nhập tên đăng nhập"></label>
+                    <label>Mật khẩu<input type="password" name="password" autocomplete="current-password" required placeholder="Nhập mật khẩu"></label>
+                    <button type="submit" class="ndt-auth-submit">Đăng nhập</button>
+                </form>
+                <button type="button" class="ndt-auth-switch" data-auth-switch="register">Chưa có tài khoản? <strong>Đăng ký</strong></button>
+            </div>
+            <div class="ndt-auth-pane" data-auth-pane="register">
+                <h2>Đăng ký tài khoản</h2><p>Tạo tài khoản để đặt phòng và sử dụng các dịch vụ NDT MOTEL.</p>
+                <form method="post" action="{% url 'dang_ky' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <div class="ndt-auth-grid"><label>Họ và tên<input type="text" name="ho_ten" required placeholder="Nhập họ và tên"></label><label>Số điện thoại<input type="tel" name="so_dien_thoai" required placeholder="Nhập số điện thoại"></label></div>
+                    <div class="ndt-auth-grid"><label>Email<input type="email" name="email" placeholder="Nhập email"></label><label>CCCD<input type="text" name="cccd" placeholder="Nhập CCCD"></label></div>
+                    <label>Tên đăng nhập<input type="text" name="username" autocomplete="username" required placeholder="Chọn tên đăng nhập"></label>
+                    <label>Mật khẩu<input type="password" name="password" autocomplete="new-password" required placeholder="Tạo mật khẩu"></label>
+                    <button type="submit" class="ndt-auth-submit">Đăng ký</button>
+                </form>
+                <button type="button" class="ndt-auth-switch" data-auth-switch="login">Đã có tài khoản? <strong>Đăng nhập</strong></button>
+            </div>
+        </section>
+    </div>
+    {% endif %}
+
+    <!-- =========================================================
+         DJANGO MESSAGES
+         ========================================================= -->
+
+    {% if messages %}
+
+        <div class="messages-container">
+
+            {% for message in messages %}
+
+                <div
+                    class="message message-{{ message.tags }}"
+                >
+
+                    <span
+                        class="message-icon"
+                    >
+
+                        {% if message.tags == "success" %}
+                            ✓
+                        {% elif message.tags == "error" %}
+                            !
+                        {% elif message.tags == "warning" %}
+                            ⚠
+                        {% else %}
+                            ℹ
+                        {% endif %}
+
+                    </span>
+
+                    <span
+                        class="message-text"
+                    >
+                        {{ message }}
+                    </span>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- =========================================================
+         MAIN
+         ========================================================= -->
+
+    <main class="site-main">
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+
+    <!-- =========================================================
+         FOOTER
+         ========================================================= -->
+
+    <footer class="site-footer ndt-public-footer">
+
+        <div class="footer-container">
+
+            <!-- GIỚI THIỆU -->
+
+            <div class="footer-brand">
+
+                <div class="footer-logo">
+                    NDT MOTEL
+                </div>
+
+                <p>
+                    Tìm phòng và quản lý lưu trú tại NDT MOTEL.
+                    Kết nối nơi ở của bạn với các tiện ích Smart Living.
+                </p>
+
+            </div>
+
+
+            <!-- KHÁM PHÁ -->
+
+            <div class="footer-column">
+
+                <h4>
+                    Khám phá
+                </h4>
+
+                <a href="{% url 'home' %}">
+                    Trang chủ
+                </a>
+
+                <a href="{% url 'danh_sach_phong' %}">
+                    Tìm phòng
+                </a>
+
+                <a href="{% url 'home' %}#features">
+                    Smart Living
+                </a>
+
+            </div>
+
+
+            <!-- NGƯỜI THUÊ -->
+
+            <div class="footer-column">
+
+                <h4>
+                    Dành cho người thuê
+                </h4>
+
+                {% if request.user.is_authenticated %}
+
+                    {% if not request.user.is_staff and not request.user.is_superuser %}
+
+                        <a
+                            href="{% url 'tai_khoan' %}"
+                        >
+                            Tài khoản
+                        </a>
+
+                        <a
+                            href="{% url 'hop_dong_cua_toi' %}"
+                        >
+                            Hợp đồng của tôi
+                        </a>
+
+                        <!-- =================================================
+                             YÊU CẦU Ở GHÉP
+                             ================================================= -->
+
+                        {% if not an_menu_ghep_phong %}
+                        <a
+                            href="{% url 'yeu_cau_ghep_cua_toi' %}"
+                        >
+                            Yêu cầu ở ghép
+                        </a>
+
+                        {% endif %}
+                        <a
+                            href="{% url 'hoa_don_cua_toi' %}"
+                        >
+                            Hóa đơn của tôi
+                        </a>
+
+                        <a
+                            href="{% url 'yeu_cau_sua_chua_cua_toi' %}"
+                        >
+                            Yêu cầu sửa chữa
+                        </a>
+
+                    {% else %}
+
+                        <span>
+                            Bạn đang dùng tài khoản quản trị
+                        </span>
+
+                    {% endif %}
+
+                {% else %}
+
+                    <a
+                        href="{% url 'dang_nhap' %}"
+                        class="ndt-auth-open" data-auth-mode="login"
+                    >
+                        Đăng nhập
+                    </a>
+
+                    <span>
+                        Đăng nhập để sử dụng các chức năng
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- LIÊN HỆ -->
+
+            <div
+                class="footer-column"
+                id="contact"
+            >
+
+                <h4>
+                    Liên hệ
+                </h4>
+
+                <span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg> Đà Nẵng
+                </span>
+
+                <span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13v-1a8 8 0 0 1 16 0v1M4 12H2v7h4v-7ZM20 12h2v7h-4v-7ZM20 19c0 2-3 2-7 2"></path></svg> Hỗ trợ khách thuê
+                </span>
+
+                <a href="mailto:ndtmotel@gmail.com"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 6 9 7 9-7"></path></svg>ndtmotel@gmail.com</a>
+
+            </div>
+
+        </div>
+
+
+        <!-- FOOTER BOTTOM -->
+
+        <div class="footer-bottom">
+
+            © {% now "Y" %} NDT MOTEL —
+            Hệ thống quản lý phòng trọ
+
+        </div>
+
+    </footer>
+
+
+    <!-- =========================================================
+         JAVASCRIPT ADMIN MENU
+         ========================================================= -->
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const button =
+                document.getElementById("adminMenuButton");
+
+            const menu =
+                document.getElementById("adminMegaMenu");
+
+            const closeButton =
+                document.getElementById("adminMenuClose");
+
+            const overlay =
+                document.getElementById("adminMenuOverlay");
+
+
+            if (!button || !menu) {
+                return;
+            }
+
+
+            /*
+             * =====================================================
+             * QUAN TRỌNG
+             *
+             * Đưa menu trực tiếp vào BODY.
+             *
+             * Tránh stacking context của HEADER làm menu
+             * nhìn thấy nhưng không click được.
+             * =====================================================
+             */
+
+            document.body.appendChild(menu);
+
+
+            /*
+             * Đảm bảo menu nằm trên overlay.
+             */
+
+            menu.style.zIndex = "100001";
+
+            if (overlay) {
+                overlay.style.zIndex = "99998";
+            }
+
+
+            /*
+             * =====================================================
+             * MỞ MENU
+             * =====================================================
+             */
+
+            function openAdminMenu() {
+
+                menu.classList.add("show");
+
+                button.classList.add("active");
+
+                button.setAttribute(
+                    "aria-expanded",
+                    "true"
+                );
+
+                if (overlay) {
+                    overlay.classList.add("show");
+                }
+
+            }
+
+
+            /*
+             * =====================================================
+             * ĐÓNG MENU
+             * =====================================================
+             */
+
+            function closeAdminMenu() {
+
+                menu.classList.remove("show");
+
+                button.classList.remove("active");
+
+                button.setAttribute(
+                    "aria-expanded",
+                    "false"
+                );
+
+                if (overlay) {
+                    overlay.classList.remove("show");
+                }
+
+            }
+
+
+            /*
+             * =====================================================
+             * NÚT QUẢN LÝ
+             * =====================================================
+             */
+
+            button.addEventListener(
+                "click",
+                function (event) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    if (
+                        menu.classList.contains("show")
+                    ) {
+
+                        closeAdminMenu();
+
+                    } else {
+
+                        openAdminMenu();
+
+                    }
+
+                }
+            );
+
+
+            /*
+             * =====================================================
+             * NÚT ĐÓNG X
+             * =====================================================
+             */
+
+            if (closeButton) {
+
+                closeButton.addEventListener(
+                    "click",
+                    function (event) {
+
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        closeAdminMenu();
+
+                    }
+                );
+
+            }
+
+
+            /*
+             * =====================================================
+             * CLICK OVERLAY
+             * =====================================================
+             */
+
+            if (overlay) {
+
+                overlay.addEventListener(
+                    "click",
+                    function () {
+
+                        closeAdminMenu();
+
+                    }
+                );
+
+            }
+
+
+            /*
+             * =====================================================
+             * PHÍM ESC
+             * =====================================================
+             */
+
+            document.addEventListener(
+                "keydown",
+                function (event) {
+
+                    if (
+                        event.key === "Escape" &&
+                        menu.classList.contains("show")
+                    ) {
+
+                        closeAdminMenu();
+
+                    }
+
+                }
+            );
+
+
+            /*
+             * =====================================================
+             * LINK TRONG MENU
+             *
+             * TUYỆT ĐỐI KHÔNG:
+             * - preventDefault()
+             * - stopPropagation()
+             *
+             * Để trình duyệt tự chuyển tới href Django.
+             * =====================================================
+             */
+
+            const menuLinks =
+                menu.querySelectorAll(
+                    "a.admin-menu-card"
+                );
+
+
+            menuLinks.forEach(
+                function (link) {
+
+                    link.addEventListener(
+                        "click",
+                        function () {
+
+                            closeAdminMenu();
+
+                            /*
+                             * Không chặn hành động mặc định
+                             * của thẻ <a>.
+                             *
+                             * Django URL sẽ được trình duyệt
+                             * chuyển tới bình thường.
+                             */
+
+                        }
+                    );
+
+                }
+            );
+
+        });
+
+    </script>
+
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const body = document.body;
+        const sidebar = document.getElementById("ndtSidebar");
+        const overlay = document.getElementById("ndtShellOverlay");
+        const collapse = document.getElementById("ndtSidebarCollapse");
+        const mobile = document.getElementById("ndtMobileMenu");
+        const triggers = Array.from(document.querySelectorAll(".ndt-panel-trigger"));
+        const panels = Array.from(document.querySelectorAll(".ndt-flyout"));
+        const closes = Array.from(document.querySelectorAll(".ndt-flyout-close"));
+        let activePanel = null;
+
+        function positionPanel(panel, trigger) {
+            if (!panel || !trigger) return;
+
+            const viewportGap = 18;
+            const topSafe = 104;
+            const triggerRect = trigger.getBoundingClientRect();
+
+            /*
+             * V6 / VNA-style:
+             * - panel starts beside the clicked parent item;
+             * - short panels stay close to that item;
+             * - long panels are lifted just enough to stay visible;
+             * - very long panels keep an internal scrollbar.
+             */
+            let top = Math.max(topSafe, Math.round(triggerRect.top - 10));
+            panel.style.setProperty("--ndt-flyout-top", top + "px");
+
+            requestAnimationFrame(function () {
+                const availableHeight = window.innerHeight - topSafe - viewportGap;
+                panel.style.setProperty("--ndt-flyout-max-height", Math.max(300, availableHeight) + "px");
+
+                const naturalHeight = panel.scrollHeight;
+                if (top + naturalHeight > window.innerHeight - viewportGap) {
+                    top = Math.max(
+                        topSafe,
+                        Math.round(window.innerHeight - Math.min(naturalHeight, availableHeight) - viewportGap)
+                    );
+                    panel.style.setProperty("--ndt-flyout-top", top + "px");
+                }
+            });
+        }
+
+        function closePanels() {
+            panels.forEach(function (panel) {
+                panel.classList.remove("is-open");
+                panel.setAttribute("aria-hidden", "true");
+            });
+            triggers.forEach(function (trigger) {
+                trigger.classList.remove("is-open");
+                trigger.setAttribute("aria-expanded", "false");
+            });
+            if (overlay) overlay.classList.remove("is-visible");
+            activePanel = null;
+        }
+
+        function openPanel(id, trigger) {
+            const panel = document.querySelector('[data-panel-id="' + id + '"]');
+            if (!panel) return;
+            if (activePanel === id) { closePanels(); return; }
+            closePanels();
+            positionPanel(panel, trigger);
+            panel.classList.add("is-open");
+            panel.setAttribute("aria-hidden", "false");
+            trigger.classList.add("is-open");
+            trigger.setAttribute("aria-expanded", "true");
+            if (overlay) overlay.classList.add("is-visible");
+            activePanel = id;
+        }
+
+        triggers.forEach(function (trigger) {
+            trigger.addEventListener("click", function () { openPanel(trigger.dataset.panel, trigger); });
+        });
+        closes.forEach(function (button) { button.addEventListener("click", closePanels); });
+        if (overlay) overlay.addEventListener("click", function () { closePanels(); body.classList.remove("ndt-mobile-nav-open"); });
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") { closePanels(); body.classList.remove("ndt-mobile-nav-open"); }
+        });
+        window.addEventListener("resize", function () {
+            if (!activePanel) return;
+            const trigger = document.querySelector('.ndt-panel-trigger[data-panel="' + activePanel + '"]');
+            const panel = document.querySelector('[data-panel-id="' + activePanel + '"]');
+            positionPanel(panel, trigger);
+        });
+
+        if (collapse) {
+            const saved = localStorage.getItem("ndtSidebarCollapsed");
+            if (saved === "1") body.classList.add("ndt-sidebar-collapsed");
+            collapse.addEventListener("click", function () {
+                closePanels();
+                body.classList.toggle("ndt-sidebar-collapsed");
+                localStorage.setItem("ndtSidebarCollapsed", body.classList.contains("ndt-sidebar-collapsed") ? "1" : "0");
+            });
+        }
+        if (mobile) mobile.addEventListener("click", function () { body.classList.toggle("ndt-mobile-nav-open"); });
+        if (sidebar) sidebar.querySelectorAll("a").forEach(function (link) {
+            link.addEventListener("click", function () { body.classList.remove("ndt-mobile-nav-open"); closePanels(); });
+        });
+    });
+    </script>
+
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function(){
+        const modal=document.getElementById("ndtAuthModal"); if(!modal) return;
+        const opens=document.querySelectorAll(".ndt-auth-open");
+        const tabs=modal.querySelectorAll("[data-auth-tab]"); const panes=modal.querySelectorAll("[data-auth-pane]");
+        function setMode(mode){ tabs.forEach(x=>x.classList.toggle("is-active",x.dataset.authTab===mode)); panes.forEach(x=>x.classList.toggle("is-active",x.dataset.authPane===mode)); }
+        function open(mode){ setMode(mode||"login"); modal.classList.add("is-open"); modal.setAttribute("aria-hidden","false"); document.body.classList.add("ndt-auth-opened"); }
+        function close(){ modal.classList.remove("is-open"); modal.setAttribute("aria-hidden","true"); document.body.classList.remove("ndt-auth-opened"); }
+        opens.forEach(x=>x.addEventListener("click",e=>{e.preventDefault();open(x.dataset.authMode)}));
+        modal.querySelectorAll("[data-auth-close]").forEach(x=>x.addEventListener("click",close));
+        tabs.forEach(x=>x.addEventListener("click",()=>setMode(x.dataset.authTab)));
+        modal.querySelectorAll("[data-auth-switch]").forEach(x=>x.addEventListener("click",()=>setMode(x.dataset.authSwitch)));
+        document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal.classList.contains("is-open"))close()});
+        document.querySelectorAll('a[href*="dang-nhap"],a[href*="dang-ky"]').forEach(a=>{ if(a.closest(".site-header")) return; a.addEventListener("click",function(e){ const href=this.getAttribute("href")||""; if(href.includes("dang-nhap")){e.preventDefault();open("login")} else if(href.includes("dang-ky")){e.preventDefault();open("register")} }); });
+    });
+    </script>
+
+    <script src="{% static 'js/components/toast.js' %}" defer></script>
+    <script src="{% static 'js/ui-system.js' %}" defer></script>
+
+</body>
+
+</html>

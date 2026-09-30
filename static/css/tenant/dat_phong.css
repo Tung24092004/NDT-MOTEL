@@ -1,0 +1,279 @@
+/* Page layout retained from dat_phong; shared components in components.css. */
+.tenant-ui * {
+            box-sizing: border-box;
+        }.tenant-ui {
+            margin: 0;
+            background: #f5f9fa;
+            color: #123338;
+            font-family: Arial, Helvetica, sans-serif;
+        }.tenant-ui .booking-page {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 38px 20px 60px;
+        }.tenant-ui .booking-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 22px;
+            color: #08798a;
+            font-weight: 700;
+            text-decoration: none;
+        }.tenant-ui .booking-back:hover {
+            text-decoration: underline;
+        }.tenant-ui .booking-layout {
+            display: grid;
+            grid-template-columns: 0.9fr 1.35fr;
+            gap: 24px;
+            align-items: start;
+        }.tenant-ui .booking-card {
+            background: #ffffff;
+            border: 1px solid #e1ebe5;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(31, 41, 51, 0.07);
+        }.tenant-ui .booking-room-card {
+            overflow: hidden;
+            position: sticky;
+            top: 22px;
+        }.tenant-ui .booking-room-header {
+            padding: 24px;
+            background: linear-gradient(
+                135deg,
+                #08798a,
+                #08798a
+            );
+            color: #ffffff;
+        }.tenant-ui .booking-room-label {
+            margin-bottom: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            opacity: 0.88;
+        }.tenant-ui .booking-room-header h2 {
+            margin: 0 0 12px;
+            font-size: 28px;
+        }.tenant-ui .booking-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 11px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.20);
+            font-size: 13px;
+            font-weight: 700;
+        }.tenant-ui .booking-room-body {
+            padding: 24px;
+        }.tenant-ui .booking-room-price {
+            margin-bottom: 22px;
+            color: #08798a;
+            font-size: 27px;
+            font-weight: 900;
+        }.tenant-ui .booking-room-price span {
+            color: #738078;
+            font-size: 13px;
+            font-weight: 600;
+        }.tenant-ui .booking-info-list {
+            display: grid;
+            gap: 0;
+        }.tenant-ui .booking-info-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 14px 0;
+            border-bottom: 1px solid #edf2ef;
+        }.tenant-ui .booking-info-row:last-child {
+            border-bottom: none;
+        }.tenant-ui .booking-info-label {
+            color: #748279;
+            font-size: 14px;
+        }.tenant-ui .booking-info-value {
+            text-align: right;
+            color: #123338;
+            font-size: 14px;
+            font-weight: 700;
+        }.tenant-ui .booking-profile-note {
+            margin-top: 20px;
+            padding: 14px;
+            border: 1px solid #cfe5d9;
+            border-radius: 12px;
+            background: #f0f8f4;
+            color: #356c52;
+            font-size: 13px;
+            line-height: 1.6;
+        }.tenant-ui .booking-form-card {
+            padding: 28px;
+        }.tenant-ui .booking-form-title {
+            margin-bottom: 26px;
+        }.tenant-ui .booking-form-title h1 {
+            margin: 0 0 8px;
+            color: #123338;
+            font-size: 28px;
+        }.tenant-ui .booking-form-title p {
+            margin: 0;
+            color: #68766d;
+            line-height: 1.6;
+            font-size: 14px;
+        }.tenant-ui .booking-message {
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            border-radius: 11px;
+            border: 1px solid #f0c8c8;
+            background: #fff3f3;
+            color: #a52727;
+            font-size: 14px;
+            line-height: 1.5;
+        }.tenant-ui .booking-message.success {
+            border-color: #cce5d6;
+            background: #eff8f3;
+            color: #286344;
+        }.tenant-ui .booking-message.warning {
+            border-color: #e9d39b;
+            background: #fff8e7;
+            color: #7f6414;
+        }.tenant-ui .booking-message.info {
+            border-color: #c8dcef;
+            background: #f0f6fc;
+            color: #315f85;
+        }.tenant-ui .booking-section-title {
+            margin: 25px 0 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e8efeb;
+            color: #08798a;
+            font-size: 15px;
+            font-weight: 800;
+        }.tenant-ui .booking-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }.tenant-ui .booking-form-group {
+            display: flex;
+            flex-direction: column;
+        }.tenant-ui .booking-form-group.full {
+            grid-column: 1 / -1;
+        }.tenant-ui .booking-form-group label {
+            margin-bottom: 7px;
+            color: #28352e;
+            font-size: 13px;
+            font-weight: 700;
+        }.tenant-ui .booking-required {
+            color: #c0392b;
+        }.tenant-ui .booking-form-group input,.tenant-ui .booking-form-group select,.tenant-ui .booking-form-group textarea {
+            width: 100%;
+            border: 1px solid #dbe6df;
+            border-radius: 11px;
+            background: #ffffff;
+            color: #123338;
+            font-size: 14px;
+            outline: none;
+            transition: 0.2s ease;
+        }.tenant-ui .booking-form-group input,.tenant-ui .booking-form-group select {
+            height: 48px;
+            padding: 0 13px;
+        }.tenant-ui .booking-form-group select {
+            cursor: pointer;
+        }.tenant-ui .booking-form-group textarea {
+            min-height: 105px;
+            padding: 12px 13px;
+            resize: vertical;
+        }.tenant-ui .booking-form-group input:focus,.tenant-ui .booking-form-group select:focus,.tenant-ui .booking-form-group textarea:focus {
+            border-color: #08798a;
+            box-shadow: 0 0 0 4px rgba(79, 169, 130, 0.10);
+        }.tenant-ui .booking-form-group input[readonly] {
+            background: #f7faf8;
+            color: #4d5d53;
+            cursor: default;
+        }.tenant-ui .booking-duration-summary {
+            margin-top: 8px;
+            padding: 13px 14px;
+            border: 1px solid #cfe5d9;
+            border-radius: 11px;
+            background: #f0f8f4;
+            color: #356c52;
+            font-size: 13px;
+            line-height: 1.55;
+        }.tenant-ui .booking-duration-summary strong {
+            color: #075d68;
+        }.tenant-ui .booking-input-note {
+            margin-top: 6px;
+            color: #849188;
+            font-size: 12px;
+            line-height: 1.4;
+        }.tenant-ui .booking-notice {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            padding: 15px;
+            border: 1px solid #d7e7df;
+            border-radius: 12px;
+            background: #f5faf7;
+            color: #4b6255;
+            font-size: 13px;
+            line-height: 1.6;
+        }.tenant-ui .booking-notice-icon {
+            flex-shrink: 0;
+            font-size: 18px;
+        }.tenant-ui .booking-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 26px;
+            flex-wrap: wrap;
+        }.tenant-ui .booking-btn {
+            min-height: 46px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 18px;
+            border: none;
+            border-radius: 11px;
+            font-size: 14px;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }.tenant-ui .booking-btn-secondary {
+            border: 1px solid #d6e2db;
+            background: #ffffff;
+            color: #506157;
+        }.tenant-ui .booking-btn-secondary:hover {
+            background: #f5f9fa;
+        }.tenant-ui .booking-btn-primary {
+            background: linear-gradient(
+                135deg,
+                #08798a,
+                #08798a
+            );
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(47, 125, 91, 0.18);
+        }.tenant-ui .booking-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 11px 25px rgba(47, 125, 91, 0.24);
+        }
+
+        @media (max-width: 900px) {.tenant-ui .booking-layout {
+                grid-template-columns: 1fr;
+            }.tenant-ui .booking-room-card {
+                position: static;
+            }
+        }
+
+        @media (max-width: 640px) {.tenant-ui .booking-page {
+                padding: 26px 14px 45px;
+            }.tenant-ui .booking-form-card {
+                padding: 22px 17px;
+            }.tenant-ui .booking-form-grid {
+                grid-template-columns: 1fr;
+            }.tenant-ui .booking-form-group.full {
+                grid-column: auto;
+            }.tenant-ui .booking-actions {
+                flex-direction: column;
+            }.tenant-ui .booking-btn {
+                width: 100%;
+            }
+        }.tenant-ui .booking-profile-note,.tenant-ui .booking-duration-summary,.tenant-ui .booking-notice {
+            font-size: 14px;
+        }.tenant-ui .booking-input-note {
+            font-size: 13px;
+        }.tenant-ui .booking-form-group label {
+            font-size: 14px;
+        }
+    

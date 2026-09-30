@@ -1,0 +1,222 @@
+/* Page layout retained from dang_nhap; shared components in components.css. */
+.tenant-ui * {
+            box-sizing: border-box;
+        }.tenant-ui {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #123338;
+            background: #f5f9fa;
+        }.tenant-ui .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 50px 20px;
+
+            background:
+                radial-gradient(
+                    circle at top left,
+                    rgba(79, 169, 130, 0.18) 0,
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at bottom right,
+                    rgba(47, 125, 91, 0.10) 0,
+                    transparent 32%
+                ),
+                #f5f9fa;
+        }.tenant-ui .auth-card {
+            width: 100%;
+            max-width: 450px;
+            background: #ffffff;
+            border: 1px solid #dbe7e8;
+            border-radius: 22px;
+            padding: 38px;
+            box-shadow: 0 18px 50px rgba(23, 35, 29, 0.10);
+        }.tenant-ui .auth-brand {
+            text-align: center;
+            margin-bottom: 28px;
+        }.tenant-ui .auth-logo {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            background: linear-gradient(
+                135deg,
+                #08798a,
+                #08798a
+            );
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 900;
+            box-shadow: 0 10px 25px rgba(47, 125, 91, 0.22);
+        }.tenant-ui .auth-brand h1 {
+            margin: 0;
+            color: #123338;
+            font-size: 28px;
+            font-weight: 800;
+        }.tenant-ui .auth-brand p {
+            margin: 8px 0 0;
+            color: #6d8083;
+            font-size: 14px;
+            line-height: 1.5;
+        }.tenant-ui .auth-return-notice {
+            margin-bottom: 20px;
+            padding: 12px 14px;
+            border: 1px solid #cae6d8;
+            border-radius: 11px;
+            background: #f0f8f4;
+            color: #2f6f52;
+            font-size: 13px;
+            line-height: 1.5;
+        }.tenant-ui .auth-message {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 12px 14px;
+            margin-bottom: 20px;
+            border-radius: 11px;
+            background: #fff1f1;
+            border: 1px solid #f2caca;
+            color: #b42318;
+            font-size: 14px;
+            line-height: 1.5;
+        }.tenant-ui .auth-message.success {
+            background: #edf8f2;
+            border-color: #c7e5d4;
+            color: #256346;
+        }.tenant-ui .auth-message.warning {
+            background: #fff8e8;
+            border-color: #ecd89d;
+            color: #8a6500;
+        }.tenant-ui .auth-message.info {
+            background: #eef5ff;
+            border-color: #c9dcf5;
+            color: #2f5f90;
+        }.tenant-ui .auth-message-icon {
+            flex-shrink: 0;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.55);
+            font-weight: 800;
+        }.tenant-ui .auth-field {
+            margin-bottom: 19px;
+        }.tenant-ui .auth-field label {
+            display: block;
+            margin-bottom: 8px;
+            color: #123338;
+            font-size: 14px;
+            font-weight: 700;
+        }.tenant-ui .auth-input-wrap {
+            position: relative;
+        }.tenant-ui .auth-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #89978f;
+            font-size: 17px;
+            pointer-events: none;
+        }.tenant-ui .auth-input {
+            width: 100%;
+            height: 50px;
+            padding: 0 45px;
+            border: 1px solid #dbe7e8;
+            border-radius: 11px;
+            outline: none;
+            background: #ffffff;
+            color: #123338;
+            font-size: 15px;
+            transition: 0.2s ease;
+        }.tenant-ui .auth-input::placeholder {
+            color: #a0aaa5;
+        }.tenant-ui .auth-input:focus {
+            border-color: #08798a;
+            box-shadow: 0 0 0 4px rgba(79, 169, 130, 0.12);
+        }.tenant-ui .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: #6d8083;
+            cursor: pointer;
+            font-size: 16px;
+        }.tenant-ui .password-toggle:hover {
+            background: #edf7f7;
+            color: #075d68;
+        }.tenant-ui .auth-submit {
+            width: 100%;
+            height: 50px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 11px;
+            background: linear-gradient(
+                135deg,
+                #08798a,
+                #08798a
+            );
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }.tenant-ui .auth-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(47, 125, 91, 0.20);
+        }.tenant-ui .auth-submit:active {
+            transform: translateY(0);
+        }.tenant-ui .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 25px 0 20px;
+            color: #89978f;
+            font-size: 12px;
+        }.tenant-ui .auth-divider::before,.tenant-ui .auth-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #dbe7e8;
+        }.tenant-ui .auth-register {
+            text-align: center;
+            color: #6d8083;
+            font-size: 14px;
+        }.tenant-ui .auth-register a {
+            color: #08798a;
+            font-weight: 800;
+            text-decoration: none;
+        }.tenant-ui .auth-register a:hover {
+            text-decoration: underline;
+        }.tenant-ui .auth-home {
+            display: block;
+            margin-top: 18px;
+            text-align: center;
+            color: #89978f;
+            font-size: 13px;
+            text-decoration: none;
+        }.tenant-ui .auth-home:hover {
+            color: #08798a;
+        }
+
+        @media (max-width: 520px) {.tenant-ui .auth-page {
+                padding: 30px 15px;
+            }.tenant-ui .auth-card {
+                padding: 30px 22px;
+                border-radius: 18px;
+            }.tenant-ui .auth-brand h1 {
+                font-size: 24px;
+            }
+        }
+    

@@ -1,0 +1,511 @@
+/* Final NDT MOTEL interface normalization layer.
+   Loaded after page CSS so active templates share one visual contract. */
+:root {
+    --ndt-ui-primary: #08798a;
+    --ndt-ui-primary-strong: #075d68;
+    --ndt-ui-primary-soft: #e8f4f5;
+    --ndt-ui-accent: #d3a83f;
+    --ndt-ui-text: #17383e;
+    --ndt-ui-heading: #102f35;
+    --ndt-ui-muted: #687d81;
+    --ndt-ui-line: #d8e4e6;
+    --ndt-ui-soft: #f3f8f9;
+    --ndt-ui-surface: #ffffff;
+    --ndt-ui-success: #157347;
+    --ndt-ui-success-soft: #e9f7ef;
+    --ndt-ui-warning: #8a6200;
+    --ndt-ui-warning-soft: #fff7df;
+    --ndt-ui-danger: #a63d3d;
+    --ndt-ui-danger-soft: #fff0f0;
+    --ndt-ui-info: #176b87;
+    --ndt-ui-info-soft: #eaf6fa;
+    --ndt-ui-radius-sm: 4px;
+    --ndt-ui-radius: 8px;
+    --ndt-ui-radius-lg: 12px;
+    --ndt-ui-shadow: 0 5px 18px rgba(20, 55, 62, .055);
+    --ndt-ui-shadow-raised: 0 14px 34px rgba(20, 55, 62, .10);
+    --ndt-ui-content: 1420px;
+    --ndt-ui-reading: 760px;
+    --ndt-ui-space-1: 4px;
+    --ndt-ui-space-2: 8px;
+    --ndt-ui-space-3: 12px;
+    --ndt-ui-space-4: 16px;
+    --ndt-ui-space-5: 24px;
+    --ndt-ui-space-6: 32px;
+    --ndt-ui-space-7: 48px;
+    --ndt-ui-space-8: 64px;
+    --ndt-ui-font: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.ndt-premium-ui {
+    color: var(--ndt-ui-text);
+    background: #f6f9fa;
+    font-family: var(--ndt-ui-font);
+}
+
+.ndt-premium-ui .site-main {
+    width: min(1420px, calc(100% - 48px));
+    padding-top: 30px;
+    padding-bottom: 56px;
+}
+
+.ndt-premium-ui .site-main > * {
+    min-width: 0;
+}
+
+.ndt-premium-ui .site-main :is(h1, h2, h3, h4) {
+    color: var(--ndt-ui-heading);
+    letter-spacing: 0;
+    text-wrap: balance;
+}
+
+.ndt-premium-ui :focus-visible {
+    outline: 3px solid rgba(8, 121, 138, .28);
+    outline-offset: 3px;
+}
+
+.ndt-premium-ui .ndt-breadcrumb,
+.ndt-premium-ui [class*="breadcrumb"] {
+    color: var(--ndt-ui-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.ndt-premium-ui .site-main h1 {
+    font-size: 30px;
+    line-height: 1.2;
+}
+
+.ndt-premium-ui .site-main h2 {
+    font-size: 20px;
+    line-height: 1.35;
+}
+
+/* Admin section banners use the dark brand surface, so their copy must not
+   inherit the default dark heading color from the normalization above. */
+.ndt-premium-ui .site-main :is(
+    .facility-hero, .rooms-header, .invoice-page-header, .repair-header,
+    .policy-header, .notification-header, .smart-hero, .access-header,
+    .mate-header, .face-header, .access-log-header, .audit-header,
+    .room-overview
+) {
+    color: #fff;
+}
+
+.ndt-premium-ui .site-main :is(
+    .facility-hero, .rooms-header, .invoice-page-header, .repair-header,
+    .policy-header, .notification-header, .smart-hero, .access-header,
+    .mate-header, .face-header, .access-log-header, .audit-header,
+    .room-overview
+) :is(h1, h2, h3, p) {
+    color: inherit;
+}
+
+.ndt-premium-ui .site-main :is(
+    .page-header, .booking-header, .booking-room-header, .contract-header,
+    .billing-header, .payment-header, .notify-hero, .face-hero,
+    .ghep-header, .policy-topbar, .welcome
+) {
+    border: 1px solid var(--ndt-ui-line) !important;
+    border-radius: var(--ndt-ui-radius) !important;
+    background: var(--ndt-ui-surface) !important;
+    background-image: none !important;
+    box-shadow: var(--ndt-ui-shadow) !important;
+    color: var(--ndt-ui-text) !important;
+}
+
+.ndt-premium-ui .site-main :is(
+    .page-header, .booking-header, .booking-room-header, .contract-header,
+    .billing-header, .payment-header, .notify-hero, .face-hero,
+    .ghep-header, .policy-topbar, .welcome
+) :is(h1, h2, h3, p, span, small, strong, a) {
+    color: inherit;
+}
+
+.ndt-premium-ui .site-main :is(
+    .card, .panel, .stat, .stat-card, .info-card, .form-card, .action-card,
+    .booking-card, .booking-table-card, .contract-card, .invoice-card,
+    .payment-card, .notify-panel, .policy-card, .policy-stat, .detail-card,
+    .repair-card, .repair-form-card, .repair-content-card, .repair-info-card,
+    .my-repair-table-card, .ghep-card, .face-card, .smart-card,
+    .access-card, .log-card, .edit-card, .password-card,
+    .tenant-admin, .tenant-detail
+) {
+    border-radius: var(--ndt-ui-radius) !important;
+    border-color: var(--ndt-ui-line) !important;
+    box-shadow: var(--ndt-ui-shadow) !important;
+}
+
+.ndt-premium-ui .site-main :is(input, select, textarea) {
+    max-width: 100%;
+    border-radius: 6px !important;
+    border-color: #c8d7da !important;
+    background: #fff;
+    color: var(--ndt-ui-text);
+}
+
+.ndt-premium-ui .site-main :is(input, select, textarea):focus {
+    border-color: var(--ndt-ui-primary) !important;
+    box-shadow: 0 0 0 3px rgba(8, 121, 138, .12) !important;
+    outline: 0;
+}
+
+.ndt-premium-ui .site-main :is(button, .btn, [class*="-btn"], [class*="btn-"]) {
+    border-radius: 6px !important;
+    letter-spacing: 0;
+}
+
+.ndt-premium-ui .site-main :is(button, .btn, [class*="-btn"], [class*="btn-"]):disabled,
+.ndt-premium-ui .site-main :is(button, .btn, [class*="-btn"], [class*="btn-"])[aria-disabled="true"] {
+    cursor: wait;
+    opacity: .58;
+}
+
+.ndt-premium-ui .site-main :is(
+    .btn-primary, .btn-success, .booking-btn-primary, .payment-btn-primary,
+    .action-primary, .invoice-action, .repair-submit-btn, .notify-btn-primary,
+    .my-repair-create-btn, .my-repair-filter-btn
+) {
+    background: var(--ndt-ui-primary) !important;
+    border-color: var(--ndt-ui-primary) !important;
+    color: #fff !important;
+}
+
+.ndt-premium-ui .site-main :is(
+    .btn-secondary, .btn-outline, .booking-btn-secondary, .payment-btn-secondary,
+    .action-secondary, .repair-back-btn, .repair-cancel-btn, .notification-back
+) {
+    background: #fff !important;
+    border-color: #bdced1 !important;
+    color: var(--ndt-ui-primary-strong) !important;
+}
+
+.ndt-premium-ui .site-main :is(.btn-danger, .danger, [class*="danger-btn"]) {
+    background: var(--ndt-ui-danger) !important;
+    border-color: var(--ndt-ui-danger) !important;
+    color: #fff !important;
+}
+
+.ndt-premium-ui .site-main :is(
+    .badge, .status, .status-badge, [class*="status-badge"],
+    .invoice-status, .payment-status, .my-repair-status, .policy-status
+) {
+    border-radius: 999px !important;
+    letter-spacing: 0;
+    font-weight: 700;
+}
+
+.ndt-premium-ui .site-main :is(
+    .status-pending, .status-cho, .status-review, .invoice-status-review,
+    [class*="cho-xac-nhan"], [class*="cho_duyet"]
+) {
+    background: var(--ndt-ui-warning-soft) !important;
+    border-color: #ead59d !important;
+    color: var(--ndt-ui-warning) !important;
+}
+
+.ndt-premium-ui .site-main :is(
+    .status-success, .status-paid, .invoice-status-paid,
+    [class*="da-thanh-toan"], [class*="da_duyet"]
+) {
+    background: var(--ndt-ui-success-soft) !important;
+    border-color: #bde1ca !important;
+    color: var(--ndt-ui-success) !important;
+}
+
+.ndt-premium-ui .site-main :is(
+    .status-danger, .status-rejected, .invoice-status-cancelled,
+    [class*="rejected"], [class*="tu-choi"], [class*="tu_choi"]
+) {
+    background: var(--ndt-ui-danger-soft) !important;
+    border-color: #efcaca !important;
+    color: var(--ndt-ui-danger) !important;
+}
+
+.ndt-premium-ui .site-main table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--ndt-ui-surface);
+    font-size: 13px;
+}
+
+.ndt-premium-ui .site-main th {
+    padding: 12px 13px !important;
+    background: #edf5f6 !important;
+    color: #31565d !important;
+    font-size: 12px;
+    font-weight: 750;
+    text-align: left;
+}
+
+.ndt-premium-ui .site-main td {
+    padding: 13px !important;
+    border-bottom: 1px solid var(--ndt-ui-line) !important;
+    vertical-align: middle;
+}
+
+.ndt-premium-ui .site-main tbody tr:hover {
+    background: #f7fbfb;
+}
+
+.ndt-premium-ui .site-main :is(
+    .empty, .empty-state, .billing-empty, .notification-empty,
+    .my-repair-empty, .ghep-empty, .no-data
+) {
+    padding: 34px 20px !important;
+    border: 1px dashed #bfcfd2 !important;
+    border-radius: var(--ndt-ui-radius) !important;
+    background: var(--ndt-ui-soft) !important;
+    color: var(--ndt-ui-muted) !important;
+    text-align: center;
+}
+
+.messages-container {
+    width: min(1420px, calc(100% - 48px));
+}
+
+.message-alert {
+    border-radius: var(--ndt-ui-radius) !important;
+    border: 1px solid var(--ndt-ui-line);
+    box-shadow: var(--ndt-ui-shadow);
+}
+
+.message-alert.success { background: var(--ndt-ui-success-soft); color: var(--ndt-ui-success); }
+.message-alert.warning { background: var(--ndt-ui-warning-soft); color: var(--ndt-ui-warning); }
+.message-alert.error { background: var(--ndt-ui-danger-soft); color: var(--ndt-ui-danger); }
+.message-alert.info { background: var(--ndt-ui-info-soft); color: var(--ndt-ui-info); }
+
+.tenant-ui {
+    max-width: 1360px;
+    padding-top: 0;
+}
+
+.tenant-ui .tenant-navigation-shell > .tenant-navigation {
+    display: flex;
+}
+
+.tenant-ui .tenant-navigation {
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid var(--ndt-ui-line);
+    border-radius: var(--ndt-ui-radius);
+    background: var(--ndt-ui-surface);
+    box-shadow: var(--ndt-ui-shadow);
+}
+
+.tenant-ui .tenant-navigation__group {
+    display: contents;
+}
+
+.tenant-ui .tenant-navigation__group:last-child {
+    border-right: 0;
+}
+
+.tenant-ui .tenant-navigation__group:has(a[aria-current="page"]) {
+    background: transparent;
+}
+
+.tenant-ui .tenant-navigation__group:has(a[aria-current="page"])::after {
+    content: none;
+}
+
+.tenant-ui .tenant-navigation__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.tenant-ui .tenant-navigation a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 8px 13px;
+    border: 1px solid var(--ndt-ui-line);
+    border-radius: 999px;
+    background: var(--ndt-ui-surface);
+    color: var(--ndt-ui-text);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.25;
+    text-align: center;
+    text-decoration: none;
+}
+
+.tenant-ui .tenant-navigation a:hover {
+    background: rgba(7, 133, 154, .07);
+    color: var(--ndt-ui-primary-strong);
+}
+
+.tenant-ui .tenant-navigation a[aria-current="page"] {
+    border-color: var(--ndt-ui-primary);
+    background: var(--ndt-ui-primary);
+    color: #fff;
+    font-weight: 850;
+}
+
+.tenant-ui .tenant-navigation a[aria-current="page"]::before {
+    content: none;
+}
+
+@media (max-width: 900px) {
+    .ndt-premium-ui .site-main,
+    .messages-container {
+        width: min(100% - 28px, 1420px);
+    }
+
+    .ndt-premium-ui .site-main :is(
+        .page-header, .booking-header, .billing-header, .payment-header,
+        .contract-header, .policy-topbar, .tenant-admin__head
+    ) {
+        align-items: stretch !important;
+        flex-direction: column !important;
+    }
+
+    .ndt-premium-ui .site-main :is(
+        .grid, .stats, .stats-grid, .info-grid, .form-grid, .detail-grid,
+        .booking-layout, .payment-layout, .contract-info-grid,
+        .facility-stats, .facility-info-grid, .tenant-facts
+    ) {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .ndt-premium-ui .site-main,
+    .messages-container {
+        width: min(100% - 20px, 1420px);
+    }
+
+    .ndt-premium-ui .site-main {
+        padding-top: 18px;
+        padding-bottom: 36px;
+    }
+
+    .ndt-premium-ui .site-main h1 { font-size: 25px; }
+    .ndt-premium-ui .site-main h2 { font-size: 18px; }
+
+    .ndt-premium-ui .site-main :is(form, .filter-form, .search-form, .action-row, .button-row) {
+        max-width: 100%;
+    }
+
+    .ndt-premium-ui .site-main :is(button, .btn, [class*="-btn"], [class*="btn-"]) {
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    .ndt-premium-ui .site-main table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .tenant-ui .tenant-navigation-shell { margin-bottom: 14px; }
+
+    .tenant-ui .tenant-navigation-shell > summary {
+        min-height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 8px 12px;
+        border: 1px solid var(--ndt-ui-line);
+        border-radius: var(--ndt-ui-radius);
+        background: var(--ndt-ui-surface);
+        box-shadow: var(--ndt-ui-shadow);
+        color: var(--ndt-ui-text);
+        cursor: pointer;
+        list-style: none;
+    }
+
+    .tenant-ui .tenant-navigation-shell > summary::-webkit-details-marker { display: none; }
+    .tenant-ui .tenant-navigation-shell > summary strong,
+    .tenant-ui .tenant-navigation-shell > summary small { display: block; }
+    .tenant-ui .tenant-navigation-shell > summary strong { font-size: 13px; line-height: 1.3; }
+    .tenant-ui .tenant-navigation-shell > summary small { margin-top: 1px; color: var(--ndt-ui-muted); font-size: 10px; line-height: 1.3; }
+
+    .tenant-ui .tenant-navigation-shell__toggle {
+        width: 9px;
+        height: 9px;
+        flex: 0 0 9px;
+        border-right: 2px solid var(--ndt-ui-primary);
+        border-bottom: 2px solid var(--ndt-ui-primary);
+        transform: rotate(45deg) translateY(-2px);
+        transition: transform .15s ease;
+    }
+
+    .tenant-ui .tenant-navigation-shell[open] .tenant-navigation-shell__toggle { transform: rotate(225deg) translate(-2px, -2px); }
+    .tenant-ui .tenant-navigation-shell:not([open]) > .tenant-navigation { display: none; }
+
+    .tenant-ui .tenant-navigation-shell[open] > .tenant-navigation {
+        display: block;
+        padding: 0;
+        margin-top: 7px;
+        overflow: hidden;
+    }
+
+    .tenant-ui .tenant-navigation__group {
+        display: block;
+        min-height: 0;
+        padding: 9px 11px;
+        border-right: 0;
+        border-bottom: 1px solid var(--ndt-ui-line);
+    }
+
+    .tenant-ui .tenant-navigation__group:last-child { border-right: 0; border-bottom: 0; }
+    .tenant-ui .tenant-navigation__group:has(a[aria-current="page"]) { border-color: var(--ndt-ui-line); }
+    .tenant-ui .tenant-navigation__label {
+        position: static;
+        display: block;
+        width: auto;
+        height: auto;
+        min-height: 0;
+        margin: 0 0 2px;
+        overflow: visible;
+        clip: auto;
+        white-space: normal;
+        color: var(--ndt-ui-muted);
+        font-size: 10px;
+        font-weight: 800;
+        line-height: 1.35;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+    .tenant-ui .tenant-navigation a {
+        display: inline-flex;
+        margin: 3px 7px 3px 0;
+        min-height: 36px;
+        padding: 7px 10px;
+        border-radius: 8px;
+    }
+
+    body:has(.tenant-ui) .ndt-public-footer .footer-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        padding: 24px 16px;
+    }
+
+    body:has(.tenant-ui) .ndt-public-footer .footer-brand { grid-column: 1 / -1; }
+    body:has(.tenant-ui) .ndt-public-footer .footer-brand p { margin-top: 8px; font-size: 12px; line-height: 1.55; }
+    body:has(.tenant-ui) .ndt-public-footer .footer-column { gap: 1px; }
+    body:has(.tenant-ui) .ndt-public-footer .footer-column h4 { margin-bottom: 5px; font-size: 13px; }
+    body:has(.tenant-ui) .ndt-public-footer .footer-column a,
+    body:has(.tenant-ui) .ndt-public-footer .footer-column > span { min-height: 32px; font-size: 12px; line-height: 1.35; }
+    body:has(.tenant-ui) .ndt-public-footer .footer-bottom { padding: 14px 16px; font-size: 11px; }
+}
+
+@media (max-width: 520px) {
+    .tenant-ui .page .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}

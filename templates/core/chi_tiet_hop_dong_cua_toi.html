@@ -1,0 +1,266 @@
+{% extends "core/tenant_base.html" %}
+{% load static bo_loc %}
+
+{% block title %}{{ hop_dong.so_hop_dong }} - NDT MOTEL{% endblock %}
+{% block page_title %}Chi tiết hợp đồng{% endblock %}
+
+{% block tenant_styles %}
+<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
+<link rel="stylesheet" href="{% static 'css/contract_management.css' %}">
+{% endblock %}
+
+{% block tenant_content %}
+<div
+    class="contract-management contract-management--tenant ndt-foundation"
+    data-contract-screen="tenant-detail"
+>
+    {% url 'hop_dong_cua_toi' as contract_list_url %}
+    {% include 'core/foundation/page_header.html' with breadcrumb='Tài khoản / Hợp đồng' title=hop_dong.so_hop_dong subtitle='Chi tiết thời hạn, phòng thuê, tài chính và gia hạn hợp đồng.' action_url=contract_list_url action_label='Về danh sách' %}
+
+    <section class="ndt-surface contract-overview" aria-labelledby="tenant-contract-overview">
+        <div class="contract-overview__main">
+            <div>
+                <span class="contract-eyebrow">Hợp đồng của tôi</span>
+                <h2 id="tenant-contract-overview">Phòng {{ hop_dong.dat_phong.phong.so_phong }}</h2>
+                <p>{{ hop_dong.dat_phong.phong.co_so.ten_co_so|default:'NDT MOTEL' }}</p>
+            </div>
+            <div class="contract-overview__badges">
+                {% include 'core/partials/contract_status_badge.html' with contract=hop_dong %}
+            </div>
+        </div>
+
+        <div class="contract-overview__facts">
+            <div>
+                <span>Bắt đầu</span>
+                <strong>{{ hop_dong.ngay_bat_dau|date:'d/m/Y' }}</strong>
+            </div>
+            <div>
+                <span>Kết thúc</span>
+                <strong>{{ hop_dong.ngay_ket_thuc|date:'d/m/Y' }}</strong>
+            </div>
+            <div>
+                <span>Còn lại</span>
+                <strong>
+                    {% if so_ngay_con_lai < 0 %}
+                        Đã hết hạn
+                    {% elif so_ngay_con_lai == 0 %}
+                        Hết hạn hôm nay
+                    {% else %}
+                        {{ so_ngay_con_lai }} ngày
+                    {% endif %}
+                </strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="contract-priority-grid" aria-label="Việc cần chú ý">
+        <section class="ndt-surface contract-next-step" aria-labelledby="tenant-renewal">
+            <span class="contract-eyebrow">Bước tiếp theo</span>
+            <h2 id="tenant-renewal">Gia hạn hợp đồng</h2>
+            <dl class="contract-facts contract-facts--compact">
+                <div>
+                    <dt>Kết thúc hiện tại</dt>
+                    <dd>{{ hop_dong.ngay_ket_thuc|date:'d/m/Y' }}</dd>
+                </div>
+                <div>
+                    <dt>Trạng thái xử lý</dt>
+                    <dd>
+                        {% if yeu_cau_gia_han_dang_cho %}
+                            Chờ quản trị xử lý
+                        {% elif co_the_gia_han %}
+                            Có thể gửi yêu cầu gia hạn
+                        {% elif hop_dong.trang_thai == 'cho_hieu_luc' %}
+                            Hợp đồng chưa bắt đầu
+                        {% elif hop_dong.trang_thai == 'da_het_han' %}
+                            Hợp đồng đã hết hạn
+                        {% elif hop_dong.trang_thai == 'da_huy' %}
+                            Hợp đồng đã hủy
+                        {% else %}
+                            Chưa đến thời gian gia hạn
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+
+            {% if yeu_cau_gia_han_dang_cho %}
+            <div class="contract-renewal">
+                <div>{% include 'core/partials/renewal_status_badge.html' with renewal=yeu_cau_gia_han_dang_cho %}</div>
+                <strong>Yêu cầu đang chờ quản trị xử lý</strong>
+                <span>
+                    {{ yeu_cau_gia_han_dang_cho.so_thang_gia_han }} tháng
+                    · gửi {{ yeu_cau_gia_han_dang_cho.ngay_tao|date:'d/m/Y H:i' }}
+                    · đề xuất đến {{ yeu_cau_gia_han_dang_cho.ngay_ket_thuc_de_xuat|date:'d/m/Y' }}
+                </span>
+                {% if yeu_cau_gia_han_dang_cho.ly_do %}
+                <p>{{ yeu_cau_gia_han_dang_cho.ly_do }}</p>
+                {% endif %}
+            </div>
+            <form
+                class="contract-action-stack"
+                method="post"
+                action="{% url 'huy_yeu_cau_gia_han' yeu_cau_gia_han_dang_cho.id %}"
+                data-contract-confirm
+                data-confirm-danger="true"
+                data-confirm-title="Hủy yêu cầu gia hạn"
+                data-confirm-message="Yêu cầu gia hạn đang chờ duyệt sẽ được hủy."
+            >
+                {% csrf_token %}
+                <button type="submit" class="ndt-button ndt-button--danger">
+                    Hủy yêu cầu gia hạn
+                </button>
+            </form>
+            {% elif co_the_gia_han %}
+            <form
+                class="contract-renewal-form"
+                method="post"
+                action="{% url 'gui_yeu_cau_gia_han' hop_dong.id %}"
+            >
+                {% csrf_token %}
+                <div class="ndt-field">
+                    <label class="ndt-label" for="so_thang_gia_han">
+                        Số tháng muốn gia hạn <span class="ndt-required">*</span>
+                    </label>
+                    <input
+                        class="ndt-control"
+                        id="so_thang_gia_han"
+                        name="so_thang_gia_han"
+                        type="number"
+                        min="1"
+                        max="36"
+                        required
+                    >
+                </div>
+                <div class="ndt-field">
+                    <label class="ndt-label" for="ly_do">Lý do / ghi chú</label>
+                    <textarea
+                        class="ndt-control"
+                        id="ly_do"
+                        name="ly_do"
+                        maxlength="1000"
+                        rows="3"
+                    ></textarea>
+                </div>
+                <button type="submit" class="ndt-button ndt-button--primary">
+                    Gửi yêu cầu gia hạn
+                </button>
+            </form>
+            {% else %}
+            <p class="contract-muted">
+                Hợp đồng chưa đủ điều kiện gửi yêu cầu gia hạn ở trạng thái hiện tại.
+            </p>
+            {% endif %}
+
+            {% if lich_su_gia_han %}
+            <div class="contract-history" aria-label="Lịch sử gia hạn">
+                {% for yc in lich_su_gia_han %}
+                <div>
+                    <strong>{% include 'core/partials/renewal_status_badge.html' with renewal=yc %}</strong>
+                    <span>{{ yc.so_thang_gia_han }} tháng · {{ yc.ngay_tao|date:'d/m/Y H:i' }}</span>
+                    {% if yc.trang_thai == 'tu_choi' and yc.ly_do_tu_choi %}
+                    <span>Lý do: {{ yc.ly_do_tu_choi }}</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="ndt-surface contract-action-card" aria-labelledby="tenant-contract-actions">
+            <span class="contract-eyebrow">Thao tác</span>
+            <h2 id="tenant-contract-actions">Hợp đồng và thanh toán</h2>
+            <div class="contract-action-stack">
+                <a class="ndt-button ndt-button--primary" href="{% url 'hoa_don_cua_toi' %}">
+                    Hóa đơn và thanh toán
+                </a>
+                <a class="ndt-button ndt-button--secondary" href="{% url 'xuat_hop_dong_pdf' hop_dong.id %}">
+                    Tải PDF
+                </a>
+                <button class="ndt-button ndt-button--ghost" type="button" onclick="window.print()">
+                    In trang
+                </button>
+            </div>
+        </section>
+    </section>
+
+    <div class="contract-detail-grid contract-detail-grid--single">
+        <main class="contract-detail-main">
+            <section class="ndt-surface" aria-labelledby="tenant-contract-info">
+                <h2 id="tenant-contract-info">Thông tin hợp đồng</h2>
+                <dl class="contract-facts">
+                    <div>
+                        <dt>Số hợp đồng</dt>
+                        <dd>{{ hop_dong.so_hop_dong }}</dd>
+                    </div>
+                    <div>
+                        <dt>Người thuê</dt>
+                        <dd>{{ nguoi_thue.ho_ten }}</dd>
+                    </div>
+                    <div>
+                        <dt>Phòng / cơ sở</dt>
+                        <dd>
+                            Phòng {{ hop_dong.dat_phong.phong.so_phong }}
+                            · {{ hop_dong.dat_phong.phong.co_so.ten_co_so|default:'NDT MOTEL' }}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>Số người theo hợp đồng</dt>
+                        <dd>{{ hop_dong.so_nguoi_o }} người</dd>
+                    </div>
+                    <div>
+                        <dt>Cho phép ghép</dt>
+                        <dd>{{ hop_dong.cho_phep_ghep|yesno:'Có,Không' }}</dd>
+                    </div>
+                    <div>
+                        <dt>Ngày thanh toán</dt>
+                        <dd>Ngày {{ hop_dong.ngay_thanh_toan_hang_thang }} hằng tháng</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="ndt-surface" aria-labelledby="tenant-contract-money">
+                <h2 id="tenant-contract-money">Tài chính</h2>
+                <dl class="contract-facts">
+                    <div>
+                        <dt>Tiền thuê hằng tháng</dt>
+                        <dd>{{ hop_dong.tien_thue_thang|vnd }} VNĐ</dd>
+                    </div>
+                    <div>
+                        <dt>Tiền cọc</dt>
+                        <dd>{{ hop_dong.tien_coc|vnd }} VNĐ</dd>
+                    </div>
+                    <div>
+                        <dt>Phương thức</dt>
+                        <dd>{{ hop_dong.get_phuong_thuc_thanh_toan_display|default:hop_dong.phuong_thuc_thanh_toan }}</dd>
+                    </div>
+                    <div>
+                        <dt>Phạt trễ hạn</dt>
+                        <dd>{{ hop_dong.tien_phat_tre_han|vnd }} VNĐ</dd>
+                    </div>
+                </dl>
+            </section>
+
+            {% if hop_dong.dieu_khoan or hop_dong.ghi_chu %}
+            <section class="ndt-surface" aria-labelledby="tenant-contract-terms">
+                <h2 id="tenant-contract-terms">Điều khoản và ghi chú</h2>
+                {% if hop_dong.dieu_khoan %}
+                <div class="contract-prose">{{ hop_dong.dieu_khoan|linebreaks }}</div>
+                {% endif %}
+                {% if hop_dong.ghi_chu %}
+                <div class="contract-note-box">
+                    <strong>Ghi chú</strong>
+                    <p>{{ hop_dong.ghi_chu|linebreaksbr }}</p>
+                </div>
+                {% endif %}
+            </section>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+{% include 'core/foundation/dialog_root.html' %}
+<script src="{% static 'js/foundation/dialog.js' %}" defer></script>
+<script src="{% static 'js/contract_management.js' %}" defer></script>
+{% endblock %}

@@ -1,0 +1,1324 @@
+{% extends "core/tenant_base.html" %}
+{% load static %}
+
+{% block title %}Đăng ký nhận diện — NDT MOTEL{% endblock %}
+{% block page_title %}Đăng ký Face ID{% endblock %}
+
+{% block tenant_styles %}
+<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+<link rel="stylesheet" href="{% static 'css/smart_room.css' %}">
+<link rel="stylesheet" href="{% static 'css/tenant/chi_tiet_face_profile.css' %}">
+<style>
+.face-profile-v4{
+    --brand:#08798a;
+    --deep:#075d68;
+    --ink:#123338;
+    --muted:#6d8083;
+    --line:#dbe7e8;
+    --soft:#edf7f7;
+    --ok:#18734d;
+    --warn:#8a6419;
+    --danger:#a44444;
+    max-width:1160px;
+    margin:0 auto;
+    padding:6px 0 46px;
+    color:var(--ink);
+    font-size:12px;
+}
+
+.face-profile-v4 *{box-sizing:border-box}
+
+.fp4-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    margin-bottom:12px;
+}
+
+.fp4-back{
+    color:var(--deep);
+    font-size:12px;
+    font-weight:800;
+    text-decoration:none;
+}
+
+.fp4-top-label{
+    color:#829397;
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:.09em;
+}
+
+/* Completely new split identity header */
+.fp4-identity{
+    display:grid;
+    grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);
+    overflow:hidden;
+    margin-bottom:14px;
+    border:1px solid var(--line);
+    border-radius:18px;
+    background:#fff;
+    box-shadow:0 10px 30px rgba(18,51,56,.06);
+}
+
+.fp4-identity-main{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:22px;
+}
+
+.fp4-avatar{
+    width:82px;
+    height:82px;
+    flex:0 0 82px;
+    overflow:hidden;
+    display:grid;
+    place-items:center;
+    border-radius:22px;
+    background:var(--soft);
+    color:var(--brand);
+    font-size:28px;
+    font-weight:900;
+}
+
+.fp4-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.fp4-kicker{
+    margin-bottom:5px;
+    color:var(--brand);
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:.08em;
+}
+
+.fp4-name{
+    margin:0;
+    color:var(--ink);
+    font-size:24px;
+    line-height:1.15;
+    font-weight:900;
+}
+
+.fp4-role{
+    margin-top:5px;
+    color:var(--muted);
+    font-size:12px;
+}
+
+.fp4-state-panel{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:20px 22px;
+    border-left:1px solid rgba(255,255,255,.12);
+    background:linear-gradient(135deg,var(--deep),var(--brand));
+    color:#fff;
+}
+
+.fp4-state-label{
+    color:rgba(255,255,255,.68);
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:.08em;
+}
+
+.fp4-state{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:6px;
+    font-size:18px;
+    font-weight:900;
+}
+
+.fp4-state-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:#78e1ad;
+    box-shadow:0 0 0 4px rgba(120,225,173,.14);
+}
+
+.fp4-state-note{
+    margin-top:6px;
+    color:rgba(255,255,255,.76);
+    font-size:11px;
+    line-height:1.45;
+}
+
+/* Facts as a horizontal control strip */
+.fp4-facts{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    margin-bottom:14px;
+    border:1px solid var(--line);
+    border-radius:13px;
+    background:#fff;
+}
+
+.fp4-fact{
+    min-height:76px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:12px 15px;
+    border-right:1px solid var(--line);
+}
+
+.fp4-fact:last-child{border-right:0}
+
+.fp4-fact span{
+    margin-bottom:4px;
+    color:var(--muted);
+    font-size:10px;
+    font-weight:800;
+}
+
+.fp4-fact strong{
+    color:var(--ink);
+    font-size:13px;
+    font-weight:900;
+}
+
+/* Main content: operational area + slim rail */
+.fp4-layout{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 300px;
+    gap:14px;
+    align-items:start;
+}
+
+.fp4-card{
+    overflow:hidden;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:#fff;
+}
+
+.fp4-card + .fp4-card{margin-top:14px}
+
+.fp4-card-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    padding:14px 16px;
+    border-bottom:1px solid var(--line);
+}
+
+.fp4-card-head h2{
+    margin:0;
+    font-size:15px;
+    font-weight:900;
+}
+
+.fp4-card-head p{
+    margin:3px 0 0;
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.45;
+}
+
+.fp4-card-body{padding:16px}
+
+.fp4-badge{
+    padding:5px 8px;
+    border-radius:999px;
+    background:#e7f7ef;
+    color:var(--ok);
+    font-size:10px;
+    font-weight:900;
+    white-space:nowrap;
+}
+
+/* Verified callout */
+.fp4-access{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:14px;
+    border-radius:11px;
+    background:#f7fafb;
+}
+
+.fp4-access-icon{
+    width:38px;
+    height:38px;
+    flex:0 0 38px;
+    display:grid;
+    place-items:center;
+    border-radius:10px;
+    background:var(--soft);
+    color:var(--brand);
+    font-size:17px;
+    font-weight:900;
+}
+
+.fp4-access h3{
+    margin:0 0 4px;
+    font-size:13px;
+    font-weight:900;
+}
+
+.fp4-access p{
+    margin:0;
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.5;
+}
+
+.fp4-warning{
+    margin-top:10px;
+    padding:11px 12px;
+    border-left:3px solid #d5a637;
+    border-radius:8px;
+    background:#fff9e9;
+    color:#765b1b;
+    font-size:11px;
+    line-height:1.5;
+}
+
+.fp4-ready{
+    margin-top:10px;
+    padding:11px 12px;
+    border-left:3px solid #39a875;
+    border-radius:8px;
+    background:#eef9f3;
+    color:#176b47;
+    font-size:11px;
+    line-height:1.5;
+}
+
+/* Camera preserved, but new frame */
+.fp4-camera{
+    position:relative;
+    overflow:hidden;
+    width:100%;
+    aspect-ratio:16/9;
+    min-height:320px;
+    border-radius:12px;
+    background:#102f35;
+}
+
+.fp4-camera video,.fp4-camera .snapshot{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.fp4-camera video{transform:scaleX(-1)}
+.fp4-camera .snapshot{position:absolute;inset:0;display:none}
+.fp4-camera.preview-mode .snapshot{display:block}
+.fp4-camera.preview-mode video{visibility:hidden}
+
+.camera-empty{
+    position:absolute;
+    inset:0;
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    color:rgba(255,255,255,.72);
+}
+.camera-empty strong{color:#fff;font-size:13px}
+.camera-empty span{font-size:11px}
+.camera-empty-icon{font-size:28px}
+
+.face-guide{
+    position:absolute;
+    z-index:3;
+    top:50%;
+    left:50%;
+    width:42%;
+    height:70%;
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+}
+
+.guide-corner{
+    position:absolute;
+    width:30px;
+    height:30px;
+    border-color:rgba(255,255,255,.88);
+    border-style:solid;
+}
+.guide-corner.tl{top:0;left:0;border-width:2px 0 0 2px}
+.guide-corner.tr{top:0;right:0;border-width:2px 2px 0 0}
+.guide-corner.bl{bottom:0;left:0;border-width:0 0 2px 2px}
+.guide-corner.br{right:0;bottom:0;border-width:0 2px 2px 0}
+.guide-axis-h{position:absolute;top:50%;left:14%;right:14%;height:1px;background:rgba(255,255,255,.18)}
+.guide-label{
+    position:absolute;
+    z-index:4;
+    left:50%;
+    bottom:14px;
+    transform:translateX(-50%);
+    padding:5px 8px;
+    border-radius:999px;
+    background:rgba(5,35,40,.68);
+    color:#fff;
+    font-size:10px;
+    white-space:nowrap;
+}
+.camera-badge{
+    position:absolute;
+    z-index:4;
+    top:12px;
+    left:12px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 8px;
+    border-radius:999px;
+    background:rgba(5,35,40,.68);
+    color:#fff;
+    font-size:10px;
+}
+.camera-dot{width:7px;height:7px;border-radius:50%;background:#8fa2a5}
+.camera-on .camera-dot{background:#62d99f}
+
+.steps{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:7px;
+    margin-top:10px;
+}
+.step{
+    padding:8px 5px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fafcfc;
+    color:#819095;
+    text-align:center;
+    font-size:10px;
+    font-weight:800;
+}
+.step.active{border-color:#8cc6ce;background:var(--soft);color:var(--deep)}
+.step.done{border-color:#cce9da;background:#edf9f3;color:var(--ok)}
+
+.camera-status{
+    margin-top:10px;
+    padding:10px 11px;
+    border-radius:8px;
+    background:#f5f8f8;
+    color:#60757a;
+    font-size:11px;
+    line-height:1.5;
+}
+.camera-status.success{background:#edf9f3;color:var(--ok)}
+.camera-status.error{background:#fff2f2;color:var(--danger)}
+.camera-status.processing{background:var(--soft);color:var(--deep)}
+
+.camera-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    margin-top:10px;
+}
+
+.face-profile-v4 .btn{
+    min-height:40px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 12px;
+    border:1px solid transparent;
+    border-radius:8px;
+    font:inherit;
+    font-size:11px;
+    font-weight:900;
+    cursor:pointer;
+}
+.face-profile-v4 .btn:disabled{opacity:.45;cursor:not-allowed}
+.face-profile-v4 .btn-primary{background:var(--brand);color:#fff}
+.face-profile-v4 .btn-blue{border-color:#89c4cc;background:var(--soft);color:var(--deep)}
+.face-profile-v4 .btn-secondary{border-color:#d5e0e2;background:#fff;color:#5d7075}
+.face-profile-v4 .btn-danger-soft{border-color:#efcece;background:#fff2f2;color:var(--danger)}
+.helper-line{display:flex;gap:6px;margin-top:8px;color:var(--muted);font-size:10px}
+
+/* Admin controls as a settings panel, not old cards */
+.fp4-admin-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 260px;
+    gap:12px;
+}
+
+.fp4-settings{
+    padding:14px;
+    border:1px solid var(--line);
+    border-radius:11px;
+    background:#fafcfc;
+}
+
+.fp4-settings h3{
+    margin:0 0 3px;
+    font-size:13px;
+    font-weight:900;
+}
+
+.fp4-settings > p{
+    margin:0 0 12px;
+    color:var(--muted);
+    font-size:11px;
+}
+
+.form-group{margin-bottom:10px}
+.form-group label{display:block;margin-bottom:5px;font-size:11px;font-weight:800}
+.form-control{
+    width:100%;
+    min-height:40px;
+    padding:0 10px;
+    border:1px solid #cfdee1;
+    border-radius:8px;
+    background:#fff;
+    color:var(--ink);
+    font:inherit;
+    font-size:11px;
+}
+textarea.form-control{min-height:82px;padding-top:8px;resize:vertical}
+
+.fp4-danger{
+    padding:14px;
+    border:1px solid #efdada;
+    border-radius:11px;
+    background:#fffafa;
+}
+.fp4-danger h3{margin:0 0 5px;color:#8f3f3f;font-size:13px}
+.fp4-danger p{margin:0 0 12px;color:#806767;font-size:11px;line-height:1.5}
+
+/* Right rail */
+.fp4-rail-title{
+    margin:0 0 9px;
+    color:#829397;
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:.08em;
+}
+
+.fp4-guide{
+    display:grid;
+    gap:7px;
+}
+
+.fp4-guide-item{
+    display:grid;
+    grid-template-columns:25px 1fr;
+    gap:9px;
+    align-items:start;
+    padding:9px 0;
+    border-bottom:1px solid #edf1f2;
+}
+
+.fp4-guide-item:last-child{border-bottom:0}
+
+.fp4-guide-num{
+    width:25px;
+    height:25px;
+    display:grid;
+    place-items:center;
+    border-radius:7px;
+    background:var(--soft);
+    color:var(--brand);
+    font-size:10px;
+    font-weight:900;
+}
+
+.fp4-guide-item strong{
+    display:block;
+    margin-bottom:2px;
+    font-size:11px;
+}
+
+.fp4-guide-item span{
+    color:var(--muted);
+    font-size:10px;
+    line-height:1.45;
+}
+
+@media(max-width:900px){
+    .fp4-identity{grid-template-columns:1fr}
+    .fp4-state-panel{border-left:0}
+    .fp4-layout{grid-template-columns:1fr}
+    .fp4-facts{grid-template-columns:repeat(2,1fr)}
+    .fp4-fact:nth-child(2){border-right:0}
+    .fp4-fact:nth-child(-n+2){border-bottom:1px solid var(--line)}
+}
+
+@media(max-width:700px){
+    .fp4-identity-main{align-items:flex-start;padding:17px}
+    .fp4-avatar{width:64px;height:64px;flex-basis:64px;border-radius:17px}
+    .fp4-name{font-size:20px}
+    .fp4-facts{grid-template-columns:1fr}
+    .fp4-fact{border-right:0;border-bottom:1px solid var(--line)}
+    .fp4-fact:last-child{border-bottom:0}
+    .fp4-admin-grid{grid-template-columns:1fr}
+    .steps{grid-template-columns:repeat(2,1fr)}
+}
+
+@media(max-width:500px){
+    .fp4-top{align-items:flex-start;flex-direction:column-reverse}
+    .fp4-identity-main{display:grid;grid-template-columns:58px 1fr}
+    .fp4-avatar{width:58px;height:58px;flex-basis:58px}
+    .camera-actions{display:grid;grid-template-columns:1fr 1fr}
+}
+</style>
+<link rel="stylesheet" href="{% static 'css/bill_smart_full_refresh.css' %}">
+{% endblock %}
+{% block tenant_content %}
+
+
+
+<div class="face-profile-v4">
+
+    <div class="fp4-top">
+        {% if la_admin_smart_room %}
+            <a href="{% url 'quan_ly_face_profile' %}" class="fp4-back">← Quản lý hồ sơ nhận diện</a>
+        {% else %}
+            <a href="{% url 'tai_khoan' %}" class="fp4-back">← Tài khoản của tôi</a>
+        {% endif %}
+        <div class="fp4-top-label">SMART ROOM · FACE ID PROFILE</div>
+    </div>
+
+    <section class="fp4-identity">
+        <div class="fp4-identity-main">
+            <div class="fp4-avatar">
+                {% if fp.anh_dai_dien %}
+                    <img src="{{ fp.anh_dai_dien.url }}" alt="Ảnh khuôn mặt">
+                {% else %}
+                    ◉
+                {% endif %}
+            </div>
+
+            <div>
+                <div class="fp4-kicker">HỒ SƠ NHẬN DIỆN</div>
+                <h1 class="fp4-name">
+                    {% if fp.nguoi_thue %}
+                        {{ fp.nguoi_thue.ho_ten }}
+                    {% elif fp.nguoi_o_cung %}
+                        {{ fp.nguoi_o_cung.ho_ten }}
+                    {% else %}
+                        Không xác định
+                    {% endif %}
+                </h1>
+                <div class="fp4-role">{{ fp.get_loai_chu_the_display }}</div>
+            </div>
+        </div>
+
+        <div class="fp4-state-panel">
+            <div class="fp4-state-label">TRẠNG THÁI FACE ID</div>
+            <div class="fp4-state">
+                <span class="fp4-state-dot"></span>
+                {{ fp.get_trang_thai_display }}
+            </div>
+            <div class="fp4-state-note">
+                {% if fp.trang_thai == "da_xac_thuc" %}
+                    Dữ liệu khuôn mặt đã được xác thực trên hệ thống.
+                {% elif fp.trang_thai == "bi_vo_hieu" %}
+                    Hồ sơ hiện không được phép sử dụng quyền Smart Room.
+                {% else %}
+                    Hoàn tất đăng ký khuôn mặt để kích hoạt nhận diện.
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="fp4-facts">
+        <div class="fp4-fact">
+            <span>Phòng</span>
+            <strong>{% if phong %}{{ phong.so_phong }}{% else %}Chưa gắn{% endif %}</strong>
+        </div>
+        <div class="fp4-fact">
+            <span>Cơ sở</span>
+            <strong>{% if phong %}{{ phong.co_so.ten_co_so }}{% else %}—{% endif %}</strong>
+        </div>
+        <div class="fp4-fact">
+            <span>Quyền ra vào</span>
+            <strong>{% if quyen_ra_vao %}{{ quyen_ra_vao.get_trang_thai_display }}{% else %}Chưa cấp{% endif %}</strong>
+        </div>
+        <div class="fp4-fact">
+            <span>Ngày tạo</span>
+            <strong>{{ fp.ngay_tao|date:"d/m/Y" }}</strong>
+        </div>
+    </section>
+
+    <div class="fp4-layout">
+        <main>
+
+            <section class="fp4-card">
+                <div class="fp4-card-head">
+                    <div>
+                        {% if fp.trang_thai == "da_xac_thuc" %}
+                            <h2>Tình trạng sử dụng Face ID</h2>
+                            <p>Kiểm tra trạng thái nhận diện và quyền mở cửa của hồ sơ.</p>
+                        {% else %}
+                            <h2>Đăng ký khuôn mặt</h2>
+                            <p>Chụp và xác nhận khuôn mặt để hoàn tất hồ sơ Smart Room.</p>
+                        {% endif %}
+                    </div>
+
+                    {% if fp.trang_thai == "da_xac_thuc" %}
+                        <span class="fp4-badge">ĐÃ XÁC THỰC</span>
+                    {% endif %}
+                </div>
+
+                <div class="fp4-card-body">
+
+                    {% if fp.trang_thai == "da_xac_thuc" %}
+                        <div class="fp4-access">
+                            <div class="fp4-access-icon">✓</div>
+                            <div>
+                                <h3>Khuôn mặt đã được đăng ký</h3>
+                                <p>Không cần đăng ký lại. Hồ sơ Face ID hiện đã có dữ liệu nhận diện hợp lệ.</p>
+                            </div>
+                        </div>
+
+                        {% if quyen_ra_vao %}
+                            <div class="fp4-ready">
+                                <strong>✓ Đã có quyền ra vào:</strong>
+                                {{ quyen_ra_vao.get_trang_thai_display }}.
+                            </div>
+                        {% else %}
+                            <div class="fp4-warning">
+                                <strong>Chưa có quyền ra vào.</strong>
+                                Face ID đã xác thực nhưng quản trị viên chưa cấp quyền Smart Room cho hồ sơ này.
+                            </div>
+                        {% endif %}
+
+                    {% elif co_the_dang_ky_face %}
+
+                        <div id="cameraShell" class="fp4-camera">
+                            <video id="faceCamera" autoplay playsinline muted></video>
+                            <img id="faceSnapshot" class="snapshot" alt="Ảnh xem trước Face ID">
+
+                            <div id="cameraEmpty" class="camera-empty">
+                                <div class="camera-empty-icon">◉</div>
+                                <strong>Camera chưa được bật</strong>
+                                <span>Nhấn “Bật camera” để bắt đầu.</span>
+                            </div>
+
+                            <div class="face-guide">
+                                <div class="guide-corners">
+                                    <span class="guide-corner tl"></span>
+                                    <span class="guide-corner tr"></span>
+                                    <span class="guide-corner bl"></span>
+                                    <span class="guide-corner br"></span>
+                                </div>
+                                <div class="guide-axis-h"></div>
+                            </div>
+                            <div class="guide-label">Đưa khuôn mặt vào khung để bắt đầu</div>
+
+                            <div class="camera-badge">
+                                <span class="camera-dot"></span>
+                                <span id="cameraBadgeText">Camera chưa bật</span>
+                            </div>
+                        </div>
+
+                        <canvas id="faceCanvas" style="display:none;"></canvas>
+
+                        <div class="steps">
+                            <div id="stepCamera" class="step active">1 · Bật camera</div>
+                            <div id="stepCapture" class="step">2 · Chụp ảnh</div>
+                            <div id="stepPreview" class="step">3 · Xem trước</div>
+                            <div id="stepConfirm" class="step">4 · Xác nhận</div>
+                        </div>
+
+                        <div id="cameraStatus" class="camera-status">
+                            Camera chưa được bật. Trình duyệt có thể yêu cầu cấp quyền truy cập camera.
+                        </div>
+
+                        <div class="camera-actions">
+                            <button type="button" id="btnStartCamera" class="btn btn-primary">Bật camera</button>
+                            <button type="button" id="btnCapture" class="btn btn-blue" disabled>Chụp ảnh</button>
+                            <button type="button" id="btnRetake" class="btn btn-secondary" disabled>↻ Chụp lại</button>
+                            <button type="button" id="btnConfirm" class="btn btn-primary" disabled>Xác nhận đăng ký</button>
+                            <button type="button" id="btnStopCamera" class="btn btn-secondary" disabled>■ Tắt camera</button>
+                        </div>
+
+                        <div class="helper-line">
+                            <span>⌨</span>
+                            <span>Khi camera hoạt động, nhấn <strong>SPACE</strong> để chụp.</span>
+                        </div>
+
+                        <form id="csrfForm" style="display:none;">
+                            {% csrf_token %}
+                        </form>
+
+                    {% else %}
+                        {% if fp.trang_thai == "bi_vo_hieu" %}
+                            <div class="fp4-warning">
+                                Hồ sơ đang bị vô hiệu. Vui lòng kích hoạt lại trước khi đăng ký Face ID.
+                            </div>
+                        {% else %}
+                            <div class="fp4-warning">
+                                Chưa thể đăng ký Face ID vì hồ sơ hiện không có hợp đồng Smart Room đang hiệu lực.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </section>
+
+            {% if la_admin_smart_room %}
+                <section class="fp4-card">
+                    <div class="fp4-card-head">
+                        <div>
+                            <h2>Công cụ quản trị</h2>
+                            <p>Điều chỉnh trạng thái nghiệp vụ hoặc vô hiệu hồ sơ.</p>
+                        </div>
+                    </div>
+
+                    <div class="fp4-card-body">
+                        <div class="fp4-admin-grid">
+                            <div class="fp4-settings">
+                                <h3>Cập nhật hồ sơ</h3>
+                                <p>Thay đổi trạng thái và ghi chú quản trị.</p>
+
+                                <form method="post" action="{% url 'xu_ly_face_profile' fp.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="hanh_dong" value="cap_nhat_trang_thai">
+
+                                    <div class="form-group">
+                                        <label for="trang_thai">Trạng thái</label>
+                                        <select id="trang_thai" name="trang_thai" class="form-control">
+                                            <option value="chua_co_anh" {% if fp.trang_thai == "chua_co_anh" %}selected{% endif %}>Chưa có ảnh</option>
+                                            <option value="co_anh" {% if fp.trang_thai == "co_anh" %}selected{% endif %}>Đã có ảnh</option>
+                                            <option value="da_xac_thuc" {% if fp.trang_thai == "da_xac_thuc" %}selected{% endif %}>Đã xác thực</option>
+                                            <option value="bi_vo_hieu" {% if fp.trang_thai == "bi_vo_hieu" %}selected{% endif %}>Bị vô hiệu</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="ghi_chu">Ghi chú</label>
+                                        <textarea id="ghi_chu" name="ghi_chu" class="form-control">{{ fp.ghi_chu|default:"" }}</textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                                </form>
+                            </div>
+
+                            <div class="fp4-danger">
+                                <h3>Vô hiệu hồ sơ</h3>
+                                <p>Hồ sơ sẽ ngừng hoạt động và các quyền ra vào liên quan sẽ bị thu hồi.</p>
+
+                                <form method="post"
+                                      action="{% url 'xu_ly_face_profile' fp.id %}"
+                                      data-ndt-confirm-form
+                                      data-confirm-title="Vô hiệu hồ sơ Face ID"
+                                      data-confirm-message="Hồ sơ nhận diện sẽ ngừng hoạt động và các quyền ra vào liên quan sẽ bị thu hồi theo nghiệp vụ hiện tại."
+                                      data-confirm-label="Vô hiệu hồ sơ">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="hanh_dong" value="xoa">
+                                    <button type="submit" class="btn btn-danger-soft">Vô hiệu hồ sơ</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            {% endif %}
+
+        </main>
+
+        <aside>
+            <section class="fp4-card">
+                <div class="fp4-card-head">
+                    <div>
+                        <h2>Hướng dẫn nhận diện</h2>
+                        <p>Giữ Face ID ổn định khi đăng ký và sử dụng.</p>
+                    </div>
+                </div>
+
+                <div class="fp4-card-body">
+                    <div class="fp4-guide">
+                        <div class="fp4-guide-item">
+                            <div class="fp4-guide-num">01</div>
+                            <div><strong>Nhìn thẳng</strong><span>Giữ đầu ở chính giữa camera.</span></div>
+                        </div>
+                        <div class="fp4-guide-item">
+                            <div class="fp4-guide-num">02</div>
+                            <div><strong>Đủ ánh sáng</strong><span>Tránh ngược sáng hoặc khuôn mặt quá tối.</span></div>
+                        </div>
+                        <div class="fp4-guide-item">
+                            <div class="fp4-guide-num">03</div>
+                            <div><strong>Giữ khoảng cách</strong><span>Không đứng quá xa thiết bị nhận diện.</span></div>
+                        </div>
+                        <div class="fp4-guide-item">
+                            <div class="fp4-guide-num">04</div>
+                            <div><strong>Một người</strong><span>Không để người khác cùng xuất hiện trong khung hình.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {% if hop_dong %}
+                <section class="fp4-card">
+                    <div class="fp4-card-head">
+                        <div>
+                            <h2>Hợp đồng hiện tại</h2>
+                            <p>Thông tin liên kết với Smart Room.</p>
+                        </div>
+                    </div>
+                    <div class="fp4-card-body">
+                        <div class="fp4-guide">
+                            <div class="fp4-guide-item">
+                                <div class="fp4-guide-num">HD</div>
+                                <div>
+                                    <strong>{{ hop_dong.so_hop_dong }}</strong>
+                                    <span>{{ hop_dong.ngay_bat_dau|date:"d/m/Y" }} – {{ hop_dong.ngay_ket_thuc|date:"d/m/Y" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            {% endif %}
+        </aside>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const video = document.getElementById("faceCamera");
+
+    if (!video) {
+        return;
+    }
+
+    const canvas = document.getElementById("faceCanvas");
+    const snapshot = document.getElementById("faceSnapshot");
+    const cameraShell = document.getElementById("cameraShell");
+    const cameraEmpty = document.getElementById("cameraEmpty");
+    const cameraStatus = document.getElementById("cameraStatus");
+    const cameraBadgeText = document.getElementById("cameraBadgeText");
+
+    const btnStart = document.getElementById("btnStartCamera");
+    const btnCapture = document.getElementById("btnCapture");
+    const btnRetake = document.getElementById("btnRetake");
+    const btnConfirm = document.getElementById("btnConfirm");
+    const btnStop = document.getElementById("btnStopCamera");
+
+    const stepCamera = document.getElementById("stepCamera");
+    const stepCapture = document.getElementById("stepCapture");
+    const stepPreview = document.getElementById("stepPreview");
+    const stepConfirm = document.getElementById("stepConfirm");
+
+    let stream = null;
+    let capturedImage = "";
+    let processing = false;
+
+    function setStatus(message, type = "") {
+        cameraStatus.textContent = message;
+        cameraStatus.className = "camera-status";
+
+        if (type) {
+            cameraStatus.classList.add(type);
+        }
+    }
+
+    function setSteps(stage) {
+        const steps = [
+            stepCamera,
+            stepCapture,
+            stepPreview,
+            stepConfirm
+        ];
+
+        steps.forEach(function (item) {
+            item.classList.remove("active", "done");
+        });
+
+        if (stage >= 1) {
+            stepCamera.classList.add(stage === 1 ? "active" : "done");
+        }
+
+        if (stage >= 2) {
+            stepCapture.classList.add(stage === 2 ? "active" : "done");
+        }
+
+        if (stage >= 3) {
+            stepPreview.classList.add(stage === 3 ? "active" : "done");
+        }
+
+        if (stage >= 4) {
+            stepConfirm.classList.add(stage === 4 ? "active" : "done");
+        }
+    }
+
+    function resetPreview() {
+        capturedImage = "";
+        snapshot.removeAttribute("src");
+        cameraShell.classList.remove("preview-mode");
+
+        btnCapture.disabled = !stream;
+        btnRetake.disabled = true;
+        btnConfirm.disabled = true;
+
+        if (stream) {
+            setSteps(2);
+            setStatus(
+                "Camera đã sẵn sàng. Căn khuôn mặt vào giữa vùng hướng dẫn rồi chụp.",
+                ""
+            );
+        }
+    }
+
+    async function startCamera() {
+        if (processing || stream) {
+            return;
+        }
+
+        if (!window.isSecureContext) {
+            setStatus("Camera cần HTTPS hoặc localhost. Địa chỉ HTTP qua IP mạng LAN không được trình duyệt cấp quyền camera.", "error");
+            return;
+        }
+
+        if (
+            !navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia
+        ) {
+            setStatus(
+                "Trình duyệt hiện tại không hỗ trợ truy cập camera.",
+                "error"
+            );
+            return;
+        }
+
+        btnStart.disabled = true;
+
+        setStatus(
+            "Đang yêu cầu quyền truy cập camera...",
+            "processing"
+        );
+
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    facingMode: "user"
+                },
+                audio: false
+            });
+
+            video.srcObject = stream;
+
+            await video.play();
+
+            cameraShell.classList.add("camera-on");
+            cameraEmpty.style.display = "none";
+            cameraBadgeText.textContent = "Camera đang hoạt động";
+
+            btnCapture.disabled = false;
+            btnStop.disabled = false;
+            btnStart.disabled = true;
+
+            setSteps(2);
+
+            setStatus(
+                "Camera đã bật. Hãy nhìn thẳng camera, giữ khuôn mặt ở giữa và đảm bảo đủ ánh sáng."
+            );
+
+        } catch (error) {
+            console.error(error);
+
+            btnStart.disabled = false;
+
+            let message =
+                "Không thể mở camera. Hãy kiểm tra quyền camera của trình duyệt.";
+
+            if (error && error.name === "NotAllowedError") {
+                message =
+                    "Bạn đã từ chối quyền camera. Hãy cho phép camera trong cài đặt trình duyệt rồi thử lại.";
+            } else if (error && error.name === "NotFoundError") {
+                message =
+                    "Không tìm thấy thiết bị camera trên máy.";
+            } else if (error && error.name === "NotReadableError") {
+                message =
+                    "Camera đang được ứng dụng khác sử dụng hoặc không thể truy cập.";
+            }
+
+            setStatus(message, "error");
+        }
+    }
+
+    function captureFrame() {
+        if (processing || !stream) {
+            return;
+        }
+
+        if (!video.videoWidth || !video.videoHeight) {
+            setStatus(
+                "Camera chưa sẵn sàng. Vui lòng chờ thêm một chút.",
+                "error"
+            );
+            return;
+        }
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext("2d");
+
+        // Video đang hiển thị mirror cho người dùng.
+        // Ảnh gửi server được lưu theo hướng thật.
+        ctx.drawImage(
+            video,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        capturedImage = canvas.toDataURL(
+            "image/jpeg",
+            0.92
+        );
+
+        snapshot.src = capturedImage;
+        cameraShell.classList.add("preview-mode");
+
+        btnCapture.disabled = true;
+        btnRetake.disabled = false;
+        btnConfirm.disabled = false;
+
+        setSteps(3);
+
+        setStatus(
+            "Ảnh đã được chụp. Hãy kiểm tra khuôn mặt trước khi xác nhận đăng ký.",
+            "success"
+        );
+    }
+
+    async function confirmEnrollment() {
+        if (
+            processing ||
+            !capturedImage
+        ) {
+            return;
+        }
+
+        const csrfElement =
+            document.querySelector(
+                "#csrfForm [name=csrfmiddlewaretoken]"
+            );
+
+        if (!csrfElement) {
+            setStatus(
+                "Không tìm thấy CSRF token.",
+                "error"
+            );
+            return;
+        }
+
+        processing = true;
+
+        btnConfirm.disabled = true;
+        btnRetake.disabled = true;
+        btnCapture.disabled = true;
+        btnStop.disabled = true;
+
+        setSteps(4);
+
+        setStatus(
+            "Đang kiểm tra chất lượng ảnh và đăng ký Face ID...",
+            "processing"
+        );
+
+        try {
+            const formData = new FormData();
+
+            formData.append(
+                "image",
+                capturedImage
+            );
+
+            const response = await fetch(
+                "{% url 'face_id_dang_ky' fp.id %}",
+                {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfElement.value
+                    },
+                    body: formData
+                }
+            );
+
+            let data = null;
+
+            try {
+                data = await response.json();
+            } catch (jsonError) {
+                throw new Error(
+                    "Máy chủ trả về dữ liệu không hợp lệ."
+                );
+            }
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data && data.message
+                        ? data.message
+                        : "Đăng ký Face ID không thành công."
+                );
+            }
+
+            stepConfirm.classList.remove("active");
+            stepConfirm.classList.add("done");
+
+            setStatus(
+                " " + data.message,
+                "success"
+            );
+
+            cameraBadgeText.textContent = "Đã đăng ký";
+
+            stopCamera(false);
+
+            setTimeout(function () {
+                window.location.reload();
+            }, 1200);
+
+        } catch (error) {
+            console.error(error);
+
+            processing = false;
+
+            btnRetake.disabled = false;
+            btnConfirm.disabled = false;
+            btnStop.disabled = !stream;
+
+            setSteps(3);
+
+            setStatus(
+                error.message ||
+                "Có lỗi khi kết nối đến hệ thống Face ID.",
+                "error"
+            );
+        }
+    }
+
+    function stopCamera(updateStatus = true) {
+        if (stream) {
+            stream
+                .getTracks()
+                .forEach(function (track) {
+                    track.stop();
+                });
+        }
+
+        stream = null;
+        video.srcObject = null;
+
+        cameraShell.classList.remove(
+            "camera-on",
+            "preview-mode"
+        );
+
+        cameraEmpty.style.display = "";
+        cameraBadgeText.textContent = "Camera chưa bật";
+
+        btnStart.disabled = false;
+        btnCapture.disabled = true;
+        btnRetake.disabled = true;
+        btnConfirm.disabled = true;
+        btnStop.disabled = true;
+
+        capturedImage = "";
+        snapshot.removeAttribute("src");
+
+        if (!processing) {
+            setSteps(1);
+        }
+
+        if (updateStatus) {
+            setStatus(
+                "Camera đã tắt."
+            );
+        }
+    }
+
+    btnStart.addEventListener(
+        "click",
+        startCamera
+    );
+
+    btnCapture.addEventListener(
+        "click",
+        captureFrame
+    );
+
+    btnRetake.addEventListener(
+        "click",
+        function () {
+            resetPreview();
+        }
+    );
+
+    btnConfirm.addEventListener(
+        "click",
+        confirmEnrollment
+    );
+
+    btnStop.addEventListener(
+        "click",
+        function () {
+            if (!processing) {
+                stopCamera(true);
+            }
+        }
+    );
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+            if (
+                event.code !== "Space" ||
+                processing ||
+                !stream ||
+                capturedImage
+            ) {
+                return;
+            }
+
+            const target = event.target;
+
+            if (
+                target &&
+                (
+                    target.tagName === "INPUT" ||
+                    target.tagName === "TEXTAREA" ||
+                    target.tagName === "SELECT" ||
+                    target.tagName === "BUTTON"
+                )
+            ) {
+                return;
+            }
+
+            event.preventDefault();
+            captureFrame();
+        }
+    );
+
+    window.addEventListener(
+        "beforeunload",
+        function () {
+            if (stream) {
+                stream
+                    .getTracks()
+                    .forEach(function (track) {
+                        track.stop();
+                    });
+            }
+        }
+    );
+});
+</script>
+
+<script src="{% static 'js/foundation/dialog.js' %}" defer></script>
+
+{% endblock %}

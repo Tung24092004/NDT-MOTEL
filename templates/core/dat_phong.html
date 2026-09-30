@@ -1,0 +1,572 @@
+{% extends "core/tenant_base.html" %}
+{% load static bo_loc %}
+{% block title %}Đặt phòng - NDT MOTEL{% endblock %}
+{% block tenant_styles %}<link rel="stylesheet" href="{% static 'css/tenant/dat_phong.css' %}">{% endblock %}
+{% block tenant_content %}
+
+
+
+
+
+<div class="booking-page">
+
+    <a
+        href="{% url 'chi_tiet_phong' phong.id %}"
+        class="booking-back"
+    >
+        ← Quay lại chi tiết phòng
+    </a>
+
+
+    <div class="booking-layout">
+
+        <!-- =================================================
+             THÔNG TIN PHÒNG
+        ================================================== -->
+
+        <aside class="booking-card booking-room-card">
+
+            <div class="booking-room-header">
+
+                <div class="booking-room-label">
+                    PHÒNG ĐANG CHỌN
+                </div>
+
+                <h2>
+                    Phòng {{ phong.so_phong }}
+                </h2>
+
+                <span class="booking-status">
+                     Có thể gửi yêu cầu đặt phòng
+                </span>
+
+            </div>
+
+
+            <div class="booking-room-body">
+
+                <div class="booking-room-price">
+                    {{ phong.gia_thue|vnd }} VNĐ
+                    <span>/ tháng</span>
+                </div>
+
+
+                <div class="booking-info-list">
+
+                    <div class="booking-info-row">
+                        <span class="booking-info-label">
+                            Cơ sở
+                        </span>
+
+                        <span class="booking-info-value">
+                            {{ phong.co_so.ten_co_so }}
+                        </span>
+                    </div>
+
+
+                    <div class="booking-info-row">
+                        <span class="booking-info-label">
+                            Địa chỉ
+                        </span>
+
+                        <span class="booking-info-value">
+                            {{ phong.co_so.dia_chi }}
+                        </span>
+                    </div>
+
+
+                    <div class="booking-info-row">
+                        <span class="booking-info-label">
+                            Quận
+                        </span>
+
+                        <span class="booking-info-value">
+                            {{ phong.co_so.quan }}
+                        </span>
+                    </div>
+
+
+                    <div class="booking-info-row">
+                        <span class="booking-info-label">
+                            Loại phòng
+                        </span>
+
+                        <span class="booking-info-value">
+                            {{ phong.get_loai_phong_display }}
+                        </span>
+                    </div>
+
+
+                    <div class="booking-info-row">
+                        <span class="booking-info-label">
+                            Diện tích
+                        </span>
+
+                        <span class="booking-info-value">
+                            {{ phong.dien_tich }} m²
+                        </span>
+                    </div>
+
+
+                    <div class="booking-info-row">
+                        <span class="booking-info-label">
+                            Sức chứa tối đa
+                        </span>
+
+                        <span class="booking-info-value">
+                            {% if phong.so_nguoi_toi_da %}
+                                {% if phong.so_nguoi_toi_da %}{{ phong.so_nguoi_toi_da }} người{% else %}Chưa cấu hình{% endif %}
+                            {% else %}
+                                Chưa cấu hình
+                            {% endif %}
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="booking-profile-note">
+                    Thông tin người đặt được lấy từ tài khoản đang đăng nhập.
+                    Nếu bạn chỉnh sửa họ tên, số điện thoại hoặc email tại đây,
+                    hệ thống sẽ cập nhật lại hồ sơ người thuê của tài khoản.
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =================================================
+             FORM ĐẶT PHÒNG
+        ================================================== -->
+
+        <section class="booking-card booking-form-card">
+
+            <div class="booking-form-title">
+
+                <h1>
+                    Gửi yêu cầu đặt phòng
+                </h1>
+
+                <p>
+                    Kiểm tra lại thông tin cá nhân, chọn ngày nhận phòng và thời hạn thuê.
+                    Hệ thống sẽ tự tính ngày trả dự kiến trước khi bạn gửi yêu cầu.
+                    Yêu cầu sau khi gửi sẽ ở trạng thái chờ quản trị viên duyệt.
+                </p>
+
+            </div>
+
+
+            
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+
+                <!-- =================================================
+                     THÔNG TIN NGƯỜI THUÊ
+                ================================================== -->
+
+                <div class="booking-section-title">
+                    Thông tin người thuê
+                </div>
+
+
+                <div class="booking-form-grid">
+
+                    <div class="booking-form-group">
+
+                        <label for="ho_ten">
+                            Họ và tên
+                            <span class="booking-required">*</span>
+                        </label>
+
+                        <input
+                            id="ho_ten"
+                            type="text"
+                            name="ho_ten"
+                            value="{{ request.POST.ho_ten|default:nguoi_thue.ho_ten }}"
+                            placeholder="Nhập họ và tên"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="booking-form-group">
+
+                        <label for="so_dien_thoai">
+                            Số điện thoại
+                            <span class="booking-required">*</span>
+                        </label>
+
+                        <input
+                            id="so_dien_thoai"
+                            type="text"
+                            name="so_dien_thoai"
+                            value="{{ request.POST.so_dien_thoai|default:nguoi_thue.so_dien_thoai }}"
+                            placeholder="Ví dụ: 0905123456"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="booking-form-group">
+
+                        <label for="email">
+                            Email
+                        </label>
+
+                        <input
+                            id="email"
+                            type="email"
+                            name="email"
+                            value="{{ request.POST.email|default:nguoi_thue.email }}"
+                            placeholder="example@gmail.com"
+                        >
+
+                    </div>
+
+
+                    <div class="booking-form-group">
+
+                        <label for="cccd">
+                            CCCD
+                            <span class="booking-required">*</span>
+                        </label>
+
+                        <input
+                            id="cccd"
+                            type="text"
+                            name="cccd"
+                            value="{{ request.POST.cccd|default:nguoi_thue.cccd }}"
+                            readonly
+                            required
+                        >
+
+                        <div class="booking-input-note">
+                            CCCD là định danh tài khoản nên không chỉnh trực tiếp
+                            tại bước đặt phòng.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     THÔNG TIN ĐẶT PHÒNG
+                ================================================== -->
+
+                <div class="booking-section-title">
+                    Thông tin đặt phòng
+                </div>
+
+
+                <div class="booking-form-grid">
+
+                    <div class="booking-form-group">
+
+                        <label for="ngay_nhan_phong">
+                            Ngày nhận phòng
+                            <span class="booking-required">*</span>
+                        </label>
+
+                        <input
+                            id="ngay_nhan_phong"
+                            type="date"
+                            name="ngay_nhan_phong"
+                            value="{{ request.POST.ngay_nhan_phong }}"
+                            required
+                        >
+
+                        <div class="booking-input-note">
+                            Ngày nhận phòng không được ở trong quá khứ.
+                        </div>
+
+                    </div>
+
+
+                    <div class="booking-form-group">
+
+                        <label for="so_thang_thue">
+                            Thời hạn thuê
+                            <span class="booking-required">*</span>
+                        </label>
+
+                        <select
+                            id="so_thang_thue"
+                            name="so_thang_thue"
+                            required
+                        >
+                            <option value="">-- Chọn thời hạn thuê --</option>
+                            {% with selected=request.POST.so_thang_thue %}
+                                <option value="1" {% if selected == "1" %}selected{% endif %}>1 tháng</option>
+                                <option value="3" {% if selected == "3" %}selected{% endif %}>3 tháng</option>
+                                <option value="6" {% if selected == "6" %}selected{% endif %}>6 tháng</option>
+                                <option value="9" {% if selected == "9" %}selected{% endif %}>9 tháng</option>
+                                <option value="12" {% if selected == "12" %}selected{% endif %}>12 tháng</option>
+                                <option value="18" {% if selected == "18" %}selected{% endif %}>18 tháng</option>
+                                <option value="24" {% if selected == "24" %}selected{% endif %}>24 tháng</option>
+                                <option value="36" {% if selected == "36" %}selected{% endif %}>36 tháng</option>
+                            {% endwith %}
+                        </select>
+
+                        <div class="booking-input-note">
+                            Đây là thời hạn thuê bạn đề nghị. Hợp đồng sẽ sử dụng
+                            thời hạn đã được xác nhận sau khi đơn được duyệt.
+                        </div>
+
+                    </div>
+
+
+                    <div class="booking-form-group">
+
+                        <label for="ngay_tra_du_kien_hien_thi">
+                            Ngày trả dự kiến
+                        </label>
+
+                        <input
+                            id="ngay_tra_du_kien_hien_thi"
+                            type="text"
+                            value=""
+                            placeholder="Chọn ngày nhận và thời hạn thuê"
+                            readonly
+                        >
+
+                        <div class="booking-input-note">
+                            Ngày này được hệ thống tự tính, bạn không cần nhập thủ công.
+                        </div>
+
+                    </div>
+
+
+                    <div class="booking-form-group full">
+
+                        <div class="booking-duration-summary" id="booking-duration-summary">
+                            Chọn <strong>ngày nhận phòng</strong> và
+                            <strong>thời hạn thuê</strong> để xem thời gian thuê dự kiến.
+                        </div>
+
+                    </div>
+
+
+                    <div class="booking-form-group">
+
+                        <label for="tien_coc_du_kien">
+                            Tiền cọc dự kiến
+                        </label>
+
+                        <input
+                            id="tien_coc_du_kien"
+                            type="text"
+                            value="{{ phong.tien_coc_mac_dinh|default:0|vnd }} VNĐ"
+                            readonly
+                        >
+
+                        <div class="booking-input-note">
+                            Tiền cọc được hệ thống lấy theo cấu hình của phòng và
+                            không thể tự thay đổi tại bước đặt phòng.
+                        </div>
+
+                    </div>
+
+
+                    <div class="booking-form-group full">
+
+                        <label for="ghi_chu">
+                            Ghi chú
+                        </label>
+
+                        <textarea
+                            id="ghi_chu"
+                            name="ghi_chu"
+                            placeholder="Ví dụ: Tôi muốn nhận phòng vào buổi sáng..."
+                        >{{ request.POST.ghi_chu }}</textarea>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     LƯU Ý
+                ================================================== -->
+
+                <div class="booking-notice">
+
+                    <div class="booking-notice-icon">
+                        ℹ
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Quy trình sau khi gửi yêu cầu
+                        </strong>
+
+                        <br>
+
+                        Yêu cầu sẽ ở trạng thái
+                        <strong>Chờ duyệt</strong>.
+                        Quản trị viên sẽ kiểm tra thông tin, ngày nhận phòng và
+                        thời hạn thuê trước khi xác nhận. Khi tạo hợp đồng,
+                        hệ thống sử dụng thời hạn thuê đã được ghi nhận trong đơn,
+                        thay vì nhập ngày kết thúc tùy ý. Khi trạng thái thay đổi,
+                        thông báo sẽ được gắn với chính tài khoản đang đăng nhập của bạn.
+
+                    </div>
+
+                </div>
+
+
+                <div class="booking-actions">
+
+                    <a
+                        href="{% url 'chi_tiet_phong' phong.id %}"
+                        class="booking-btn booking-btn-secondary"
+                    >
+                        ← Quay lại
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="booking-btn booking-btn-primary"
+                    >
+                        Gửi yêu cầu đặt phòng
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+    </div>
+
+</div>
+
+
+
+
+
+<script>
+    const dateInput = document.getElementById("ngay_nhan_phong");
+    const monthInput = document.getElementById("so_thang_thue");
+    const endDateInput = document.getElementById("ngay_tra_du_kien_hien_thi");
+    const durationSummary = document.getElementById("booking-duration-summary");
+
+    function pad2(value) {
+        return String(value).padStart(2, "0");
+    }
+
+    function formatDateVN(date) {
+        return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`;
+    }
+
+    function calculateExpectedEndDate(startValue, monthsValue) {
+        if (!startValue || !monthsValue) {
+            return null;
+        }
+
+        const parts = startValue.split("-").map(Number);
+        const months = Number(monthsValue);
+
+        if (parts.length !== 3 || !Number.isInteger(months) || months < 1 || months > 36) {
+            return null;
+        }
+
+        const year = parts[0];
+        const month = parts[1];
+        const day = parts[2];
+
+        const targetMonthIndex = (month - 1) + months;
+        const targetYear = year + Math.floor(targetMonthIndex / 12);
+        const targetMonthZeroBased = targetMonthIndex % 12;
+        const lastDayTargetMonth = new Date(
+            targetYear,
+            targetMonthZeroBased + 1,
+            0
+        ).getDate();
+
+        if (day <= lastDayTargetMonth) {
+            const sameDayNextPeriod = new Date(
+                targetYear,
+                targetMonthZeroBased,
+                day
+            );
+
+            sameDayNextPeriod.setDate(
+                sameDayNextPeriod.getDate() - 1
+            );
+
+            return sameDayNextPeriod;
+        }
+
+        return new Date(
+            targetYear,
+            targetMonthZeroBased,
+            lastDayTargetMonth
+        );
+    }
+
+    function updateRentalPreview() {
+        if (!dateInput || !monthInput || !endDateInput) {
+            return;
+        }
+
+        const endDate = calculateExpectedEndDate(
+            dateInput.value,
+            monthInput.value
+        );
+
+        if (!endDate) {
+            endDateInput.value = "";
+
+            if (durationSummary) {
+                durationSummary.innerHTML =
+                    'Chọn <strong>ngày nhận phòng</strong> và ' +
+                    '<strong>thời hạn thuê</strong> để xem thời gian thuê dự kiến.';
+            }
+
+            return;
+        }
+
+        endDateInput.value = formatDateVN(endDate);
+
+        if (durationSummary) {
+            const startParts = dateInput.value.split("-");
+            const startText =
+                `${startParts[2]}/${startParts[1]}/${startParts[0]}`;
+
+            durationSummary.innerHTML =
+                `Thời gian thuê dự kiến: <strong>${monthInput.value} tháng</strong>, ` +
+                `từ <strong>${startText}</strong> đến ` +
+                `<strong>${formatDateVN(endDate)}</strong>.`;
+        }
+    }
+
+    if (dateInput) {
+        const today = new Date();
+
+        const yyyy = today.getFullYear();
+        const mm = pad2(today.getMonth() + 1);
+        const dd = pad2(today.getDate());
+
+        dateInput.min = `${yyyy}-${mm}-${dd}`;
+        dateInput.addEventListener("change", updateRentalPreview);
+        dateInput.addEventListener("input", updateRentalPreview);
+    }
+
+    if (monthInput) {
+        monthInput.addEventListener("change", updateRentalPreview);
+    }
+
+    updateRentalPreview();
+</script>
+
+
+{% endblock %}

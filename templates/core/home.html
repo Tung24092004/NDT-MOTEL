@@ -1,0 +1,2475 @@
+﻿{% extends "core/base.html" %}
+{% load bo_loc %}
+
+{% block title %}NDT MOTEL - Tìm phòng tại Đà Nẵng{% endblock %}
+
+{% block extra_css %}
+<style>
+/* =========================================================
+   NDT MOTEL — HOME V8
+   Public discovery / existing carousel and account navigation
+   ========================================================= */
+
+.ndt-home {
+    --home-ink: #123338;
+    --home-muted: #6d8083;
+    --home-brand: #08798a;
+    --home-deep: #075d68;
+    --home-soft: #edf7f7;
+    --home-line: #dbe7e8;
+    --home-gold: #d3a83f;
+    max-width: 1480px;
+    margin: 0 auto;
+    color: var(--home-ink);
+}
+
+.ndt-home *,
+.ndt-home *::before,
+.ndt-home *::after {
+    box-sizing: border-box;
+}
+
+.ndt-home a {
+    text-decoration: none;
+}
+
+.ndt-home-kicker {
+    margin-bottom: 10px;
+    color: var(--home-brand);
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: 1.55px;
+    text-transform: uppercase;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.ndt-home-hero {
+    position: relative;
+    min-height: 610px;
+    overflow: hidden;
+    background: #d9d2bc;
+    box-shadow: 0 24px 60px rgba(18, 57, 62, 0.14);
+}
+
+.ndt-home-slides,
+.ndt-home-slide {
+    position: absolute;
+    inset: 0;
+}
+
+.ndt-home-slide {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.48s ease,
+        visibility 0.48s ease;
+}
+
+.ndt-home-slide.is-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.ndt-home-slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.ndt-home-slide--room {
+    background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), transparent 29%),
+        linear-gradient(110deg, #e3d7b6 0%, #efe9d7 40%, #8ca69c 100%);
+}
+
+.ndt-home-slide--room::before {
+    background:
+        linear-gradient(90deg, rgba(54,53,39,.12), transparent 45%),
+        radial-gradient(circle at 70% 50%, rgba(255,255,255,.18), transparent 38%);
+}
+
+.ndt-home-slide--smart {
+    background:
+        radial-gradient(circle at 27% 35%, rgba(255,255,255,.18), transparent 30%),
+        linear-gradient(112deg, #d3e7e5 0%, #74aaa8 45%, #08798a 100%);
+}
+
+.ndt-home-slide--smart::before {
+    background:
+        linear-gradient(90deg, rgba(6,78,87,.12), transparent 48%),
+        radial-gradient(circle at 75% 22%, rgba(255,255,255,.16), transparent 28%);
+}
+
+.ndt-home-slide--service {
+    background:
+        radial-gradient(circle at 30% 28%, rgba(255,255,255,.42), transparent 28%),
+        linear-gradient(112deg, #eee6d8 0%, #d8c59b 47%, #7b786b 100%);
+}
+
+.ndt-home-slide--service::before {
+    background:
+        linear-gradient(90deg, rgba(92,73,42,.10), transparent 45%),
+        radial-gradient(circle at 74% 56%, rgba(255,255,255,.12), transparent 36%);
+}
+
+.ndt-home-slide--community {
+    background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,.30), transparent 30%),
+        linear-gradient(112deg, #dcece7 0%, #9dc9bd 44%, #397f79 100%);
+}
+
+.ndt-home-slide--community::before {
+    background:
+        linear-gradient(90deg, rgba(25,91,85,.08), transparent 48%),
+        radial-gradient(circle at 77% 25%, rgba(255,255,255,.15), transparent 28%);
+}
+
+/* =========================================================
+   HERO — INDEX 01 / 02 / 03 / 04
+   ========================================================= */
+
+.ndt-home-index {
+    position: absolute;
+    z-index: 8;
+    left: 42px;
+    top: 50%;
+    width: 84px;
+    transform: translateY(-50%);
+}
+
+.ndt-home-index::before {
+    content: "";
+    position: absolute;
+    top: 13px;
+    bottom: 13px;
+    right: 13px;
+    width: 2px;
+    background: rgba(255,255,255,.60);
+}
+
+.ndt-home-index button {
+    position: relative;
+    display: block;
+    width: 84px;
+    height: 72px;
+    padding: 0 28px 0 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: rgba(255,255,255,.56);
+    font-size: 18px;
+    font-weight: 700;
+    text-align: right;
+    cursor: pointer;
+    transition:
+        height .22s ease,
+        color .22s ease,
+        font-size .22s ease;
+}
+
+.ndt-home-index button::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    transform: translateY(-50%);
+}
+
+.ndt-home-index button.is-active {
+    height: 92px;
+    color: #fff;
+    font-size: 31px;
+}
+
+.ndt-home-index button.is-active::after {
+    right: 9px;
+    width: 7px;
+    height: 50px;
+    border-radius: 999px;
+    background: #fff;
+}
+
+/* =========================================================
+   HERO — VISUAL
+   ========================================================= */
+
+.ndt-home-art {
+    position: absolute;
+    z-index: 2;
+    left: 11%;
+    top: 10%;
+    width: 40%;
+    height: 78%;
+}
+
+.ndt-home-art::before {
+    content: "";
+    position: absolute;
+    inset: 4%;
+    border-radius: 46% 54% 48% 52%;
+    background: rgba(255,255,255,.20);
+    box-shadow:
+        0 0 0 35px rgba(255,255,255,.035),
+        0 0 0 75px rgba(255,255,255,.022);
+}
+
+/* ROOM ART */
+
+.ndt-art-room-window {
+    position: absolute;
+    left: 15%;
+    top: 12%;
+    width: 54%;
+    height: 39%;
+    border: 10px solid rgba(255,255,255,.82);
+    background: linear-gradient(#88bdc0, #dff0e8);
+    box-shadow: inset 0 0 0 2px rgba(18,102,109,.16);
+}
+
+.ndt-art-room-window::before,
+.ndt-art-room-window::after {
+    content: "";
+    position: absolute;
+    background: rgba(255,255,255,.84);
+}
+
+.ndt-art-room-window::before {
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 5px;
+}
+
+.ndt-art-room-window::after {
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 5px;
+}
+
+.ndt-art-room-bed {
+    position: absolute;
+    left: 7%;
+    right: 2%;
+    bottom: 12%;
+    height: 30%;
+    border-radius: 20px 20px 6px 6px;
+    background: #f8f4e9;
+    box-shadow: 0 24px 38px rgba(63,60,43,.18);
+}
+
+.ndt-art-room-bed::before {
+    content: "";
+    position: absolute;
+    left: 7%;
+    top: -31%;
+    width: 39%;
+    height: 48%;
+    border-radius: 13px;
+    background: #fff;
+}
+
+.ndt-art-room-lamp {
+    position: absolute;
+    right: 5%;
+    top: 31%;
+    width: 9px;
+    height: 42%;
+    background: #676d60;
+}
+
+.ndt-art-room-lamp::before {
+    content: "";
+    position: absolute;
+    left: -29px;
+    top: -9px;
+    border-left: 33px solid transparent;
+    border-right: 33px solid transparent;
+    border-bottom: 50px solid var(--home-gold);
+}
+
+.ndt-art-room-plant {
+    position: absolute;
+    left: 0;
+    bottom: 10%;
+    width: 52px;
+    height: 94px;
+    border-radius: 50% 50% 10px 10px;
+    background: #46795c;
+}
+
+/* SMART ART */
+
+.ndt-art-smart-door {
+    position: absolute;
+    left: 11%;
+    top: 8%;
+    width: 49%;
+    height: 77%;
+    border: 12px solid rgba(255,255,255,.86);
+    border-bottom: 0;
+    background: linear-gradient(145deg, #0c727c, #70aaa5);
+    box-shadow: 0 25px 40px rgba(14,74,79,.22);
+}
+
+.ndt-art-smart-door::after {
+    content: "";
+    position: absolute;
+    right: 21px;
+    top: 50%;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #e6bb3e;
+}
+
+.ndt-art-smart-phone {
+    position: absolute;
+    right: 2%;
+    bottom: 6%;
+    width: 31%;
+    height: 56%;
+    border: 10px solid #173e43;
+    border-radius: 32px;
+    background: #edf8f5;
+    transform: rotate(7deg);
+    box-shadow: 0 24px 40px rgba(18,67,72,.24);
+}
+
+.ndt-art-smart-phone::before {
+    content: "";
+    position: absolute;
+    left: 18%;
+    right: 18%;
+    top: 14%;
+    height: 8px;
+    border-radius: 999px;
+    background: #a7cfca;
+    box-shadow:
+        0 32px 0 #d1e9e5,
+        0 64px 0 #d1e9e5,
+        0 96px 0 #0b7c88;
+}
+
+.ndt-art-smart-signal {
+    position: absolute;
+    right: 11%;
+    top: 14%;
+    width: 90px;
+    height: 90px;
+    border: 5px solid rgba(255,255,255,.80);
+    border-left-color: transparent;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    transform: rotate(-45deg);
+}
+
+.ndt-art-smart-key {
+    position: absolute;
+    left: 46%;
+    bottom: 11%;
+    width: 80px;
+    height: 80px;
+    border: 13px solid #e7bd42;
+    border-radius: 50%;
+}
+
+.ndt-art-smart-key::after {
+    content: "";
+    position: absolute;
+    left: 52px;
+    top: 21px;
+    width: 86px;
+    height: 14px;
+    background: #e7bd42;
+}
+
+/* SERVICE ART */
+
+.ndt-art-service-card {
+    position: absolute;
+    width: 48%;
+    height: 28%;
+    border-radius: 22px;
+    background: rgba(255,255,255,.86);
+    box-shadow: 0 24px 42px rgba(73,63,44,.18);
+}
+
+.ndt-art-service-card::before {
+    content: "";
+    position: absolute;
+    left: 22px;
+    top: 22px;
+    width: 45px;
+    height: 45px;
+    border-radius: 14px;
+    background: #0d7c89;
+}
+
+.ndt-art-service-card::after {
+    content: "";
+    position: absolute;
+    left: 83px;
+    right: 25px;
+    top: 31px;
+    height: 9px;
+    border-radius: 999px;
+    background: #bca46d;
+    box-shadow: 0 23px 0 rgba(30,75,78,.18);
+}
+
+.ndt-art-service-card--a {
+    left: 4%;
+    top: 14%;
+    transform: rotate(-7deg);
+}
+
+.ndt-art-service-card--b {
+    right: 1%;
+    top: 37%;
+    transform: rotate(7deg);
+}
+
+.ndt-art-service-card--c {
+    left: 13%;
+    bottom: 5%;
+    transform: rotate(-2deg);
+}
+
+.ndt-art-service-orbit {
+    position: absolute;
+    inset: 4% 3%;
+    border: 2px dashed rgba(255,255,255,.55);
+    border-radius: 50%;
+}
+
+/* COMMUNITY ART */
+
+.ndt-art-house {
+    position: absolute;
+    bottom: 12%;
+    width: 30%;
+    height: 42%;
+    border-radius: 6px;
+    background: #f7f1df;
+    box-shadow: 0 22px 34px rgba(26,82,77,.16);
+}
+
+.ndt-art-house::before {
+    content: "";
+    position: absolute;
+    left: -8%;
+    top: -36%;
+    border-left: 70px solid transparent;
+    border-right: 70px solid transparent;
+    border-bottom: 80px solid #0c7180;
+}
+
+.ndt-art-house::after {
+    content: "";
+    position: absolute;
+    left: 39%;
+    bottom: 0;
+    width: 25%;
+    height: 43%;
+    background: #b89b63;
+}
+
+.ndt-art-house--1 {
+    left: 2%;
+}
+
+.ndt-art-house--2 {
+    left: 34%;
+    width: 32%;
+    height: 52%;
+}
+
+.ndt-art-house--3 {
+    right: 0;
+    height: 38%;
+}
+
+.ndt-art-sun {
+    position: absolute;
+    right: 5%;
+    top: 7%;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #e7bd42;
+    box-shadow: 0 0 0 22px rgba(231,189,66,.14);
+}
+
+/* =========================================================
+   HERO — COPY
+   ========================================================= */
+
+.ndt-home-copy {
+    position: absolute;
+    z-index: 4;
+    left: 55%;
+    top: 50%;
+    width: min(590px, 40%);
+    transform: translateY(-50%);
+    color: #17383c;
+}
+
+.ndt-home-slide--smart .ndt-home-copy,
+.ndt-home-slide--community .ndt-home-copy {
+    color: #fff;
+}
+
+.ndt-home-eyebrow {
+    display: block;
+    margin-bottom: 20px;
+    font-size: 13px;
+    font-weight: 760;
+    letter-spacing: .45px;
+}
+
+.ndt-home-copy h1,
+.ndt-home-copy h2 {
+    max-width: 620px;
+    margin: 0 0 20px;
+    font-size: clamp(44px, 4.1vw, 68px);
+    line-height: 1.03;
+    letter-spacing: -2.2px;
+    font-weight: 680;
+}
+
+.ndt-home-copy p {
+    max-width: 555px;
+    margin: 0 0 29px;
+    font-size: 16px;
+    line-height: 1.68;
+}
+
+.ndt-home-cta {
+    display: inline-flex;
+    min-height: 49px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 22px;
+    border: 1px solid currentColor;
+    border-radius: 14px;
+    color: inherit;
+    background: rgba(255,255,255,.12);
+    font-size: 14px;
+    font-weight: 780;
+    transition:
+        transform .18s ease,
+        background .18s ease;
+}
+
+.ndt-home-cta:hover {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,.28);
+}
+
+/* =========================================================
+   QUICK BOOKING / ACCESS BAR
+   This replaces the duplicate body search form.
+   Real search remains in the top shell.
+   ========================================================= */
+
+.ndt-home-bookbar {
+    position: relative;
+    z-index: 10;
+    width: calc(100% - 90px);
+    margin: -58px auto 0;
+    overflow: hidden;
+    border: 1px solid rgba(215,226,228,.95);
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 24px 55px rgba(26,59,64,.16);
+}
+
+.ndt-home-booktabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    min-height: 72px;
+    border-bottom: 1px solid #e2e9ea;
+}
+
+.ndt-home-booktabs a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 16px;
+    border-right: 1px solid #edf1f2;
+    color: #53666a;
+    font-size: 14px;
+    font-weight: 740;
+    text-align: center;
+}
+
+.ndt-home-booktabs a:last-child {
+    border-right: 0;
+}
+
+.ndt-home-booktabs a:first-child {
+    color: var(--home-brand);
+}
+
+.ndt-home-booktabs a:first-child::after {
+    content: "";
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: -1px;
+    height: 2px;
+    background: var(--home-brand);
+}
+
+.ndt-home-booktabs a:hover {
+    color: var(--home-brand);
+    background: #f7fbfb;
+}
+
+.ndt-home-bookcontent {
+    display: flex;
+    min-height: 92px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    padding: 18px 24px;
+}
+
+.ndt-home-bookcontent strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 15px;
+}
+
+.ndt-home-bookcontent span {
+    color: var(--home-muted);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.ndt-home-bookcontent a {
+    display: inline-flex;
+    min-height: 46px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    border-radius: 13px;
+    background: var(--home-brand);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* =========================================================
+   SECTION
+   ========================================================= */
+
+.ndt-home-section {
+    padding-top: 82px;
+}
+
+.ndt-home-section-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 28px;
+}
+
+.ndt-home-section-head h2 {
+    margin: 0 0 9px;
+    font-size: 39px;
+    line-height: 1.08;
+    letter-spacing: -1.35px;
+}
+
+.ndt-home-section-head p {
+    max-width: 670px;
+    margin: 0;
+    color: var(--home-muted);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.ndt-home-more {
+    flex: 0 0 auto;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #8cb9c0;
+    color: #087184;
+    font-size: 12px;
+    font-weight: 820;
+}
+
+/* =========================================================
+   ROOMS
+   ========================================================= */
+
+.ndt-home-rooms {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.ndt-home-room {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--home-line);
+    border-radius: 21px;
+    background: #fff;
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+.ndt-home-room:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 19px 44px rgba(27,61,66,.10);
+}
+
+.ndt-home-room-visual {
+    position: relative;
+    display: flex;
+    height: 184px;
+    align-items: flex-start;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: 20px;
+    background:
+        radial-gradient(circle at 78% 25%, rgba(255,255,255,.62), transparent 24%),
+        linear-gradient(145deg, #eef8f8, #d8ecef);
+}
+
+.ndt-home-room-visual::after {
+    content: attr(data-room);
+    position: absolute;
+    right: 10px;
+    bottom: -24px;
+    color: rgba(8,121,138,.075);
+    font-size: 96px;
+    font-weight: 900;
+    letter-spacing: -6px;
+}
+
+.ndt-home-room-no {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    width: 60px;
+    height: 60px;
+    place-items: center;
+    border-radius: 18px;
+    background: var(--home-brand);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 850;
+}
+
+.ndt-home-room-status {
+    position: relative;
+    z-index: 2;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: #fff;
+    color: #35666d;
+    font-size: 10px;
+    font-weight: 820;
+}
+
+.ndt-home-room-status--empty {
+    color: #176c4a;
+}
+
+.ndt-home-room-status--maintenance {
+    color: #9b5b31;
+}
+
+.ndt-home-room-body {
+    padding: 23px;
+}
+
+.ndt-home-room-type {
+    color: #168094;
+    font-size: 10px;
+    font-weight: 820;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.ndt-home-room h3 {
+    margin: 7px 0 8px;
+    font-size: 22px;
+}
+
+.ndt-home-room-location {
+    min-height: 50px;
+    color: #697d80;
+    font-size: 11.5px;
+    line-height: 1.55;
+}
+
+.ndt-home-room-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 17px 0;
+}
+
+.ndt-home-room-meta span {
+    padding: 7px 9px;
+    border-radius: 9px;
+    background: #f3f7f7;
+    color: #607578;
+    font-size: 10px;
+}
+
+.ndt-home-room-foot {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 14px;
+    padding-top: 17px;
+    border-top: 1px solid #edf1f1;
+}
+
+.ndt-home-price small {
+    display: block;
+    color: #829295;
+    font-size: 9px;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+}
+
+.ndt-home-price strong {
+    display: block;
+    margin-top: 3px;
+    font-size: 18px;
+}
+
+.ndt-home-price em {
+    color: #7c8c8f;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 500;
+}
+
+.ndt-home-detail {
+    display: inline-flex;
+    height: 39px;
+    align-items: center;
+    padding: 0 15px;
+    border-radius: 999px;
+    background: #e8f5f6;
+    color: #087184;
+    font-size: 11px;
+    font-weight: 820;
+}
+
+.ndt-home-empty {
+    grid-column: 1 / -1;
+    padding: 50px;
+    border: 1px dashed #cfdcdd;
+    border-radius: 18px;
+    color: #708487;
+    text-align: center;
+}
+
+/* =========================================================
+   SMART LIVING JOURNEY
+   ========================================================= */
+
+.ndt-home-journey {
+    display: grid;
+    grid-template-columns: .9fr 1.1fr;
+    overflow: hidden;
+    border: 1px solid #dbe8e9;
+    border-radius: 25px;
+    background: #f0f7f7;
+}
+
+.ndt-home-journey-copy {
+    padding: 54px;
+}
+
+.ndt-home-journey-copy h2 {
+    margin: 10px 0 15px;
+    font-size: 39px;
+    line-height: 1.08;
+    letter-spacing: -1.25px;
+}
+
+.ndt-home-journey-copy p {
+    margin: 0 0 25px;
+    color: var(--home-muted);
+    font-size: 13px;
+    line-height: 1.72;
+}
+
+.ndt-home-journey-copy a {
+    display: inline-flex;
+    height: 45px;
+    align-items: center;
+    padding: 0 19px;
+    border-radius: 999px;
+    background: var(--home-brand);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 820;
+}
+
+.ndt-home-journey-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #fff;
+}
+
+.ndt-home-journey-item {
+    min-height: 168px;
+    padding: 30px;
+    border-left: 1px solid var(--home-line);
+    border-bottom: 1px solid var(--home-line);
+}
+
+.ndt-home-journey-item:nth-child(3),
+.ndt-home-journey-item:nth-child(4) {
+    border-bottom: 0;
+}
+
+.ndt-home-journey-item span {
+    color: #138094;
+    font-size: 10px;
+    font-weight: 850;
+}
+
+.ndt-home-journey-item strong {
+    display: block;
+    margin: 14px 0 7px;
+    font-size: 16px;
+}
+
+.ndt-home-journey-item p {
+    margin: 0;
+    color: #738588;
+    font-size: 11px;
+    line-height: 1.58;
+}
+
+/* =========================================================
+   SUPPORT
+   ========================================================= */
+
+.ndt-home-support {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.ndt-home-support a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-height: 110px;
+    padding: 24px;
+    border: 1px solid var(--home-line);
+    border-radius: 18px;
+    background: #fff;
+    color: var(--home-ink);
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease;
+}
+
+.ndt-home-support a:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px rgba(23,59,64,.08);
+}
+
+.ndt-home-support strong {
+    font-size: 14px;
+}
+
+.ndt-home-support span {
+    display: block;
+    margin-top: 5px;
+    color: #7a8d90;
+    font-size: 10.5px;
+}
+
+.ndt-home-support b {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    place-items: center;
+    border-radius: 50%;
+    background: #edf7f8;
+    color: var(--home-brand);
+}
+
+/* =========================================================
+   FINAL CTA
+   ========================================================= */
+
+.ndt-home-final {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 30px;
+    margin-top: 82px;
+    padding: 42px 46px;
+    border-radius: 24px;
+    background:
+        radial-gradient(circle at 88% 20%, rgba(255,255,255,.12), transparent 25%),
+        linear-gradient(115deg, #075d68, #08798a);
+    color: #fff;
+}
+
+.ndt-home-final h2 {
+    margin: 0 0 9px;
+    font-size: 31px;
+    letter-spacing: -.8px;
+}
+
+.ndt-home-final p {
+    max-width: 680px;
+    margin: 0;
+    color: rgba(255,255,255,.78);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.ndt-home-final a {
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 21px;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--home-deep);
+    font-size: 12px;
+    font-weight: 830;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1120px) {
+    .ndt-home-copy {
+        left: 51%;
+        width: 45%;
+    }
+
+    .ndt-home-art {
+        left: 12%;
+        width: 35%;
+    }
+
+    .ndt-home-copy h1,
+    .ndt-home-copy h2 {
+        font-size: 46px;
+    }
+
+    .ndt-home-rooms {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ndt-home-booktabs {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .ndt-home-booktabs a:nth-child(n+4) {
+        border-top: 1px solid #edf1f2;
+    }
+
+    .ndt-home-journey {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .ndt-home-hero {
+        min-height: 650px;
+        border-radius: 0;
+    }
+
+    .ndt-home-art {
+        left: 14%;
+        top: 4%;
+        width: 72%;
+        height: 40%;
+    }
+
+    .ndt-home-copy {
+        left: 28px;
+        right: 28px;
+        top: auto;
+        bottom: 82px;
+        width: auto;
+        transform: none;
+    }
+
+    .ndt-home-copy h1,
+    .ndt-home-copy h2 {
+        font-size: 37px;
+        letter-spacing: -1.5px;
+    }
+
+    .ndt-home-copy p {
+        font-size: 14px;
+    }
+
+    .ndt-home-index {
+        left: auto;
+        right: 17px;
+        top: 17px;
+        display: flex;
+        width: auto;
+        transform: none;
+    }
+
+    .ndt-home-index::before {
+        display: none;
+    }
+
+    .ndt-home-index button,
+    .ndt-home-index button.is-active {
+        width: 45px;
+        height: 45px;
+        padding: 0;
+        font-size: 13px;
+        text-align: center;
+    }
+
+    .ndt-home-index button::after {
+        display: none;
+    }
+
+    .ndt-home-bookbar {
+        width: calc(100% - 28px);
+        margin-top: -38px;
+    }
+
+    .ndt-home-booktabs {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .ndt-home-bookcontent {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ndt-home-section {
+        padding-top: 62px;
+    }
+
+    .ndt-home-section-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ndt-home-section-head h2,
+    .ndt-home-journey-copy h2 {
+        font-size: 32px;
+    }
+
+    .ndt-home-rooms {
+        grid-template-columns: 1fr;
+    }
+
+    .ndt-home-journey-copy {
+        padding: 35px 27px;
+    }
+
+    .ndt-home-journey-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ndt-home-journey-item {
+        border-left: 0;
+        border-bottom: 1px solid var(--home-line) !important;
+    }
+
+    .ndt-home-support {
+        grid-template-columns: 1fr;
+    }
+
+    .ndt-home-final {
+        grid-template-columns: 1fr;
+        padding: 34px 28px;
+    }
+}
+
+/* Phase 3: page-local public composition. */
+.ndt-premium-ui .site-main:has(.ndt-home){width:100%;max-width:none;margin:0;padding:0}
+.ndt-home{max-width:none;width:100%;padding:24px 32px 48px;--home-brand:#087f91;--home-ink:#16333a;--home-muted:#5c737a;overflow-wrap:anywhere}
+.ndt-home .ndt-home-hero{border-radius:16px;box-shadow:none;min-height:580px}
+.ndt-home .ndt-home-copy h1,.ndt-home .ndt-home-copy h2{font-size:clamp(32px,3vw,52px);line-height:1.12;letter-spacing:-.025em}
+.ndt-home .ndt-home-slide{transition:opacity .25s ease,visibility .25s ease}
+.ndt-home .ndt-home-cta{background:#087f91;border-color:#087f91;color:#fff;border-radius:8px}
+.ndt-home .ndt-home-cta:hover{background:#066b7b;color:#fff}
+.ndt-home .ndt-home-bookbar{width:calc(100% - 48px);margin-top:-32px;border-radius:16px;box-shadow:0 8px 24px #16333a12}
+.ndt-home .ndt-home-booktabs a{min-height:48px;font-size:13px}
+.ndt-home-search{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,.6fr) auto;gap:16px;align-items:end;padding:24px 24px 8px}
+.ndt-home-search>div{min-width:0}.ndt-home-search label{display:block;margin-bottom:8px;font-size:14px;font-weight:600}
+.ndt-home-search input{width:100%;height:48px;border:1px solid #aebfc4;border-radius:8px;padding:12px;font:inherit;font-size:15px;background:#fff;color:#16333a;min-width:0}
+.ndt-home-search button{min-height:48px;border:0;border-radius:8px;padding:12px 24px;background:#087f91;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.ndt-home-search-all{display:inline-flex;align-items:center;min-height:44px;margin:0 24px 12px;color:#066b7b;font-size:14px}
+.ndt-home .ndt-home-index button{min-width:44px;min-height:44px}
+.ndt-home .ndt-home-index .ndt-home-pause{width:auto;height:auto;padding:8px;font-size:12px;background:#fff;color:#16333a;border-radius:8px;line-height:1.4}
+.ndt-home .ndt-home-index .ndt-home-pause:after{display:none}
+.ndt-home .ndt-home-section{padding-top:64px}
+.ndt-home .ndt-home-section-head h2,.ndt-home .ndt-home-journey-copy h2{font-size:clamp(28px,2.6vw,40px);line-height:1.2}
+.ndt-home .ndt-home-rooms{gap:24px}
+.ndt-home .ndt-home-room{border:1px solid #dce7e9;border-radius:16px;overflow:hidden;box-shadow:none;display:flex;flex-direction:column}
+.ndt-home .ndt-home-room:hover,.ndt-home .ndt-home-room:focus-within{border-color:#83b8c1;box-shadow:0 8px 24px #16434c12;transform:none}
+.ndt-home .ndt-home-room-visual{height:auto;aspect-ratio:16/10;background:#eaf4f6}
+.ndt-home .ndt-home-room-visual:before,.ndt-home .ndt-home-room-visual:after{display:none}
+.ndt-home-room-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ndt-home-room-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#547980;font-size:14px}
+.ndt-public-icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ndt-home-room-fallback .ndt-public-icon{width:48px;height:48px;color:#087f91}
+.ndt-home .ndt-home-room-status{position:absolute;left:16px;right:auto;top:16px;padding:8px 12px;background:#e9f4f8;color:#24657a;font-size:12px;border-radius:999px;display:inline-flex;gap:8px;align-items:center}
+.ndt-home .ndt-home-room-status:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.ndt-home .ndt-home-room-status--empty{background:#e8f6f2;color:#176a59}.ndt-home .ndt-home-room-status--booked{background:#fff4da;color:#805a16}.ndt-home .ndt-home-room-status--maintenance{background:#fff0ed;color:#9a4439}
+.ndt-home .ndt-home-room-body{padding:24px;display:flex;flex-direction:column;flex:1}
+.ndt-home .ndt-home-room-body h3{font-size:24px;margin:0 0 8px}.ndt-home .ndt-home-room-type{font-size:13px}.ndt-home .ndt-home-room-location{font-size:13px;line-height:1.6}
+.ndt-home .ndt-home-room-meta{font-size:14px;flex-wrap:wrap}.ndt-home .ndt-home-room-foot{margin-top:auto;flex-wrap:wrap;gap:16px}
+.ndt-home .ndt-home-price strong{font-size:22px;color:#066b7b}.ndt-home .ndt-home-price em{display:block;font-size:12px;color:#5c737a}
+.ndt-home .ndt-home-detail{min-height:48px;display:inline-flex;align-items:center;padding:12px 16px;background:#087f91;color:#fff;border:1px solid #087f91;border-radius:8px;font-size:14px}
+.ndt-home .ndt-home-journey-grid{grid-template-columns:1fr}.ndt-home .ndt-home-journey-item{padding:24px;border:0;border-bottom:1px solid #dce7e9}.ndt-home .ndt-home-journey-item p{font-size:14px}
+.ndt-home .ndt-home-support{gap:0;border-top:1px solid #dce7e9;border-bottom:1px solid #dce7e9}.ndt-home .ndt-home-support>a{border:0;border-radius:0;box-shadow:none;padding:24px}
+.ndt-home .ndt-home-final{background:#edf7f8;border:1px solid #dce7e9;border-radius:16px;color:#16333a}.ndt-home .ndt-home-final h2,.ndt-home .ndt-home-final p{color:#16333a}
+.ndt-home-final-actions{display:flex;flex-wrap:wrap;gap:12px}.ndt-home .ndt-home-final-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 20px;background:#087f91;color:#fff;border-radius:8px;border:1px solid #087f91}.ndt-home .ndt-home-final-actions .ndt-home-secondary{background:#fff;color:#066b7b;border-color:#c7dce0}
+.ndt-home :is(a,button,input):focus-visible{outline:3px solid #087f91;outline-offset:4px}
+@media(min-width:1600px){.ndt-home .ndt-home-hero{min-height:620px}}
+@media(max-width:1439px){.ndt-home .ndt-home-rooms{grid-template-columns:repeat(2,minmax(0,1fr))}.ndt-home .ndt-home-booktabs{grid-template-columns:repeat(3,minmax(0,1fr))}.ndt-home .ndt-home-booktabs a:nth-child(n){display:flex}}
+@media(max-width:1120px){.ndt-home-search{grid-template-columns:1fr 1fr}.ndt-home-search button{grid-column:1/-1}.ndt-home .ndt-home-copy{left:42%;width:52%}.ndt-home .ndt-home-copy h1,.ndt-home .ndt-home-copy h2{font-size:34px}}
+@media(max-width:767px){.ndt-home{padding:16px}.ndt-home .ndt-home-hero{min-height:640px}.ndt-home .ndt-home-copy{left:24px;right:24px;top:40px;width:auto;transform:none}.ndt-home .ndt-home-copy h1,.ndt-home .ndt-home-copy h2{font-size:32px}.ndt-home .ndt-home-art{opacity:.3;pointer-events:none}.ndt-home .ndt-home-bookbar{width:100%;margin-top:16px}.ndt-home-search{grid-template-columns:1fr;padding:16px}.ndt-home-search button{grid-column:auto}.ndt-home .ndt-home-rooms{grid-template-columns:1fr}.ndt-home .ndt-home-booktabs{grid-template-columns:1fr 1fr}.ndt-home .ndt-home-index{top:auto;bottom:24px;left:24px;right:24px;display:flex;flex-wrap:wrap;gap:4px;transform:none}.ndt-home .ndt-home-copy{bottom:auto}.ndt-home .ndt-home-room-body{padding:16px}.ndt-home .ndt-home-final{padding:24px}.ndt-home .ndt-home-journey-copy{padding:24px}}
+@media(prefers-reduced-motion:reduce){.ndt-home *{transition:none!important;animation:none!important}}
+
+.ndt-home .ndt-home-index button{color:#16333a;background:#ffffffc9;border-radius:8px;margin-bottom:8px;width:56px;height:48px;padding:0;text-align:center;font-size:15px}
+.ndt-home .ndt-home-index button.is-active{color:#fff;background:#087f91;font-size:18px;height:48px}
+.ndt-home .ndt-home-index:before,.ndt-home .ndt-home-index button:after{display:none}
+.ndt-home .ndt-home-final p,.ndt-home .ndt-home-support span,.ndt-home .ndt-home-journey-copy p{font-size:14px;line-height:1.7}
+
+
+/* =========================================================
+   HOME V9 - CINEMATIC HERO REDESIGN
+   Mục tiêu:
+   - Hero ảnh thật phủ toàn bộ vùng đầu trang
+   - Topbar trong suốt, không còn ô tìm kiếm trùng chức năng
+   - Bộ chọn 01 / 02 / 03 / 04 đặt trực tiếp trên ảnh
+   - Giữ nguyên form tìm phòng thật ở khối phía dưới hero
+   ========================================================= */
+
+/* 01. HOME SHELL - ĐƯA HERO LÊN SÁT ĐẦU TRANG */
+body.ndt-premium-ui {
+    padding-top: 0;
+}
+
+.ndt-premium-ui .site-main:has(.ndt-home) {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ndt-home {
+    width: 100%;
+    max-width: none;
+    padding: 0 24px 56px;
+}
+
+/* Topbar chỉ giữ các nút tài khoản / thông báo trên trang chủ. */
+.ndt-shell-topbar {
+    height: 92px;
+    padding: 0 38px;
+    background: transparent;
+    border-bottom: 0;
+    box-shadow: none;
+    pointer-events: none;
+}
+
+.ndt-shell-topbar .ndt-topbar-copy,
+.ndt-shell-topbar .ndt-topbar-search {
+    display: none !important;
+}
+
+.ndt-shell-topbar .ndt-topbar-actions {
+    margin-left: auto;
+    pointer-events: auto;
+}
+
+.ndt-shell-topbar .ndt-topbar-action,
+.ndt-shell-topbar .ndt-topbar-user {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, .58);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .90);
+    color: #075f70;
+    box-shadow: 0 8px 26px rgba(13, 42, 47, .14);
+    backdrop-filter: blur(12px);
+}
+
+.ndt-shell-topbar .ndt-topbar-action:hover,
+.ndt-shell-topbar .ndt-topbar-user:hover {
+    background: #ffffff;
+    color: #064f5d;
+}
+
+/* 02. HERO - ẢNH THẬT PHỦ TOÀN KHUNG */
+.ndt-home .ndt-home-hero {
+    min-height: clamp(650px, 82vh, 790px);
+    border-radius: 0 0 22px 22px;
+    overflow: hidden;
+    background: #17383c;
+    box-shadow: none;
+}
+
+.ndt-home-slide {
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    transform: scale(1.025);
+    transition:
+        opacity .55s ease,
+        visibility .55s ease,
+        transform 6s ease !important;
+}
+
+.ndt-home-slide.is-active {
+    transform: scale(1);
+}
+
+/* 4 ảnh hero đã chọn theo cùng phong cách kiến trúc / lưu trú hiện đại. */
+.ndt-home-slide--room {
+    background-image: url("https://images.unsplash.com/photo-1774311237295-a65a4c1ff38a?auto=format&fit=crop&fm=jpg&q=82&w=2400") !important;
+}
+
+.ndt-home-slide--smart {
+    background-image: url("https://images.unsplash.com/photo-1751945965597-71171ec7a458?auto=format&fit=crop&fm=jpg&q=82&w=2400") !important;
+}
+
+.ndt-home-slide--service {
+    background-image: url("https://images.unsplash.com/photo-1765862835260-47843a7bba45?auto=format&fit=crop&fm=jpg&q=82&w=2400") !important;
+}
+
+.ndt-home-slide--community {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/7/78/Modern_apartment_building_%28Unsplash%29.jpg") !important;
+}
+
+/* Lớp phủ giúp chữ luôn đọc rõ trên cả ảnh sáng và tối. */
+.ndt-home-slide::before {
+    z-index: 1;
+    background:
+        linear-gradient(90deg, rgba(7, 32, 37, .42) 0%, rgba(7, 32, 37, .12) 38%, rgba(7, 32, 37, .54) 100%),
+        linear-gradient(180deg, rgba(5, 29, 34, .20) 0%, rgba(5, 29, 34, .04) 50%, rgba(5, 29, 34, .34) 100%) !important;
+}
+
+/* Illustration cũ không còn dùng nhưng giữ markup để tránh ảnh hưởng logic. */
+.ndt-home .ndt-home-art {
+    display: none !important;
+}
+
+/* 03. NỘI DUNG HERO */
+.ndt-home .ndt-home-copy,
+.ndt-home .ndt-home-slide--smart .ndt-home-copy,
+.ndt-home .ndt-home-slide--community .ndt-home-copy {
+    left: auto;
+    right: clamp(52px, 7vw, 112px);
+    top: 47%;
+    width: min(590px, 44%);
+    transform: translateY(-50%);
+    color: #ffffff;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, .14);
+}
+
+.ndt-home .ndt-home-eyebrow {
+    margin-bottom: 18px;
+    color: rgba(255, 255, 255, .92);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+}
+
+.ndt-home .ndt-home-copy h1,
+.ndt-home .ndt-home-copy h2 {
+    max-width: 650px;
+    margin-bottom: 22px;
+    color: #ffffff;
+    font-size: clamp(42px, 4.1vw, 66px);
+    line-height: 1.04;
+    letter-spacing: -.045em;
+    font-weight: 690;
+}
+
+.ndt-home .ndt-home-copy p {
+    max-width: 560px;
+    margin-bottom: 30px;
+    color: rgba(255, 255, 255, .92);
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.ndt-home .ndt-home-cta {
+    min-height: 50px;
+    padding: 0 24px;
+    border: 1px solid rgba(255, 255, 255, .78);
+    border-radius: 10px;
+    background: rgba(4, 92, 108, .78);
+    color: #ffffff;
+    box-shadow: 0 10px 28px rgba(3, 38, 45, .16);
+    backdrop-filter: blur(8px);
+}
+
+.ndt-home .ndt-home-cta:hover {
+    border-color: #ffffff;
+    background: #087f91;
+}
+
+/* 04. BỘ CHỌN SLIDE 01 / 02 / 03 / 04 */
+.ndt-home .ndt-home-index {
+    left: 42px;
+    top: 49%;
+    width: 76px;
+    transform: translateY(-50%);
+}
+
+.ndt-home .ndt-home-index::before {
+    display: block;
+    top: 9px;
+    right: 4px;
+    bottom: 54px;
+    width: 2px;
+    background: rgba(255, 255, 255, .42);
+}
+
+.ndt-home .ndt-home-index button,
+.ndt-home .ndt-home-index button.is-active {
+    width: 68px;
+    min-width: 0;
+    height: 58px;
+    min-height: 0;
+    margin: 0;
+    padding: 0 20px 0 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, .58);
+    font-size: 17px;
+    font-weight: 700;
+    text-align: right;
+    box-shadow: none;
+}
+
+.ndt-home .ndt-home-index button.is-active {
+    height: 82px;
+    color: #ffffff;
+    font-size: 30px;
+}
+
+.ndt-home .ndt-home-index button::after {
+    display: none;
+}
+
+.ndt-home .ndt-home-index button.is-active::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    display: block;
+    width: 3px;
+    height: 48px;
+    border-radius: 999px;
+    background: #ffffff;
+    transform: translateY(-50%);
+}
+
+.ndt-home .ndt-home-index .ndt-home-pause {
+    width: auto;
+    height: auto;
+    min-height: 0;
+    margin-top: 8px;
+    padding: 7px 10px;
+    border: 1px solid rgba(255, 255, 255, .48);
+    border-radius: 7px;
+    background: rgba(10, 47, 53, .28);
+    color: rgba(255, 255, 255, .92);
+    font-size: 10px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+}
+
+.ndt-home .ndt-home-index .ndt-home-pause::after {
+    display: none;
+}
+
+/* 05. KHỐI TÌM PHÒNG - NỔI TRÊN MÉP HERO */
+.ndt-home .ndt-home-bookbar {
+    width: calc(100% - 72px);
+    max-width: 1320px;
+    margin: -88px auto 0;
+    border: 0;
+    border-radius: 22px;
+    background: #ffffff;
+    box-shadow: 0 22px 54px rgba(19, 49, 54, .18);
+}
+
+.ndt-home .ndt-home-booktabs {
+    min-height: 70px;
+}
+
+.ndt-home .ndt-home-booktabs a {
+    min-height: 70px;
+    font-size: 14px;
+}
+
+/* 06. RESPONSIVE */
+@media (max-width: 1120px) {
+    .ndt-home .ndt-home-copy,
+    .ndt-home .ndt-home-slide--smart .ndt-home-copy,
+    .ndt-home .ndt-home-slide--community .ndt-home-copy {
+        right: 54px;
+        width: 55%;
+    }
+}
+
+@media (max-width: 900px) {
+    body.ndt-premium-ui {
+        padding-top: var(--ndt-topbar);
+    }
+
+    .ndt-shell-topbar {
+        background: #ffffff;
+        border-bottom: 1px solid #d8dfe1;
+        pointer-events: auto;
+    }
+
+    .ndt-shell-topbar .ndt-topbar-copy {
+        display: flex !important;
+    }
+
+    .ndt-home {
+        padding: 16px 16px 44px;
+    }
+
+    .ndt-home .ndt-home-hero {
+        min-height: 660px;
+        border-radius: 18px;
+    }
+
+    .ndt-home .ndt-home-copy,
+    .ndt-home .ndt-home-slide--smart .ndt-home-copy,
+    .ndt-home .ndt-home-slide--community .ndt-home-copy {
+        left: 28px;
+        right: 28px;
+        top: 92px;
+        width: auto;
+        transform: none;
+    }
+
+    .ndt-home .ndt-home-copy h1,
+    .ndt-home .ndt-home-copy h2 {
+        font-size: clamp(34px, 8vw, 48px);
+    }
+
+    .ndt-home .ndt-home-index {
+        left: 28px;
+        right: 28px;
+        top: auto;
+        bottom: 36px;
+        width: auto;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transform: none;
+    }
+
+    .ndt-home .ndt-home-index::before {
+        display: none;
+    }
+
+    .ndt-home .ndt-home-index button,
+    .ndt-home .ndt-home-index button.is-active {
+        width: 48px;
+        height: 44px;
+        padding: 0;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .ndt-home .ndt-home-index button.is-active {
+        border-bottom: 2px solid #ffffff;
+        font-size: 18px;
+    }
+
+    .ndt-home .ndt-home-index button.is-active::after {
+        display: none;
+    }
+
+    .ndt-home .ndt-home-index .ndt-home-pause {
+        margin: 0 0 0 4px;
+    }
+
+    .ndt-home .ndt-home-bookbar {
+        width: 100%;
+        margin-top: 18px;
+    }
+}
+
+@media (max-width: 640px) {
+    .ndt-home .ndt-home-hero {
+        min-height: 620px;
+    }
+
+    .ndt-home .ndt-home-copy {
+        top: 58px;
+    }
+
+    .ndt-home .ndt-home-copy p {
+        font-size: 14px;
+    }
+
+    .ndt-home .ndt-home-booktabs {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+</style>
+{% endblock %}
+
+
+
+{% block content %}
+<div class="ndt-home">
+
+    <!-- =====================================================
+         HERO 4 SLIDES
+         ===================================================== -->
+    <section
+        class="ndt-home-hero"
+        aria-label="Nội dung nổi bật NDT MOTEL"
+    >
+
+        <div class="ndt-home-slides">
+
+            <!-- SLIDE 01 -->
+            {% with hero_room=phong|first %}
+            {% with hero_cover=hero_room.anh_dai_dien_hien_thi %}
+            <article
+                class="ndt-home-slide ndt-home-slide--room is-active"
+                data-home-slide="0"
+                {% if hero_cover %}style="background-image: url('{{ hero_cover.anh.url }}') !important;"{% endif %}
+            >
+
+                <div class="ndt-home-art">
+                    <span class="ndt-art-room-window"></span>
+                    <span class="ndt-art-room-bed"></span>
+                    <span class="ndt-art-room-lamp"></span>
+                    <span class="ndt-art-room-plant"></span>
+                </div>
+
+                <div class="ndt-home-copy">
+
+                    <span class="ndt-home-eyebrow">
+                        Không gian sống rõ ràng
+                    </span>
+
+                    <h1>
+                        Tìm phòng. Bắt đầu cuộc sống mới.
+                    </h1>
+
+                    <p>
+                        Khám phá phòng tại Đà Nẵng. Xem giá thuê, cơ sở và
+                        sức chứa trước khi chọn nơi ở phù hợp.
+                    </p>
+
+                    <a
+                        href="{% url 'danh_sach_phong' %}"
+                        class="ndt-home-cta"
+                    >
+                        Khám phá phòng
+                    </a>
+
+                </div>
+
+            </article>
+            {% endwith %}
+            {% endwith %}
+
+            <!-- SLIDE 02 -->
+            <article
+                class="ndt-home-slide ndt-home-slide--smart"
+                data-home-slide="1"
+            >
+
+                <div class="ndt-home-art">
+                    <span class="ndt-art-smart-door"></span>
+                    <span class="ndt-art-smart-phone"></span>
+                    <span class="ndt-art-smart-signal"></span>
+                    <span class="ndt-art-smart-key"></span>
+                </div>
+
+                <div class="ndt-home-copy">
+
+                    <span class="ndt-home-eyebrow">
+                        NDT Smart Living
+                    </span>
+
+                    <h2>
+                        Lưu trú thuận tiện, mỗi ngày.
+                    </h2>
+
+                    <p>
+                        Đặt phòng, hợp đồng, hóa đơn, hỗ trợ và những tiện
+                        ích Smart Room được kết nối xuyên suốt trong một
+                        trải nghiệm thống nhất.
+                    </p>
+
+                    {% if user.is_authenticated %}
+                        <a
+                            href="{% if user.is_staff or user.is_superuser %}{% url 'dashboard_admin' %}{% else %}{% url 'tai_khoan' %}{% endif %}"
+                            class="ndt-home-cta"
+                        >
+                            {% if user.is_staff or user.is_superuser %}Mở trung tâm quản trị{% else %}Mở trung tâm của tôi{% endif %}
+                        </a>
+                    {% else %}
+                        <a
+                            href="{% url 'dang_ky' %}"
+                            class="ndt-home-cta ndt-auth-open"
+                            data-auth-mode="register"
+                        >
+                            Tạo tài khoản
+                        </a>
+                    {% endif %}
+
+                </div>
+
+            </article>
+
+            <!-- SLIDE 03 -->
+            <article
+                class="ndt-home-slide ndt-home-slide--service"
+                data-home-slide="2"
+            >
+
+                <div class="ndt-home-art">
+                    <span class="ndt-art-service-card ndt-art-service-card--a"></span>
+                    <span class="ndt-art-service-card ndt-art-service-card--b"></span>
+                    <span class="ndt-art-service-card ndt-art-service-card--c"></span>
+                    <span class="ndt-art-service-orbit"></span>
+                </div>
+
+                <div class="ndt-home-copy">
+
+                    <span class="ndt-home-eyebrow">
+                        Dịch vụ trong thời gian ở
+                    </span>
+
+                    <h2>
+                        Dịch vụ trong tầm tay.
+                    </h2>
+
+                    <p>
+                        Theo dõi hóa đơn, thông báo, hợp đồng và yêu cầu hỗ
+                        trợ mà không phải chuyển qua nhiều kênh khác nhau.
+                    </p>
+
+                    {% if user.is_authenticated %}
+                        <a
+                            href="{% if user.is_staff or user.is_superuser %}{% url 'dashboard_admin' %}{% else %}{% url 'tai_khoan' %}{% endif %}"
+                            class="ndt-home-cta"
+                        >
+                            Xem tài khoản
+                        </a>
+                    {% else %}
+                        <a
+                            href="{% url 'dang_nhap' %}"
+                            class="ndt-home-cta ndt-auth-open"
+                            data-auth-mode="login"
+                        >
+                            Đăng nhập
+                        </a>
+                    {% endif %}
+
+                </div>
+
+            </article>
+
+            <!-- SLIDE 04 -->
+            <article
+                class="ndt-home-slide ndt-home-slide--community"
+                data-home-slide="3"
+            >
+
+                <div class="ndt-home-art">
+                    <span class="ndt-art-house ndt-art-house--1"></span>
+                    <span class="ndt-art-house ndt-art-house--2"></span>
+                    <span class="ndt-art-house ndt-art-house--3"></span>
+                    <span class="ndt-art-sun"></span>
+                </div>
+
+                <div class="ndt-home-copy">
+
+                    <span class="ndt-home-eyebrow">
+                        NDT MOTEL
+                    </span>
+
+                    <h2>
+                        Chọn nơi ở, hiểu rõ thông tin.
+                    </h2>
+
+                    <p>
+                        Khám phá các cơ sở và phòng đang được quản lý trực
+                        tiếp trên hệ thống, với trạng thái và sức chứa được
+                        thể hiện rõ trước khi bạn quyết định.
+                    </p>
+
+                    <a
+                        href="{% url 'danh_sach_phong' %}"
+                        class="ndt-home-cta"
+                    >
+                        Xem ngay
+                    </a>
+
+                </div>
+
+            </article>
+
+        </div>
+
+        <!-- 01 / 02 / 03 / 04 -->
+        <div
+            class="ndt-home-index"
+            aria-label="Chọn nội dung nổi bật"
+        >
+            <button
+                type="button"
+                class="is-active"
+                data-home-go="0"
+                aria-current="true"
+                aria-label="Slide 1"
+            >
+                01
+            </button>
+
+            <button
+                type="button"
+                data-home-go="1"
+                aria-current="false"
+                aria-label="Slide 2"
+            >
+                02
+            </button>
+
+            <button
+                type="button"
+                data-home-go="2"
+                aria-current="false"
+                aria-label="Slide 3"
+            >
+                03
+            </button>
+
+            <button
+                type="button"
+                data-home-go="3"
+                aria-current="false"
+                aria-label="Slide 4"
+            >
+                04
+            </button>
+            <button type="button" class="ndt-home-pause" aria-pressed="false">Tạm dừng</button>
+        </div>
+
+    </section>
+
+    <!-- =====================================================
+         QUICK ACCESS
+         Search and existing account shortcuts.
+         ===================================================== -->
+    <section class="ndt-home-bookbar">
+
+        <nav
+            class="ndt-home-booktabs"
+            aria-label="Truy cập nhanh"
+        >
+
+            <a href="{% url 'danh_sach_phong' %}">
+                Tìm phòng
+            </a>
+
+            {% if user.is_authenticated %}
+                <a href="{% if user.is_staff or user.is_superuser %}{% url 'dashboard_admin' %}{% else %}{% url 'dat_phong_cua_toi' %}{% endif %}">
+                    {% if user.is_staff or user.is_superuser %}Quản lý đặt phòng{% else %}Đặt phòng của tôi{% endif %}
+                </a>
+            {% else %}
+                <a
+                    href="{% url 'dang_nhap' %}"
+                    class="ndt-auth-open"
+                    data-auth-mode="login"
+                >
+                    Quản lý đặt phòng
+                </a>
+            {% endif %}
+
+            {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
+
+                <a href="{% url 'hop_dong_cua_toi' %}">
+                    Hợp đồng của tôi
+                </a>
+
+                <a href="{% url 'hoa_don_cua_toi' %}">
+                    Hóa đơn &amp; thanh toán
+                </a>
+
+                <a href="{% url 'yeu_cau_sua_chua_cua_toi' %}">
+                    Hỗ trợ của tôi
+                </a>
+
+            {% else %}
+
+                <a href="#features">
+                    Smart Living
+                </a>
+
+                <a href="#support">
+                    Hỗ trợ
+                </a>
+
+                <a href="{% url 'danh_sach_phong' %}">
+                    Thông tin phòng
+                </a>
+
+            {% endif %}
+
+        </nav>
+
+        <form class="ndt-home-search" method="get" action="{% url 'danh_sach_phong' %}">
+            <div><label for="home-q">Bạn muốn tìm phòng ở đâu?</label>
+                <input id="home-q" name="q" type="search" placeholder="Số phòng, cơ sở, quận hoặc địa chỉ"></div>
+            <div><label for="home-price">Giá tối đa (đ/tháng)</label>
+                <input id="home-price" name="gia_max" type="number" min="0" step="any" placeholder="Không giới hạn"></div>
+            <button type="submit">Tìm phòng</button>
+        </form>
+        <a class="ndt-home-search-all" href="{% url 'danh_sach_phong' %}">Xem tất cả phòng</a>
+
+    </section>
+
+    <!-- =====================================================
+         FEATURED ROOMS
+         ===================================================== -->
+    <section class="ndt-home-section">
+
+        <div class="ndt-home-section-head">
+
+            <div>
+
+                <div class="ndt-home-kicker">
+                    Phòng tại NDT MOTEL
+                </div>
+
+                <h2>
+                    Khám phá phòng đang có
+                </h2>
+
+                <p>
+                    Xem nhanh những phòng đang có trên hệ thống. Mỗi trang
+                    chi tiết cung cấp thêm tình trạng, sức chứa và thông tin
+                    cần thiết trước khi gửi yêu cầu đặt.
+                </p>
+
+            </div>
+
+            <a
+                href="{% url 'danh_sach_phong' %}"
+                class="ndt-home-more"
+            >
+                Xem tất cả phòng →
+            </a>
+
+        </div>
+
+        <div class="ndt-home-rooms">
+
+            {% for phong in phong|slice:":6" %}
+
+                {% with cover=phong.anh_dai_dien_hien_thi %}
+                <article class="ndt-home-room">
+
+                    <div
+                        class="ndt-home-room-visual{% if cover %} has-room-image{% endif %}"
+                        data-room="{{ phong.so_phong }}"
+                    >
+                        {% if cover %}
+                            <img
+                                src="{{ cover.anh.url }}"
+                                alt="Phòng {{ phong.so_phong }} - {{ phong.co_so.ten_co_so }}"
+                                class="ndt-home-room-photo"
+                                loading="lazy"
+                            >
+                        {% endif %}
+
+                        {% if not cover %}
+                        <div class="ndt-home-room-fallback"><svg class="ndt-public-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V3h12v18M16 9h4v12M2 21h20M8 7h4M8 11h4M8 15h4M9 21v-3h2v3"></path></svg><span>Chưa có hình ảnh</span></div>
+                        {% endif %}
+
+                        {% if phong.trang_thai == "trong" %}
+
+                            <span class="ndt-home-room-status ndt-home-room-status--empty">
+                                Phòng trống
+                            </span>
+
+                        {% elif phong.trang_thai == "bao_tri" %}
+
+                            <span class="ndt-home-room-status ndt-home-room-status--maintenance">
+                                Bảo trì
+                            </span>
+
+                        {% elif phong.trang_thai == "da_dat" %}
+
+                            <span class="ndt-home-room-status ndt-home-room-status--booked">
+                                Đã đặt
+                            </span>
+
+                        {% elif phong.trang_thai == "dang_thue" %}
+
+                            <span class="ndt-home-room-status">
+                                Đang thuê
+                            </span>
+
+                        {% else %}
+
+                            <span class="ndt-home-room-status">
+                                {{ phong.trang_thai_hien_thi }}
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <div class="ndt-home-room-body">
+
+                        <h3>Phòng {{ phong.so_phong }}</h3>
+                        <div class="ndt-home-room-type">{{ phong.get_loai_phong_display }}</div>
+
+                        <div class="ndt-home-room-location">
+
+                            <strong>
+                                {{ phong.co_so.ten_co_so }}
+                            </strong>
+
+                            {% if phong.co_so.quan %}
+                                · {{ phong.co_so.quan }}
+                            {% endif %}
+
+                            {% if phong.co_so.dia_chi %}
+                                <br>
+                                {{ phong.co_so.dia_chi }}
+                            {% endif %}
+
+                        </div>
+
+                        <div class="ndt-home-room-meta">
+
+                            {% if phong.dien_tich %}
+                                <span>
+                                    {{ phong.dien_tich }} m²
+                                </span>
+                            {% endif %}
+
+                            {% if phong.suc_chua_da_cau_hinh %}
+                                <span>
+                                    Tối đa {{ phong.suc_chua_hien_thi }} người
+                                </span>
+                            {% else %}
+                                <span>
+                                    Chưa cấu hình sức chứa
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="ndt-home-room-foot">
+
+                            <div class="ndt-home-price">
+
+                                <small>
+                                    Giá thuê
+                                </small>
+
+                                <strong>
+                                    {{ phong.gia_thue|vnd }} đ
+                                    <em>/ tháng</em>
+                                </strong>
+
+                            </div>
+
+                            <a
+                                href="{% url 'chi_tiet_phong' phong.id %}"
+                                class="ndt-home-detail"
+                            >
+                                Xem chi tiết
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </article>
+                {% endwith %}
+
+            {% empty %}
+
+                <div class="ndt-home-empty">
+                    Hiện chưa có phòng để hiển thị.
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+    <!-- =====================================================
+         SMART LIVING
+         ===================================================== -->
+    <section
+        class="ndt-home-section"
+        id="features"
+    >
+
+        <div class="ndt-home-journey">
+
+            <div class="ndt-home-journey-copy">
+
+                <div class="ndt-home-kicker">
+                    NDT Smart Living
+                </div>
+
+                <h2>
+                    Smart Room, gắn với nơi bạn ở.
+                </h2>
+
+                <p>
+                    Quản lý người ở cùng, hồ sơ Face ID và quyền ra vào.
+                    Các chức năng hiển thị theo quyền sử dụng phòng của bạn.
+                </p>
+
+                {% if user.is_authenticated %}
+
+                    <a href="{% if user.is_staff or user.is_superuser %}{% url 'dashboard_admin' %}{% else %}{% url 'tai_khoan' %}{% endif %}">
+                        Mở trung tâm tài khoản
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'dang_ky' %}"
+                        class="ndt-auth-open"
+                        data-auth-mode="register"
+                    >
+                        Đăng ký tài khoản
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+            <div class="ndt-home-journey-grid">
+                <div class="ndt-home-journey-item"><span>01</span><strong>Người ở cùng & hồ sơ nhận diện</strong><p>Quản lý người ở cùng và hồ sơ Face ID gắn với phòng.</p></div>
+                <div class="ndt-home-journey-item"><span>02</span><strong>Quyền ra vào</strong><p>Theo dõi quyền sử dụng đúng phòng và thời gian hiệu lực.</p></div>
+                <div class="ndt-home-journey-item"><span>03</span><strong>Lịch sử ra vào</strong><p>Xem các lượt kiểm tra và kết quả cho phép hoặc từ chối.</p></div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =====================================================
+         SUPPORT
+         ===================================================== -->
+    <section
+        class="ndt-home-section"
+        id="support"
+    >
+
+        <div class="ndt-home-section-head">
+
+            <div>
+
+                <div class="ndt-home-kicker">
+                    Cần hỗ trợ?
+                </div>
+
+                <h2>
+                    Đi đúng nơi, nhanh hơn.
+                </h2>
+
+                <p>
+                    Theo dõi hợp đồng, hóa đơn, thanh toán, yêu cầu sửa chữa
+                    và thông báo trong tài khoản của bạn.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="ndt-home-support">
+
+            <a href="{% url 'danh_sach_phong' %}">
+
+                <div>
+                    <strong>
+                        Tìm và so sánh phòng
+                    </strong>
+
+                    <span>
+                        Xem giá, vị trí và thông tin chi tiết.
+                    </span>
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+            {% if user.is_authenticated %}
+
+                <a href="{% if user.is_staff or user.is_superuser %}{% url 'dashboard_admin' %}{% else %}{% url 'tai_khoan' %}{% endif %}">
+
+                    <div>
+                        <strong>
+                            Trung tâm tài khoản
+                        </strong>
+
+                        <span>
+                            Tổng hợp hoạt động và thông tin của bạn.
+                        </span>
+                    </div>
+
+                    <b>→</b>
+
+                </a>
+
+            {% else %}
+
+                <a
+                    href="{% url 'dang_nhap' %}"
+                    class="ndt-auth-open"
+                    data-auth-mode="login"
+                >
+
+                    <div>
+                        <strong>
+                            Đăng nhập NDT MOTEL
+                        </strong>
+
+                        <span>
+                            Tiếp tục quản lý hành trình lưu trú.
+                        </span>
+                    </div>
+
+                    <b>→</b>
+
+                </a>
+
+            {% endif %}
+
+            <a href="#contact">
+
+                <div>
+                    <strong>
+                        Liên hệ NDT MOTEL
+                    </strong>
+
+                    <span>
+                        Thông tin hỗ trợ và kết nối.
+                    </span>
+                </div>
+
+                <b>→</b>
+
+            </a>
+
+        </div>
+
+    </section>
+
+    <!-- =====================================================
+         FINAL CTA
+         ===================================================== -->
+    <section
+        class="ndt-home-final"
+        id="home-final"
+    >
+
+        <div>
+
+            <h2>
+                Sẵn sàng xem phòng phù hợp?
+            </h2>
+
+            <p>
+                Bạn có thể xem danh sách và thông tin phòng công khai trước
+                khi đăng nhập. Khi sẵn sàng gửi yêu cầu đặt phòng, hệ thống
+                sẽ hướng dẫn bạn tiếp tục bằng tài khoản NDT MOTEL.
+            </p>
+
+        </div>
+
+        <div class="ndt-home-final-actions">
+            <a href="{% url 'danh_sach_phong' %}">Tìm phòng</a>
+            {% if user.is_authenticated %}
+                <a class="ndt-home-secondary" href="{% if user.is_staff or user.is_superuser %}{% url 'dashboard_admin' %}{% else %}{% url 'tai_khoan' %}{% endif %}">{% if user.is_staff or user.is_superuser %}Quản trị{% else %}Tài khoản{% endif %}</a>
+            {% else %}
+                <a class="ndt-home-secondary ndt-auth-open" data-auth-mode="login" href="{% url 'dang_nhap' %}">Đăng nhập</a>
+            {% endif %}
+        </div>
+
+    </section>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const hero = document.querySelector(".ndt-home-hero");
+
+    if (!hero) {
+        return;
+    }
+
+    const slides = Array.from(
+        hero.querySelectorAll("[data-home-slide]")
+    );
+
+    const buttons = Array.from(
+        hero.querySelectorAll("[data-home-go]")
+    );
+
+    let currentIndex = 0;
+    let autoTimer = null;
+    let paused = false;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const pauseButton = hero.querySelector(".ndt-home-pause");
+
+    function showSlide(index) {
+
+        if (!slides.length) {
+            return;
+        }
+
+        currentIndex =
+            (index + slides.length) % slides.length;
+
+        slides.forEach(function (slide, slideIndex) {
+
+            slide.setAttribute("aria-hidden", slideIndex === currentIndex ? "false" : "true");
+            slide.inert = slideIndex !== currentIndex;
+            slide.classList.toggle(
+                "is-active",
+                slideIndex === currentIndex
+            );
+
+        });
+
+        buttons.forEach(function (button, buttonIndex) {
+
+            const active =
+                buttonIndex === currentIndex;
+
+            button.classList.toggle(
+                "is-active",
+                active
+            );
+
+            button.setAttribute(
+                "aria-current",
+                active ? "true" : "false"
+            );
+
+        });
+
+    }
+
+    function stopAutoPlay() {
+
+        if (autoTimer) {
+            window.clearInterval(autoTimer);
+            autoTimer = null;
+        }
+
+    }
+
+    function startAutoPlay() {
+
+        stopAutoPlay();
+
+        if (paused || motion.matches || hero.matches(":focus-within") || hero.matches(":hover") || document.hidden) return;
+        autoTimer = window.setInterval(
+            function () {
+                showSlide(currentIndex + 1);
+            },
+            6500
+        );
+
+    }
+
+    buttons.forEach(function (button, index) {
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                showSlide(index);
+                startAutoPlay();
+
+            }
+        );
+
+    });
+
+    hero.addEventListener(
+        "mouseenter",
+        stopAutoPlay
+    );
+
+    hero.addEventListener(
+        "mouseleave",
+        startAutoPlay
+    );
+
+    pauseButton.addEventListener("click", function () {
+        paused = !paused;
+        pauseButton.setAttribute("aria-pressed", String(paused));
+        pauseButton.textContent = paused ? "Tiếp tục" : "Tạm dừng";
+        startAutoPlay();
+    });
+    hero.addEventListener("focusin", stopAutoPlay);
+    hero.addEventListener("focusout", function () { window.setTimeout(startAutoPlay, 0); });
+    motion.addEventListener("change", startAutoPlay);
+    document.addEventListener("visibilitychange", startAutoPlay);
+    showSlide(0);
+    startAutoPlay();
+
+});
+</script>
+{% endblock %}

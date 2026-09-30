@@ -1,0 +1,437 @@
+.stay-detail {
+    width: 100%;
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 8px 0 48px;
+    color: var(--ndt-text);
+}
+
+.stay-detail a { text-decoration: none; }
+
+.stay-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 22px;
+    color: var(--ndt-text-muted);
+    font-size: var(--ndt-text-xs);
+}
+
+.stay-breadcrumb a { color: var(--ndt-primary-hover); }
+
+.stay-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--ndt-space-6);
+    margin-bottom: var(--ndt-space-6);
+}
+
+.stay-heading__content { min-width: 0; }
+
+.stay-kicker,
+.stay-section-label {
+    margin: 0;
+    color: var(--ndt-primary);
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 1.4;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.ndt-premium-ui .site-main .stay-heading__title {
+    margin: 5px 0 8px;
+    color: var(--ndt-text);
+    font-size: 2.625rem;
+    line-height: 1.1;
+    letter-spacing: 0;
+}
+
+.stay-heading__meta {
+    margin: 0;
+    color: var(--ndt-text-muted);
+    line-height: 1.5;
+}
+
+.stay-status { flex: none; }
+.stay-status--trong { background: var(--ndt-success-bg); color: var(--ndt-success); }
+.stay-status--da_dat { background: var(--ndt-warning-bg); color: var(--ndt-warning); }
+.stay-status--dang_thue { background: var(--ndt-info-bg); color: var(--ndt-info); }
+.stay-status--bao_tri { background: var(--ndt-danger-bg); color: var(--ndt-danger); }
+
+.stay-gallery {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--ndt-radius-lg) var(--ndt-radius-lg) 0 0;
+    background: var(--ndt-surface-muted);
+}
+
+.stay-gallery > img {
+    display: block;
+    width: 100%;
+    height: clamp(400px, 48vw, 620px);
+    object-fit: cover;
+}
+
+.stay-thumbnails {
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    display: flex;
+    gap: 8px;
+    padding: 7px;
+    border: 1px solid rgb(214 227 229 / 80%);
+    border-radius: var(--ndt-radius-md);
+    background: rgb(255 255 255 / 92%);
+    box-shadow: var(--ndt-shadow-dropdown);
+}
+
+.stay-thumbnails button {
+    width: 72px;
+    height: 52px;
+    padding: 0;
+    overflow: hidden;
+    border: 2px solid transparent;
+    border-radius: var(--ndt-radius-sm);
+    background: var(--ndt-surface);
+    cursor: pointer;
+}
+
+.stay-thumbnails button.is-active { border-color: var(--ndt-primary); }
+
+.stay-thumbnails img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.stay-facts {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin: 0;
+    border: 1px solid var(--ndt-border);
+    border-top: 0;
+    background: var(--ndt-surface);
+}
+
+.stay-facts > div {
+    min-width: 0;
+    padding: 20px 22px;
+    border-right: 1px solid var(--ndt-border);
+}
+
+.stay-facts > div:last-child { border-right: 0; }
+
+.stay-facts dt,
+.stay-costs dt,
+.stay-facility__details dt {
+    margin-bottom: 7px;
+    color: var(--ndt-text-muted);
+    font-size: var(--ndt-text-xs);
+    line-height: 1.4;
+}
+
+.stay-facts dd,
+.stay-costs dd,
+.stay-facility__details dd {
+    margin: 0;
+    font-weight: 750;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.stay-facts > div:nth-last-child(-n + 2) dd { color: var(--ndt-primary-hover); }
+
+.stay-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
+    align-items: start;
+    gap: clamp(32px, 4vw, 56px);
+    margin-top: var(--ndt-space-12);
+}
+
+.stay-content { min-width: 0; }
+
+.stay-intro-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(28px, 4vw, 52px);
+    border-bottom: 1px solid var(--ndt-border);
+}
+
+.stay-section {
+    padding-bottom: 36px;
+    margin-bottom: 36px;
+    border-bottom: 1px solid var(--ndt-border);
+}
+
+.stay-intro-grid .stay-section { border-bottom: 0; }
+
+.ndt-premium-ui .site-main .stay-section h2 {
+    margin: 6px 0 16px;
+    color: var(--ndt-text);
+    font-size: 1.625rem;
+    line-height: 1.25;
+    letter-spacing: 0;
+}
+
+.stay-prose,
+.stay-booking > p {
+    color: var(--ndt-text-secondary);
+    font-size: 0.975rem;
+    line-height: 1.75;
+}
+
+.stay-prose {
+    max-width: 68ch;
+    margin: 0;
+}
+
+.stay-cost-section {
+    display: grid;
+    grid-template-columns: minmax(190px, 0.65fr) minmax(0, 2fr);
+    align-items: center;
+    gap: 30px;
+}
+
+.stay-costs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    border-block: 1px solid var(--ndt-border);
+}
+
+.stay-costs > div {
+    min-width: 0;
+    padding: 18px;
+    border-right: 1px solid var(--ndt-border);
+}
+
+.stay-costs > div:first-child { padding-left: 0; }
+.stay-costs > div:last-child { border-right: 0; }
+
+.stay-facility {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+    gap: clamp(32px, 5vw, 64px);
+}
+
+.stay-address {
+    margin: 0 0 8px;
+    color: var(--ndt-text);
+    font-weight: 700;
+    line-height: 1.55;
+}
+
+.stay-facility__details { margin: 0; }
+
+.stay-facility__details > div {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--ndt-border);
+}
+
+.stay-facility__details > div:first-child { padding-top: 0; }
+
+.stay-booking {
+    position: sticky;
+    top: 112px;
+    padding: 28px;
+    border: 1px solid var(--ndt-border);
+    border-radius: var(--ndt-radius-md);
+    background: var(--ndt-surface);
+    box-shadow: var(--ndt-shadow-dropdown);
+}
+
+.stay-booking-label {
+    margin: 0;
+    font-size: var(--ndt-text-xs);
+}
+
+.stay-booking-price {
+    margin: 4px 0 20px;
+    color: var(--ndt-primary);
+    font-size: 2rem;
+    font-weight: 850;
+    line-height: 1.2;
+}
+
+.stay-booking-price span { font-size: var(--ndt-text-sm); }
+
+.stay-booking-deposit {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 0;
+    border-block: 1px solid var(--ndt-border);
+    font-size: var(--ndt-text-sm);
+}
+
+.stay-availability {
+    margin: 20px 0 6px;
+    color: var(--ndt-text);
+    font-weight: 800;
+}
+
+.stay-availability--ready { color: var(--ndt-success); }
+.stay-availability--maintenance { color: var(--ndt-danger); }
+
+.stay-booking > .ndt-button,
+.stay-actions .ndt-button { width: 100%; }
+.stay-booking > .ndt-button { margin-top: var(--ndt-space-4); }
+
+.stay-actions {
+    display: grid;
+    gap: 10px;
+    margin-top: var(--ndt-space-4);
+}
+
+.stay-notice {
+    padding: 14px 16px;
+    border-left: 3px solid var(--ndt-accent);
+    background: var(--ndt-warning-bg);
+    color: #624f21;
+    line-height: 1.6;
+}
+
+.stay-notice--success {
+    border-color: var(--ndt-success);
+    background: var(--ndt-success-bg);
+    color: var(--ndt-success);
+}
+
+.stay-sharing-form {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ndt-space-4);
+    margin-top: var(--ndt-space-4);
+}
+
+.stay-inline-action { margin-top: var(--ndt-space-4); }
+
+@media (max-width: 1100px) {
+    .stay-layout {
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 28px;
+    }
+
+    .stay-intro-grid,
+    .stay-cost-section {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
+
+@media (max-width: 900px) {
+    .stay-layout {
+        grid-template-columns: 1fr;
+        gap: 0;
+        margin-top: var(--ndt-space-8);
+    }
+
+    .stay-booking {
+        position: static;
+        grid-row: 1;
+        margin-bottom: var(--ndt-space-8);
+    }
+
+    .stay-content { grid-row: 2; }
+
+    .stay-intro-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 28px;
+    }
+
+    .stay-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .stay-facts > div:nth-child(3) { border-right: 0; }
+    .stay-facts > div:nth-child(n + 4) { border-top: 1px solid var(--ndt-border); }
+}
+
+@media (max-width: 640px) {
+    .stay-detail { padding-top: 0; }
+    .stay-breadcrumb { margin-bottom: var(--ndt-space-4); }
+
+    .stay-heading {
+        align-items: flex-start;
+        gap: var(--ndt-space-3);
+    }
+
+    .ndt-premium-ui .site-main .stay-heading__title { font-size: 2rem; }
+    .stay-heading__meta { font-size: var(--ndt-text-sm); }
+
+    .stay-gallery {
+        overflow: visible;
+        border-radius: var(--ndt-radius-md) var(--ndt-radius-md) 0 0;
+    }
+
+    .stay-gallery > img {
+        height: 270px;
+        border-radius: var(--ndt-radius-md) var(--ndt-radius-md) 0 0;
+    }
+
+    .stay-thumbnails {
+        position: static;
+        width: 100%;
+        padding: 8px 0;
+        overflow-x: auto;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        scrollbar-width: thin;
+    }
+
+    .stay-thumbnails button {
+        width: 64px;
+        height: 46px;
+        flex: 0 0 auto;
+    }
+
+    .stay-facts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        border-top: 1px solid var(--ndt-border);
+    }
+
+    .stay-facts > div {
+        padding: 14px 12px;
+        border-top: 1px solid var(--ndt-border);
+    }
+
+    .stay-facts > div:nth-child(2n) { border-right: 0; }
+    .stay-facts > div:nth-child(3) { border-right: 1px solid var(--ndt-border); }
+
+    .stay-facts > div:last-child {
+        grid-column: 1 / -1;
+        border-right: 0;
+    }
+
+    .stay-booking { padding: var(--ndt-space-6); }
+
+    .stay-intro-grid,
+    .stay-facility,
+    .stay-costs {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .stay-section {
+        padding-bottom: 28px;
+        margin-bottom: 28px;
+    }
+
+    .stay-intro-grid { border-bottom: 0; }
+    .stay-intro-grid .stay-section { border-bottom: 1px solid var(--ndt-border); }
+    .ndt-premium-ui .site-main .stay-section h2 { font-size: 1.375rem; }
+
+    .stay-costs > div,
+    .stay-costs > div:first-child {
+        padding: 14px 0;
+        border-right: 0;
+        border-bottom: 1px solid var(--ndt-border);
+    }
+
+    .stay-sharing-form {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}

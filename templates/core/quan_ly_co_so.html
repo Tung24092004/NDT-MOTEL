@@ -1,0 +1,968 @@
+﻿{% extends "core/base.html" %}
+
+{% block title %}Quản lý cơ sở - NDT MOTEL{% endblock %}
+
+{% block extra_css %}
+<style>
+:root{
+    --facility-primary:#07859a;
+    --facility-deep:#075b6a;
+    --facility-soft:#e9f7f9;
+    --facility-text:#12343b;
+    --facility-muted:#6d7d82;
+    --facility-line:#e3eaec;
+    --facility-success:#16855b;
+    --facility-warning:#c88316;
+    --facility-danger:#c94b4b;
+}
+
+.facility-page{
+    width:100%;
+    max-width:1480px;
+    margin:0 auto;
+    padding:2px 0 45px;
+    color:var(--facility-text);
+}
+
+.facility-page *,
+.facility-page *::before,
+.facility-page *::after{
+    box-sizing:border-box;
+}
+
+/* ================= HERO ================= */
+
+.facility-hero{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:22px;
+    margin-bottom:16px;
+    padding:22px 24px;
+    border-radius:18px;
+    background:linear-gradient(110deg,#075b6a 0%,#07859a 58%,#24a6b6 100%);
+    box-shadow:0 12px 30px rgba(7,91,106,.14);
+    color:#fff;
+}
+
+.facility-hero__copy{
+    display:flex;
+    align-items:center;
+    gap:13px;
+}
+
+.facility-hero__icon{
+    width:44px;
+    height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 44px;
+    border:1px solid rgba(255,255,255,.20);
+    border-radius:12px;
+    background:rgba(255,255,255,.12);
+    font-size:20px;
+}
+
+.facility-hero h1{
+    margin:0;
+    color:#fff;
+    font-size:27px;
+    line-height:1.2;
+    font-weight:850;
+    letter-spacing:-.03em;
+}
+
+.facility-hero p{
+    margin:5px 0 0;
+    color:rgba(255,255,255,.80);
+    font-size:11px;
+}
+
+.facility-actions{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    flex-shrink:0;
+}
+
+.facility-btn{
+    min-height:44px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:0 16px;
+    border:1px solid transparent;
+    border-radius:11px;
+    font-family:inherit;
+    font-size:10px;
+    font-weight:850;
+    text-decoration:none;
+    white-space:nowrap;
+    cursor:pointer;
+    transition:.16s ease;
+}
+
+.facility-btn--primary{
+    background:#fff;
+    border-color:#fff;
+    color:var(--facility-deep);
+    box-shadow:0 8px 20px rgba(0,0,0,.14);
+}
+
+.facility-btn--primary:hover{
+    background:var(--facility-soft);
+    color:var(--facility-deep);
+    transform:translateY(-1px);
+}
+
+.facility-btn--secondary{
+    background:rgba(255,255,255,.10);
+    border-color:rgba(255,255,255,.45);
+    color:#fff;
+}
+
+.facility-btn--secondary:hover{
+    background:rgba(255,255,255,.18);
+    border-color:rgba(255,255,255,.75);
+    color:#fff;
+}
+
+/* ================= OVERVIEW ================= */
+
+.facility-overview{
+    display:grid;
+    grid-template-columns:minmax(220px,280px) minmax(0,1fr);
+    gap:10px;
+    margin-bottom:16px;
+}
+
+.facility-total{
+    position:relative;
+    min-height:91px;
+    overflow:hidden;
+    padding:15px 17px;
+    border:1px solid var(--facility-line);
+    border-radius:15px;
+    background:#fff;
+}
+
+.facility-total::before{
+    content:"";
+    position:absolute;
+    top:0;
+    bottom:0;
+    left:0;
+    width:3px;
+    background:var(--facility-primary);
+}
+
+.facility-total__top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+}
+
+.facility-total__label{
+    color:var(--facility-muted);
+    font-size:10px;
+    font-weight:750;
+    text-transform:uppercase;
+    letter-spacing:.045em;
+}
+
+.facility-total__icon{
+    width:31px;
+    height:31px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:9px;
+    background:var(--facility-soft);
+    font-size:13px;
+}
+
+.facility-total__value{
+    margin-top:5px;
+    color:var(--facility-text);
+    font-size:23px;
+    line-height:1;
+    font-weight:850;
+}
+
+.facility-summary{
+    display:flex;
+    align-items:center;
+    padding:14px 17px;
+    border:1px solid var(--facility-line);
+    border-radius:15px;
+    background:#fff;
+    color:var(--facility-muted);
+    font-size:10px;
+    line-height:1.6;
+}
+
+.facility-summary strong{
+    color:var(--facility-text);
+}
+
+/* ================= SEARCH ================= */
+
+.facility-filter{
+    margin-bottom:16px;
+    padding:16px 17px;
+    border:1px solid var(--facility-line);
+    border-radius:17px;
+    background:#fff;
+    box-shadow:0 7px 22px rgba(19,59,67,.035);
+}
+
+.facility-filter__heading{
+    margin-bottom:11px;
+}
+
+.facility-filter__heading strong{
+    display:block;
+    color:var(--facility-text);
+    font-size:12px;
+    font-weight:850;
+}
+
+.facility-filter__heading span{
+    display:block;
+    margin-top:3px;
+    color:var(--facility-muted);
+    font-size:9px;
+}
+
+.facility-filter__form{
+    display:grid;
+    grid-template-columns:minmax(280px,1fr) auto auto;
+    gap:10px;
+    align-items:center;
+}
+
+.facility-search{
+    position:relative;
+}
+
+.facility-search__icon{
+    position:absolute;
+    top:50%;
+    left:12px;
+    transform:translateY(-50%);
+    color:#829397;
+    font-size:12px;
+    pointer-events:none;
+}
+
+.facility-input{
+    width:100%;
+    min-height:42px;
+    padding:0 13px 0 36px;
+    border:1px solid #cfdee1;
+    border-radius:10px;
+    outline:none;
+    background:#fff;
+    color:var(--facility-text);
+    font-family:inherit;
+    font-size:11px;
+    transition:.15s ease;
+}
+
+.facility-input::placeholder{
+    color:#98a7aa;
+}
+
+.facility-input:focus{
+    border-color:#75b9c2;
+    box-shadow:0 0 0 3px rgba(7,133,154,.08);
+}
+
+.facility-filter .facility-btn--filter{
+    min-height:42px;
+    background:var(--facility-primary);
+    border-color:var(--facility-primary);
+    color:#fff;
+    box-shadow:0 5px 13px rgba(7,133,154,.15);
+}
+
+.facility-filter .facility-btn--filter:hover{
+    background:var(--facility-deep);
+    border-color:var(--facility-deep);
+    transform:translateY(-1px);
+}
+
+.facility-filter .facility-btn--clear{
+    min-height:42px;
+    background:#fff;
+    border-color:#d5e2e4;
+    color:#5e7277;
+}
+
+.facility-filter .facility-btn--clear:hover{
+    background:#f4f8f9;
+    border-color:#bdd5d9;
+    color:var(--facility-deep);
+}
+
+/* ================= TABLE ================= */
+
+.facility-table-card{
+    overflow:hidden;
+    border:1px solid var(--facility-line);
+    border-radius:18px;
+    background:#fff;
+    box-shadow:0 10px 30px rgba(19,59,67,.05);
+}
+
+.facility-table-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    padding:15px 18px;
+    border-bottom:1px solid var(--facility-line);
+}
+
+.facility-table-title{
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+
+.facility-table-title__icon{
+    width:32px;
+    height:32px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:9px;
+    background:var(--facility-soft);
+    font-size:13px;
+}
+
+.facility-table-header h2{
+    margin:0;
+    color:var(--facility-text);
+    font-size:15px;
+    font-weight:850;
+}
+
+.facility-table-header p{
+    margin:3px 0 0;
+    color:var(--facility-muted);
+    font-size:9px;
+}
+
+.facility-result-count{
+    color:var(--facility-muted);
+    font-size:9px;
+    font-weight:700;
+    white-space:nowrap;
+}
+
+.facility-table-wrapper{
+    width:100%;
+    overflow-x:auto;
+}
+
+.facility-table{
+    width:100%;
+    min-width:1050px;
+    border-collapse:collapse;
+}
+
+.facility-table th{
+    padding:11px 12px;
+    border-bottom:1px solid var(--facility-line);
+    background:#f7fafb;
+    color:#718388;
+    text-align:left;
+    font-size:8px;
+    font-weight:850;
+    text-transform:uppercase;
+    letter-spacing:.055em;
+    white-space:nowrap;
+}
+
+.facility-table td{
+    padding:12px;
+    border-bottom:1px solid #edf1f2;
+    color:#40575c;
+    font-size:10px;
+    vertical-align:middle;
+}
+
+.facility-table tbody tr{
+    transition:.14s ease;
+}
+
+.facility-table tbody tr:hover{
+    background:#f9fcfc;
+}
+
+.facility-table tbody tr:last-child td{
+    border-bottom:0;
+}
+
+.facility-stt{
+    width:48px;
+    color:#8a999d !important;
+    font-weight:700;
+}
+
+.facility-name{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-width:150px;
+}
+
+.facility-name__icon{
+    width:29px;
+    height:29px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 29px;
+    border-radius:8px;
+    background:var(--facility-soft);
+    font-size:12px;
+}
+
+.facility-name strong{
+    color:var(--facility-text);
+    font-size:10px;
+    font-weight:800;
+}
+
+.facility-address{
+    min-width:180px;
+}
+
+.facility-address__main{
+    color:#40575c;
+    line-height:1.4;
+}
+
+.facility-address small{
+    display:block;
+    margin-top:3px;
+    color:#89979b;
+    font-size:8px;
+}
+
+.facility-count{
+    min-width:32px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:5px 8px;
+    border-radius:7px;
+    font-size:9px;
+    font-weight:850;
+}
+
+.facility-count--total{
+    background:#edf7f7;
+    color:#075b6a;
+}
+
+.facility-count--empty{
+    background:#eaf8f1;
+    color:#13704d;
+}
+
+.facility-count--rented{
+    background:#fff7df;
+    color:#a66d0d;
+}
+
+.facility-count--maintenance{
+    background:#fff0f0;
+    color:#b64141;
+}
+
+.facility-status{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:5px 8px;
+    border-radius:999px;
+    font-size:8px;
+    font-weight:850;
+    white-space:nowrap;
+}
+
+.facility-status::before{
+    content:"";
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:currentColor;
+}
+
+.facility-status--active{
+    background:#eaf8f1;
+    color:#13704d;
+}
+
+.facility-status--paused{
+    background:#f0f3f4;
+    color:#65757a;
+}
+
+.facility-status--other{
+    background:#fff7df;
+    color:#a66d0d;
+}
+
+.facility-detail-btn{
+    min-width:62px;
+    height:31px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 10px;
+    border:1px solid #cce5e8;
+    border-radius:8px;
+    background:#eff9fa;
+    color:#08768a;
+    font-size:9px;
+    font-weight:850;
+    text-decoration:none;
+    transition:.15s ease;
+}
+
+.facility-detail-btn:hover{
+    background:var(--facility-primary);
+    border-color:var(--facility-primary);
+    color:#fff;
+    transform:translateY(-1px);
+}
+
+/* ================= EMPTY ================= */
+
+.facility-empty{
+    padding:56px 25px !important;
+    text-align:center !important;
+}
+
+.facility-empty__icon{
+    width:58px;
+    height:58px;
+    margin:0 auto 12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:17px;
+    background:var(--facility-soft);
+    font-size:23px;
+}
+
+.facility-empty strong{
+    display:block;
+    color:var(--facility-text);
+    font-size:14px;
+}
+
+.facility-empty p{
+    margin:6px 0 15px;
+    color:var(--facility-muted);
+    font-size:10px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:900px){
+    .facility-hero{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .facility-actions{
+        width:100%;
+        flex-wrap:wrap;
+    }
+
+    .facility-overview{
+        grid-template-columns:1fr;
+    }
+
+    .facility-filter__form{
+        grid-template-columns:1fr auto auto;
+    }
+}
+
+@media(max-width:650px){
+    .facility-hero{
+        padding:18px;
+    }
+
+    .facility-hero h1{
+        font-size:23px;
+    }
+
+    .facility-actions{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+    }
+
+    .facility-filter__form{
+        grid-template-columns:1fr;
+    }
+
+    .facility-filter .facility-btn{
+        width:100%;
+    }
+
+    .facility-table-header{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="facility-page">
+
+    <!-- =====================================================
+         HEADER
+    ===================================================== -->
+
+    <section class="facility-hero">
+
+        <div class="facility-hero__copy">
+
+            <div class="facility-hero__icon" aria-hidden="true">
+                🏢
+            </div>
+
+            <div>
+                <h1>Quản lý cơ sở</h1>
+                <p>Quản lý các cơ sở và tình trạng phòng thuộc từng cơ sở.</p>
+            </div>
+
+        </div>
+
+        <div class="facility-actions">
+
+            <a
+                href="{% url 'dashboard_admin' %}"
+                class="facility-btn facility-btn--secondary"
+            >
+                ← Dashboard
+            </a>
+
+            <a
+                href="{% url 'tao_co_so' %}"
+                class="facility-btn facility-btn--primary"
+            >
+                + Thêm cơ sở
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         TỔNG QUAN
+    ===================================================== -->
+
+    <section class="facility-overview">
+
+        <div class="facility-total">
+
+            <div class="facility-total__top">
+
+                <span class="facility-total__label">
+                    Tổng số cơ sở
+                </span>
+
+                <span class="facility-total__icon" aria-hidden="true">
+                    🏢
+                </span>
+
+            </div>
+
+            <div class="facility-total__value">
+                {{ tong_co_so }}
+            </div>
+
+        </div>
+
+        <div class="facility-summary">
+            <span>
+                <strong>Quản lý tập trung:</strong>
+                theo dõi số lượng phòng, tình trạng khai thác và trạng thái vận hành
+                của từng cơ sở trong hệ thống NDT MOTEL.
+            </span>
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         TÌM KIẾM
+    ===================================================== -->
+
+    <section class="facility-filter">
+
+        <div class="facility-filter__heading">
+            <strong>Tìm kiếm cơ sở</strong>
+            <span>Tìm nhanh theo tên cơ sở hoặc khu vực.</span>
+        </div>
+
+        <form
+            method="get"
+            action="{% url 'quan_ly_co_so' %}"
+            class="facility-filter__form"
+        >
+
+            <div class="facility-search">
+
+                <span class="facility-search__icon" aria-hidden="true">
+                    ⌕
+                </span>
+
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ tu_khoa }}"
+                    placeholder="Tên cơ sở hoặc quận..."
+                    class="facility-input"
+                    aria-label="Tìm kiếm cơ sở"
+                >
+
+            </div>
+
+            <button
+                type="submit"
+                class="facility-btn facility-btn--filter"
+            >
+                Tìm kiếm
+            </button>
+
+            {% if tu_khoa %}
+
+            <a
+                href="{% url 'quan_ly_co_so' %}"
+                class="facility-btn facility-btn--clear"
+            >
+                Xóa lọc
+            </a>
+
+            {% endif %}
+
+        </form>
+
+    </section>
+
+
+    <!-- =====================================================
+         DANH SÁCH CƠ SỞ
+    ===================================================== -->
+
+    <section class="facility-table-card">
+
+        <div class="facility-table-header">
+
+            <div class="facility-table-title">
+
+                <span class="facility-table-title__icon" aria-hidden="true">
+                    ▦
+                </span>
+
+                <div>
+                    <h2>Danh sách cơ sở</h2>
+                    <p>Theo dõi và quản lý các cơ sở của NDT MOTEL.</p>
+                </div>
+
+            </div>
+
+            <div class="facility-result-count">
+                {{ tong_co_so }} cơ sở
+            </div>
+
+        </div>
+
+
+        <div class="facility-table-wrapper">
+
+            <table class="facility-table">
+
+                <thead>
+
+                    <tr>
+                        <th>STT</th>
+                        <th>Cơ sở</th>
+                        <th>Địa chỉ</th>
+                        <th>Tổng phòng</th>
+                        <th>Phòng trống</th>
+                        <th>Đang thuê</th>
+                        <th>Bảo trì</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for cs in co_so %}
+
+                    <tr>
+
+                        <td class="facility-stt">
+                            {{ forloop.counter }}
+                        </td>
+
+                        <td>
+
+                            <div class="facility-name">
+
+                                <span class="facility-name__icon" aria-hidden="true">
+                                    🏢
+                                </span>
+
+                                <strong>
+                                    {{ cs.ten_co_so }}
+                                </strong>
+
+                            </div>
+
+                        </td>
+
+                        <td>
+
+                            <div class="facility-address">
+
+                                <div class="facility-address__main">
+                                    {{ cs.dia_chi }}
+                                </div>
+
+                                {% if cs.quan %}
+
+                                <small>
+                                    {{ cs.quan }}
+                                </small>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                        <td>
+                            <span class="facility-count facility-count--total">
+                                {{ cs.so_luong_phong }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="facility-count facility-count--empty">
+                                {{ cs.so_phong_trong }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="facility-count facility-count--rented">
+                                {{ cs.so_phong_dang_thue }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="facility-count facility-count--maintenance">
+                                {{ cs.so_phong_bao_tri }}
+                            </span>
+                        </td>
+
+                        <td>
+
+                            {% if cs.trang_thai == "hoat_dong" %}
+
+                            <span class="facility-status facility-status--active">
+                                Đang hoạt động
+                            </span>
+
+                            {% elif cs.trang_thai == "tam_ngung" %}
+
+                            <span class="facility-status facility-status--paused">
+                                Tạm ngưng
+                            </span>
+
+                            {% else %}
+
+                            <span class="facility-status facility-status--other">
+                                {{ cs.get_trang_thai_display }}
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="{% url 'chi_tiet_co_so' cs.id %}"
+                                class="facility-detail-btn"
+                                aria-label="Xem chi tiết {{ cs.ten_co_so }}"
+                            >
+                                Xem
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="9"
+                            class="facility-empty"
+                        >
+
+                            <div class="facility-empty__icon" aria-hidden="true">
+                                🏢
+                            </div>
+
+                            <strong>
+                                Chưa có cơ sở nào
+                            </strong>
+
+                            <p>
+                                Hãy thêm cơ sở đầu tiên để bắt đầu quản lý.
+                            </p>
+
+                            <a
+                                href="{% url 'tao_co_so' %}"
+                                class="facility-btn facility-btn--filter"
+                            >
+                                + Thêm cơ sở
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

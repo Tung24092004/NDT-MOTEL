@@ -1,0 +1,278 @@
+{% extends "core/tenant_base.html" %}
+{% load static bo_loc %}
+{% block title %}Đặt phòng thành công - NDT MOTEL{% endblock %}
+{% block tenant_styles %}<link rel="stylesheet" href="{% static 'css/tenant/dat_phong_thanh_cong.css' %}">{% endblock %}
+{% block tenant_content %}
+
+
+
+
+
+<div class="success-page">
+
+    <div class="success-container">
+
+        <section class="success-card">
+
+            <!-- =================================================
+                 HEADER
+            ================================================== -->
+
+            <div class="success-header">
+
+                
+
+                <h1>
+                    Đặt phòng thành công
+                </h1>
+
+                <p>
+                    Yêu cầu đặt phòng của bạn đã được ghi nhận.
+                    Thông tin đơn hiện được liên kết với tài khoản
+                    <strong>{{ request.user.username }}</strong>
+                    và đang chờ quản trị viên kiểm tra.
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 BODY
+            ================================================== -->
+
+            <div class="success-body">
+
+                <div class="success-status">
+
+                    <div class="success-status-left">
+
+                        <div class="success-status-icon">
+                            ⏳
+                        </div>
+
+                        <div>
+
+                            <div class="success-status-title">
+                                Trạng thái yêu cầu
+                            </div>
+
+                            <div class="success-status-text">
+                                Quản trị viên chưa xử lý yêu cầu này.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <span class="success-badge">
+                        {{ dat_phong.get_trang_thai_display }}
+                    </span>
+
+                </div>
+
+
+                <!-- =================================================
+                     THÔNG TIN ĐƠN
+                ================================================== -->
+
+                <h2 class="success-section-title">
+                    Thông tin yêu cầu đặt phòng
+                </h2>
+
+
+                <div class="success-info">
+
+                    <div class="success-row">
+
+                        <div class="success-label">
+                            Mã yêu cầu
+                        </div>
+
+                        <div class="success-value">
+                            #{{ dat_phong.id }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="success-row">
+
+                        <div class="success-label">
+                            Người đặt
+                        </div>
+
+                        <div class="success-value">
+                            {{ nguoi_thue.ho_ten }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="success-row">
+
+                        <div class="success-label">
+                            Phòng
+                        </div>
+
+                        <div class="success-value">
+                            Phòng {{ phong.so_phong }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="success-row">
+
+                        <div class="success-label">
+                            Cơ sở
+                        </div>
+
+                        <div class="success-value">
+                            {{ phong.co_so.ten_co_so }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="success-row">
+
+                        <div class="success-label">
+                            Địa chỉ
+                        </div>
+
+                        <div class="success-value">
+                            {{ phong.co_so.dia_chi }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="success-row">
+
+                        <div class="success-label">
+                            Ngày gửi yêu cầu
+                        </div>
+
+                        <div class="success-value">
+                            {{ dat_phong.ngay_dat|date:"d/m/Y H:i" }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="success-row">
+
+                        <div class="success-label">
+                            Ngày dự kiến nhận phòng
+                        </div>
+
+                        <div class="success-value">
+                            {{ dat_phong.ngay_nhan_phong|date:"d/m/Y" }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="success-row">
+
+                        <div class="success-label">
+                            Tiền cọc dự kiến
+                        </div>
+
+                        <div class="success-value success-value-money">
+                            {{ dat_phong.tien_coc_du_kien|vnd }} VNĐ
+                        </div>
+
+                    </div>
+
+
+                    {% if dat_phong.ghi_chu %}
+
+                        <div class="success-row">
+
+                            <div class="success-label">
+                                Ghi chú
+                            </div>
+
+                            <div class="success-value">
+                                {{ dat_phong.ghi_chu }}
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- =================================================
+                     QUY TRÌNH
+                ================================================== -->
+
+                <div class="success-process">
+
+                    <strong>
+                        Điều gì sẽ xảy ra tiếp theo?
+                    </strong>
+
+                    <ol>
+                        <li>
+                            Quản trị viên kiểm tra yêu cầu đặt phòng.
+                        </li>
+
+                        <li>
+                            Yêu cầu sẽ được duyệt hoặc từ chối
+                            dựa trên tình trạng phòng và thông tin đăng ký.
+                        </li>
+
+                        <li>
+                            Khi yêu cầu được duyệt,
+                            hệ thống sẽ tiếp tục quy trình hợp đồng và tiền cọc.
+                        </li>
+
+                        <li>
+                            Thông báo liên quan đến yêu cầu này
+                            sẽ được gắn với tài khoản của bạn.
+                        </li>
+                    </ol>
+
+                </div>
+
+
+                <!-- =================================================
+                     ACTION
+                ================================================== -->
+
+                <div class="success-actions">
+
+                    <a
+                        href="{% url 'danh_sach_phong' %}"
+                        class="success-btn success-btn-secondary"
+                    >
+                        Xem danh sách phòng
+                    </a>
+
+
+                    <a
+                        href="{% url 'tai_khoan' %}"
+                        class="success-btn success-btn-primary"
+                    >
+                        Về tài khoản của tôi
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+
+
+
+
+{% endblock %}

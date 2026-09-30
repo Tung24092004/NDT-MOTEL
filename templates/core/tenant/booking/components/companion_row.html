@@ -1,0 +1,3 @@
+<fieldset class="companion-row"><legend>Người đi cùng <span class="companion-number">{{ forloop.counter }}</span></legend>
+<div class="booking-fields">{% for field in occupant.visible_fields %}{% if field.name != 'DELETE' %}<div class="booking-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}</div>
+<span hidden>{{ occupant.DELETE }}</span><button type="button" class="remove-companion booking-icon" aria-label="Xóa người đi cùng" title="Xóa người đi cùng">×</button></fieldset>

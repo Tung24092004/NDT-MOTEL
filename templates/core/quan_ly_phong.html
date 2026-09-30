@@ -1,0 +1,84 @@
+{% extends "core/base.html" %}
+{% load static bo_loc %}
+{% block title %}Quản lý phòng - NDT MOTEL{% endblock %}
+{% block page_title %}Quản lý phòng{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
+<link rel="stylesheet" href="{% static 'css/room_management.css' %}">
+{% endblock %}
+{% block content %}
+<main class="room-management ndt-foundation" data-room-management-page="list">
+    {% url 'tao_phong' as create_room_url %}
+    {% include "core/foundation/page_header.html" with breadcrumb="Quản trị / Phòng" title="Quản lý phòng" subtitle="Theo dõi phòng, trạng thái và thông tin vận hành." action_url=create_room_url action_label="+ Thêm phòng" %}
+    <section class="ndt-filter-bar" aria-labelledby="room-filter-title">
+        <h2 class="ndt-filter-bar__title" id="room-filter-title">Tìm kiếm và lọc phòng</h2>
+        <form method="get" class="ndt-filter-bar__form">
+            <div class="ndt-field room-search-field">
+                <label class="ndt-label" for="q">Từ khóa</label>
+                <input class="ndt-control" id="q" name="q" type="search" value="{{ tu_khoa }}" placeholder="Số phòng, cơ sở hoặc quận...">
+            </div>
+            <div class="ndt-field room-status-field">
+                <label class="ndt-label" for="trang_thai">Trạng thái</label>
+                <select class="ndt-control" id="trang_thai" name="trang_thai">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="trong" {% if trang_thai == "trong" %}selected{% endif %}>Trống</option>
+                    <option value="da_dat" {% if trang_thai == "da_dat" %}selected{% endif %}>Đã đặt</option>
+                    <option value="dang_thue" {% if trang_thai == "dang_thue" %}selected{% endif %}>Đang thuê</option>
+                    <option value="bao_tri" {% if trang_thai == "bao_tri" %}selected{% endif %}>Bảo trì</option>
+                </select>
+            </div>
+            <div class="room-filter-actions">
+                <button class="ndt-button ndt-button--primary" type="submit">Lọc phòng</button>
+                {% if tu_khoa or trang_thai %}<a class="ndt-button ndt-button--secondary" href="{% url 'quan_ly_phong' %}">Đặt lại</a>{% endif %}
+            </div>
+        </form>
+    </section>
+    <section aria-labelledby="room-list-title">
+        <div class="room-list-heading">
+            <h2 id="room-list-title">Danh sách phòng</h2>
+            <p>{{ phong|length }} kết quả theo điều kiện hiện tại.</p>
+        </div>
+        {% if phong %}
+        <div class="ndt-table-wrap">
+            <table class="ndt-table room-table">
+                <thead><tr><th scope="col">Phòng</th><th scope="col">Cơ sở</th><th scope="col">Loại</th><th scope="col">Tầng</th><th scope="col">Giá thuê</th><th scope="col">Trạng thái</th><th scope="col">Thao tác</th></tr></thead>
+                <tbody>
+                    {% for p in phong %}
+                    <tr>
+                        <td data-label="Phòng"><span class="room-code">P{{ p.so_phong }}</span></td>
+                        <td data-label="Cơ sở"><strong>{{ p.co_so.ten_co_so }}</strong>{% if p.co_so.quan %}<div class="room-muted">{{ p.co_so.quan }}</div>{% endif %}</td>
+                        <td data-label="Loại">{{ p.get_loai_phong_display }}</td>
+                        <td data-label="Tầng">{{ p.tang }}</td>
+                        <td data-label="Giá thuê"><span class="room-price">{{ p.gia_thue|vnd }} đ</span></td>
+                        <td data-label="Trạng thái">
+                            {% if p.trang_thai == "trong" %}<span class="ndt-badge ndt-badge--success">Trống</span>
+                            {% elif p.trang_thai == "da_dat" %}<span class="ndt-badge ndt-badge--warning">Đã đặt</span>
+                            {% elif p.trang_thai == "dang_thue" %}<span class="ndt-badge ndt-badge--info">Đang thuê</span>
+                            {% elif p.trang_thai == "bao_tri" %}<span class="ndt-badge ndt-badge--danger">Bảo trì</span>
+                            {% else %}<span class="ndt-badge">{{ p.get_trang_thai_display }}</span>{% endif %}
+                        </td>
+                        <td data-label="Thao tác"><div class="ndt-table__actions">
+                            <a class="ndt-button ndt-button--secondary ndt-button--compact room-action" href="{% url 'chi_tiet_phong' p.id %}">Xem</a>
+                            <a class="ndt-button ndt-button--secondary ndt-button--compact room-action" href="{% url 'sua_phong' p.id %}">Sửa</a>
+                            <form class="room-delete-form" method="post" action="{% url 'xoa_phong' p.id %}" data-ndt-confirm-form data-confirm-title="Xóa phòng P{{ p.so_phong }}" data-confirm-message="Bạn có chắc chắn muốn xóa phòng P{{ p.so_phong }} không?" data-confirm-label="Xóa phòng">{% csrf_token %}<button class="ndt-button ndt-button--danger ndt-button--compact room-action" type="submit" aria-label="Xóa phòng P{{ p.so_phong }}" title="Xóa phòng P{{ p.so_phong }}">Xóa</button></form>
+                        </div></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="ndt-empty-state" role="status">
+            <h2 class="ndt-empty-state__title">Không tìm thấy phòng</h2>
+            <p class="ndt-empty-state__description">{% if tu_khoa or trang_thai %}Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.{% else %}Chưa có phòng nào trong hệ thống.{% endif %}</p>
+            <div class="room-empty-action">{% if tu_khoa or trang_thai %}<a class="ndt-button ndt-button--secondary" href="{% url 'quan_ly_phong' %}">Đặt lại bộ lọc</a>{% else %}<a class="ndt-button ndt-button--primary" href="{% url 'tao_phong' %}">+ Thêm phòng</a>{% endif %}</div>
+        </div>
+        {% endif %}
+    </section>
+</main>
+{% include 'core/foundation/dialog_root.html' %}
+<script src="{% static 'js/foundation/dialog.js' %}" defer></script>
+{% endblock %}

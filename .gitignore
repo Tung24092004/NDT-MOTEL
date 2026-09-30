@@ -1,0 +1,47 @@
+# Python caches and local test output
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Local artifacts: backups, QA evidence, and temporary files
+luu_tru/ban_sao_luu/
+luu_tru/kiem_thu/
+luu_tru/tam/
+.tmp/
+
+# Local environment and editor state
+.env
+.venv/
+venv/
+.idea/
+
+
+# Local database
+db.sqlite3
+db.sqlite3-journal
+
+# Local test media
+.test-media/
+
+# VS Code local settings
+.vscode/
+
+# Windows files
+Thumbs.db
+Desktop.ini
+
+# Root audit/discovery temporary files
+/module*_discovery.txt
+/module*_code.txt
+/module*_templates_missing.txt
+/code_*.txt
+/smart_*.txt
+
+# Private/runtime uploaded media
+media/face_profiles/
+media/phong/

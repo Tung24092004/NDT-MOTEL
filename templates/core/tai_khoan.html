@@ -1,0 +1,242 @@
+{% extends "core/tenant_base.html" %}
+{% load static bo_loc %}
+
+{% block title %}Tài khoản - NDT MOTEL{% endblock %}
+{% block page_title %}Tài khoản &amp; đặt phòng{% endblock %}
+
+{% block tenant_styles %}
+<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
+<link rel="stylesheet" href="{% static 'css/tenant/tai_khoan.css' %}">
+{% endblock %}
+
+{% block tenant_content %}
+<div class="account-center ndt-foundation">
+    {% url 'cap_nhat_thong_tin' as profile_url %}
+    {% include 'core/foundation/page_header.html' with breadcrumb='Tài khoản' title='Tài khoản & đặt phòng' subtitle='Theo dõi phòng, đặt phòng, hợp đồng, hóa đơn và các dịch vụ của bạn tại một nơi.' action_url=profile_url action_label='Cập nhật hồ sơ' %}
+
+    <section class="account-hero ndt-surface" aria-label="Lời chào tài khoản">
+        <div>
+            <span>Trung tâm khách hàng</span>
+            <h2>Xin chào, {{ nguoi_thue.ho_ten }}</h2>
+            <p>Thông tin lưu trú và các tác vụ cần xử lý được gom lại để bạn kiểm tra nhanh hơn.</p>
+        </div>
+        <div class="account-hero__actions">
+            <a class="ndt-button ndt-button--primary" href="{% url 'danh_sach_phong' %}">Tìm phòng</a>
+            <a class="ndt-button ndt-button--secondary" href="{{ profile_url }}">Cập nhật hồ sơ</a>
+        </div>
+    </section>
+
+    <section class="account-stats" aria-label="Tổng quan tài khoản">
+        <article class="ndt-surface account-stat">
+            <span>Đặt phòng chờ duyệt</span>
+            <strong>{{ so_dat_phong_cho_duyet }}</strong>
+            <p>Yêu cầu đang chờ quản lý xử lý</p>
+        </article>
+        <article class="ndt-surface account-stat">
+            <span>Hợp đồng của tôi</span>
+            <strong>{{ so_hop_dong }}</strong>
+            <p>{% if hop_dong_hien_tai %}Có hợp đồng đang sử dụng{% else %}Chưa có hợp đồng đang sử dụng{% endif %}</p>
+        </article>
+        <article class="ndt-surface account-stat">
+            <span>Hóa đơn cần xử lý</span>
+            <strong>{{ so_hoa_don_chua_thanh_toan }}</strong>
+            <p>Chưa thanh toán hoặc đã quá hạn</p>
+        </article>
+        <article class="ndt-surface account-stat">
+            <span>Thông báo chưa đọc</span>
+            <strong>{{ so_thong_bao_chua_doc }}</strong>
+            <p>Thông tin mới dành cho tài khoản</p>
+        </article>
+    </section>
+
+    <div class="account-layout">
+        <main class="account-main">
+            <section class="ndt-card account-section" aria-labelledby="current-room-title">
+                <div class="ndt-card__header account-section__header">
+                    <div>
+                        <h2 id="current-room-title">Phòng và hợp đồng hiện tại</h2>
+                        <p>Thông tin lưu trú đang hiệu lực của bạn.</p>
+                    </div>
+                    <a class="ndt-button ndt-button--ghost ndt-button--compact" href="{% url 'hop_dong_cua_toi' %}">Xem hợp đồng</a>
+                </div>
+                <div class="ndt-card__body">
+                    {% if phong_hien_tai and hop_dong_hien_tai %}
+                        <div class="current-room">
+                            <div>
+                                <span class="account-eyebrow">Đang thuê</span>
+                                <h3>Phòng {{ phong_hien_tai.so_phong }}</h3>
+                                <p>
+                                    {{ phong_hien_tai.co_so.ten_co_so }}
+                                    {% if phong_hien_tai.co_so.dia_chi %} · {{ phong_hien_tai.co_so.dia_chi }}{% endif %}
+                                </p>
+                                <p>
+                                    Hợp đồng {{ hop_dong_hien_tai.so_hop_dong }}
+                                    · {{ hop_dong_hien_tai.ngay_bat_dau|date:"d/m/Y" }}
+                                    - {{ hop_dong_hien_tai.ngay_ket_thuc|date:"d/m/Y" }}
+                                </p>
+                            </div>
+                            <div class="current-room__actions">
+                                <a class="ndt-button ndt-button--secondary" href="{% url 'chi_tiet_phong' phong_hien_tai.id %}">Xem phòng</a>
+                                <a class="ndt-button ndt-button--primary" href="{% url 'chi_tiet_hop_dong_cua_toi' hop_dong_hien_tai.id %}">Chi tiết hợp đồng</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        {% url 'danh_sach_phong' as room_list_url %}
+                        {% include 'core/foundation/empty_state.html' with title='Chưa có phòng đang thuê' description='Bạn chưa có phòng đang thuê hoặc hợp đồng đang hiệu lực.' action_url=room_list_url action_label='Tìm phòng phù hợp' %}
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="ndt-card account-section" aria-labelledby="booking-list-title">
+                <div class="ndt-card__header account-section__header">
+                    <div>
+                        <h2 id="booking-list-title">Đặt phòng của tôi</h2>
+                        <p>Các yêu cầu đặt phòng đã gửi từ tài khoản này.</p>
+                    </div>
+                    <a class="ndt-button ndt-button--ghost ndt-button--compact" href="{% url 'danh_sach_phong' %}">Đặt phòng mới</a>
+                </div>
+                <div class="ndt-card__body">
+                    {% if danh_sach_dat_phong %}
+                        <div class="booking-list">
+                            {% for dat_phong in danh_sach_dat_phong %}
+                                <article class="booking-card">
+                                    <div class="booking-card__top">
+                                        <div>
+                                            <h3>Phòng {{ dat_phong.phong.so_phong }}</h3>
+                                            <p>{{ dat_phong.phong.co_so.ten_co_so }} · Mã đơn #{{ dat_phong.id }} · {{ dat_phong.ngay_dat|date:"d/m/Y H:i" }}</p>
+                                        </div>
+                                        {% if dat_phong.trang_thai == "cho_duyet" %}
+                                            <span class="ndt-badge ndt-badge--warning">Chờ duyệt</span>
+                                        {% elif dat_phong.trang_thai == "da_duyet" %}
+                                            <span class="ndt-badge ndt-badge--success">Đã duyệt</span>
+                                        {% elif dat_phong.trang_thai == "tu_choi" %}
+                                            <span class="ndt-badge ndt-badge--danger">Từ chối</span>
+                                        {% elif dat_phong.trang_thai == "da_huy" %}
+                                            <span class="ndt-badge ndt-badge--info">Đã hủy</span>
+                                        {% else %}
+                                            <span class="ndt-badge ndt-badge--info">{{ dat_phong.get_trang_thai_display }}</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <dl class="booking-facts">
+                                        <div>
+                                            <dt>Ngày nhận phòng</dt>
+                                            <dd>{{ dat_phong.ngay_nhan_phong|date:"d/m/Y"|default:"Chưa có" }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Thời hạn dự kiến</dt>
+                                            <dd>{{ dat_phong.so_thang_thue|default:"Chưa có" }}{% if dat_phong.so_thang_thue %} tháng{% endif %}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Tiền cọc dự kiến</dt>
+                                            <dd>{{ dat_phong.tien_coc_du_kien|vnd }} VNĐ</dd>
+                                        </div>
+                                    </dl>
+
+                                    {% if dat_phong.trang_thai == "tu_choi" and dat_phong.ly_do_tu_choi %}
+                                        <div class="account-alert account-alert--danger">
+                                            <strong>Lý do từ chối:</strong>
+                                            {{ dat_phong.ly_do_tu_choi|linebreaksbr }}
+                                        </div>
+                                    {% endif %}
+
+                                    <div class="booking-card__actions">
+                                        <a class="ndt-button ndt-button--secondary ndt-button--compact" href="{% url 'chi_tiet_phong' dat_phong.phong.id %}">Xem phòng</a>
+                                        {% if dat_phong.trang_thai == "cho_duyet" %}
+                                            <form method="POST" action="{% url 'huy_dat_phong_cua_toi' dat_phong.id %}" data-cancel-booking-form data-confirm-title="Hủy yêu cầu đặt phòng" data-confirm-message="Bạn chắc chắn muốn hủy yêu cầu đặt phòng này?">
+                                                {% csrf_token %}
+                                                <button class="ndt-button ndt-button--danger ndt-button--compact" type="submit">Hủy yêu cầu</button>
+                                            </form>
+                                        {% elif dat_phong.trang_thai == "da_duyet" %}
+                                            <a class="ndt-button ndt-button--primary ndt-button--compact" href="{% url 'hop_dong_cua_toi' %}">Xem hợp đồng</a>
+                                        {% endif %}
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {% url 'danh_sach_phong' as room_list_url %}
+                        {% include 'core/foundation/empty_state.html' with title='Chưa có yêu cầu đặt phòng' description='Các yêu cầu đặt phòng của bạn sẽ xuất hiện tại đây.' action_url=room_list_url action_label='Khám phá phòng đang có' %}
+                    {% endif %}
+                </div>
+            </section>
+        </main>
+
+        <aside class="account-sidebar">
+            <section class="ndt-card account-section" aria-labelledby="profile-summary-title">
+                <div class="ndt-card__header account-section__header">
+                    <div>
+                        <h2 id="profile-summary-title">Thông tin tài khoản</h2>
+                        <p>Hồ sơ người thuê đang liên kết với tài khoản.</p>
+                    </div>
+                    <a class="ndt-button ndt-button--ghost ndt-button--compact" href="{{ profile_url }}">Chỉnh sửa</a>
+                </div>
+                <div class="ndt-card__body">
+                    <dl class="profile-grid">
+                        <div><dt>Họ và tên</dt><dd>{{ nguoi_thue.ho_ten }}</dd></div>
+                        <div><dt>Tên đăng nhập</dt><dd>{{ nguoi_thue.tai_khoan.username }}</dd></div>
+                        <div><dt>Số điện thoại</dt><dd>{{ nguoi_thue.so_dien_thoai|default:"Chưa cập nhật" }}</dd></div>
+                        <div><dt>Email</dt><dd>{{ nguoi_thue.email|default:"Chưa cập nhật" }}</dd></div>
+                        <div><dt>CCCD</dt><dd>{{ nguoi_thue.cccd|default:"Chưa cập nhật" }}</dd></div>
+                        <div><dt>Nghề nghiệp</dt><dd>{{ nguoi_thue.nghe_nghiep|default:"Chưa cập nhật" }}</dd></div>
+                    </dl>
+                    <div class="account-inline-actions">
+                        <a class="ndt-button ndt-button--secondary ndt-button--compact" href="{{ profile_url }}">Cập nhật thông tin</a>
+                        <a class="ndt-button ndt-button--secondary ndt-button--compact" href="{% url 'doi_mat_khau_user' %}">Đổi mật khẩu</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="ndt-card account-section" aria-labelledby="service-list-title">
+                <div class="ndt-card__header">
+                    <h2 id="service-list-title">Dịch vụ của tôi</h2>
+                </div>
+                <div class="ndt-card__body">
+                    <div class="quick-links">
+                        <a class="quick-link" href="{% url 'hop_dong_cua_toi' %}"><strong>Hợp đồng của tôi</strong><span>Xem hợp đồng và yêu cầu gia hạn</span></a>
+                        <a class="quick-link" href="{% url 'hoa_don_cua_toi' %}"><strong>Hóa đơn &amp; thanh toán</strong><span>Theo dõi và thanh toán hóa đơn</span></a>
+                        <a class="quick-link" href="{% url 'yeu_cau_sua_chua_cua_toi' %}"><strong>Sửa chữa của tôi</strong><span>Gửi và theo dõi yêu cầu hỗ trợ</span></a>
+                        <a class="quick-link" href="{% url 'yeu_cau_ghep_cua_toi' %}"><strong>Ở ghép của tôi</strong><span>Quản lý yêu cầu ghép phòng</span></a>
+                        <a class="quick-link" href="{% url 'nhan_dien_su_dung_phong' %}"><strong>Đăng ký Face ID</strong><span>Quản lý nhận diện sử dụng phòng</span></a>
+                        <a class="quick-link" href="{% url 'thong_bao_cua_toi' %}"><strong>Thông báo của tôi</strong><span>{{ so_thong_bao_chua_doc }} thông báo chưa đọc</span></a>
+                    </div>
+
+                    {% if so_sua_chua_dang_xu_ly %}
+                        <p class="account-alert account-alert--info">Có {{ so_sua_chua_dang_xu_ly }} yêu cầu sửa chữa đang được xử lý.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="ndt-card account-section" aria-labelledby="recent-notices-title">
+                <div class="ndt-card__header account-section__header">
+                    <div>
+                        <h2 id="recent-notices-title">Thông báo gần đây</h2>
+                        <p>Cập nhật mới nhất dành cho tài khoản.</p>
+                    </div>
+                    <a class="ndt-button ndt-button--ghost ndt-button--compact" href="{% url 'thong_bao_cua_toi' %}">Xem tất cả</a>
+                </div>
+                <div class="ndt-card__body">
+                    {% if thong_bao_gan_day %}
+                        <div class="notice-list">
+                            {% for tb in thong_bao_gan_day %}
+                                <a class="notice-item{% if not tb.da_doc %} is-unread{% endif %}" href="{% url 'chi_tiet_thong_bao_cua_toi' tb.id %}">
+                                    <strong>{{ tb.tieu_de }}</strong>
+                                    <span>{{ tb.ngay_tao|date:"d/m/Y H:i" }}</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {% include 'core/foundation/empty_state.html' with title='Chưa có thông báo' description='Thông báo mới sẽ xuất hiện tại đây.' %}
+                    {% endif %}
+                </div>
+            </section>
+        </aside>
+    </div>
+</div>
+{% include 'core/foundation/dialog_root.html' %}
+<script src="{% static 'js/foundation/dialog.js' %}" defer></script>
+<script src="{% static 'js/tenant/booking.js' %}" defer></script>
+{% endblock %}

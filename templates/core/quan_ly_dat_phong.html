@@ -1,0 +1,63 @@
+{% extends 'core/base.html' %}
+{% load static bo_loc %}
+{% block title %}Quản lý đặt phòng - NDT MOTEL{% endblock %}
+{% block page_title %}Quản lý đặt phòng{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/v2.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin_booking.css' %}">
+{% endblock %}
+{% block content %}
+<div class="admin-booking ndt-foundation ndt-v2" data-admin-booking-screen="list">
+    <header class="v2-page-header">
+        <div><div class="v2-breadcrumb">Quản trị / Đặt phòng</div><h1>Quản lý đặt phòng</h1><p>Ưu tiên yêu cầu cần đối soát, theo dõi trạng thái và xử lý đúng bước tiếp theo.</p></div>
+    </header>
+
+    <section class="v2-summary" aria-label="Tóm tắt đặt phòng">
+        <div class="v2-summary__item"><span class="v2-summary__label">Tất cả yêu cầu</span><strong class="v2-summary__value">{{ tong_don }}</strong></div>
+        <div class="v2-summary__item"><span class="v2-summary__label">Chờ duyệt</span><strong class="v2-summary__value">{{ cho_duyet }}</strong></div>
+        <div class="v2-summary__item"><span class="v2-summary__label">Chờ đối soát cọc</span><strong class="v2-summary__value">{{ cho_doi_soat }}</strong></div>
+        <div class="v2-summary__item"><span class="v2-summary__label">Đã duyệt</span><strong class="v2-summary__value">{{ da_duyet }}</strong></div>
+    </section>
+
+    <details class="admin-booking-filter v2-panel" {% if tu_khoa or trang_thai or coc or hop_dong %}open{% endif %}>
+        <summary><span>Tìm kiếm và lọc</span>{% if tu_khoa or trang_thai or coc or hop_dong %}<span class="admin-booking-filter__active">Đang áp dụng</span>{% endif %}</summary>
+        <form class="admin-booking-filter__form" method="get" action="{% url 'quan_ly_dat_phong' %}">
+            <div class="ndt-field admin-booking-filter__search"><label class="ndt-label" for="booking-query">Tìm kiếm</label><input class="ndt-control" id="booking-query" type="search" name="q" value="{{ tu_khoa }}" placeholder="Mã yêu cầu, người thuê, CCCD, SĐT, phòng hoặc cơ sở"></div>
+            <div class="ndt-field"><label class="ndt-label" for="booking-status">Trạng thái booking</label><select class="ndt-control" id="booking-status" name="trang_thai"><option value="">Tất cả</option><option value="cho_duyet" {% if trang_thai == 'cho_duyet' %}selected{% endif %}>Chờ duyệt</option><option value="da_duyet" {% if trang_thai == 'da_duyet' %}selected{% endif %}>Đã duyệt</option><option value="tu_choi" {% if trang_thai == 'tu_choi' %}selected{% endif %}>Từ chối</option><option value="da_huy" {% if trang_thai == 'da_huy' %}selected{% endif %}>Đã hủy</option></select></div>
+            <div class="ndt-field"><label class="ndt-label" for="deposit-status">Trạng thái cọc</label><select class="ndt-control" id="deposit-status" name="coc"><option value="">Tất cả</option><option value="chua_co" {% if coc == 'chua_co' %}selected{% endif %}>Chưa có giao dịch</option><option value="chua_thanh_toan" {% if coc == 'chua_thanh_toan' %}selected{% endif %}>Chờ thanh toán</option><option value="cho_xac_nhan" {% if coc == 'cho_xac_nhan' %}selected{% endif %}>Chờ đối soát</option><option value="da_xac_nhan" {% if coc == 'da_xac_nhan' %}selected{% endif %}>Đã xác nhận cọc</option><option value="tu_choi" {% if coc == 'tu_choi' %}selected{% endif %}>Cọc bị từ chối</option><option value="da_huy" {% if coc == 'da_huy' %}selected{% endif %}>Đã hủy giao dịch</option><option value="da_hoan_tien" {% if coc == 'da_hoan_tien' %}selected{% endif %}>Đã hoàn tiền</option></select></div>
+            <div class="ndt-field"><label class="ndt-label" for="contract-status">Hợp đồng</label><select class="ndt-control" id="contract-status" name="hop_dong"><option value="">Tất cả</option><option value="da_co" {% if hop_dong == 'da_co' %}selected{% endif %}>Đã có</option><option value="chua_co" {% if hop_dong == 'chua_co' %}selected{% endif %}>Chưa có</option></select></div>
+            <div class="admin-booking-filter__actions"><button class="ndt-button ndt-button--primary" type="submit">Áp dụng</button>{% if tu_khoa or trang_thai or coc or hop_dong %}<a class="ndt-button ndt-button--secondary" href="{% url 'quan_ly_dat_phong' %}">Đặt lại</a>{% endif %}</div>
+        </form>
+    </details>
+
+    <div class="v2-section-heading"><div><h2>Hàng đợi xử lý</h2><p>{{ tong_ket_qua }} kết quả{% if cho_doi_soat %} · {{ cho_doi_soat }} giao dịch cần đối soát{% endif %}</p></div></div>
+    {% if dat_phong %}
+    <div class="admin-booking-queue">
+        {% for don in dat_phong %}
+        <article class="admin-booking-record {% if don.coc_hien_tai.trang_thai == 'cho_xac_nhan' %}is-priority{% endif %}">
+            <div class="admin-booking-record__identity"><span class="v2-kicker">Yêu cầu</span><a class="admin-booking-code" href="{% url 'chi_tiet_dat_phong' don.id %}">{{ don.ma_yeu_cau|default:don.id }}</a><strong>{{ don.nguoi_thue.ho_ten }}</strong><span>{{ don.nguoi_thue.so_dien_thoai }}</span></div>
+            <dl class="admin-booking-record__facts">
+                <div><dt>Phòng</dt><dd>Phòng {{ don.phong.so_phong }}<small>{{ don.phong.co_so.ten_co_so }}</small></dd></div>
+                <div><dt>Ngày gửi</dt><dd>{{ don.ngay_dat|date:'d/m/Y H:i' }}</dd></div>
+                <div><dt>Ngày nhận phòng</dt><dd>{{ don.ngay_nhan_phong|date:'d/m/Y' }}</dd></div>
+                <div><dt>Tiền cọc</dt><dd>{{ don.tien_coc_du_kien|vnd }} VNĐ</dd></div>
+            </dl>
+            <div class="admin-booking-record__state"><span class="v2-kicker">Trạng thái</span><div class="admin-booking-record__badges">
+                {% if don.coc_hien_tai and don.coc_hien_tai.trang_thai == 'da_xac_nhan' %}<span class="ndt-badge ndt-badge--success">Cọc: {{ don.trang_thai_coc_hien_thi }}</span>{% elif don.coc_hien_tai and don.coc_hien_tai.trang_thai == 'cho_xac_nhan' %}<span class="ndt-badge ndt-badge--warning">Cọc: {{ don.trang_thai_coc_hien_thi }}</span>{% elif don.coc_hien_tai and don.coc_hien_tai.trang_thai == 'tu_choi' %}<span class="ndt-badge ndt-badge--danger">Cọc: {{ don.trang_thai_coc_hien_thi }}</span>{% else %}<span class="ndt-badge ndt-badge--info">Cọc: {{ don.trang_thai_coc_hien_thi }}</span>{% endif %}
+                {% if don.trang_thai == 'da_duyet' %}<span class="ndt-badge ndt-badge--success">Booking: {{ don.get_trang_thai_display }}</span>{% elif don.trang_thai == 'tu_choi' or don.trang_thai == 'da_huy' %}<span class="ndt-badge ndt-badge--danger">Booking: {{ don.get_trang_thai_display }}</span>{% else %}<span class="ndt-badge ndt-badge--warning">Booking: {{ don.get_trang_thai_display }}</span>{% endif %}
+            </div>{% if don.co_hop_dong %}<span class="admin-booking-contract">Đã có hợp đồng</span>{% endif %}</div>
+            <div class="admin-booking-record__action"><span class="v2-kicker">Bước tiếp theo</span>{% if don.co_the_xac_nhan_coc_va_tao_hop_dong %}<strong>Kiểm tra tiền thực nhận</strong><a class="ndt-button ndt-button--primary" href="{% url 'chi_tiet_dat_phong' don.id %}#payment-review">Xem xét và xác nhận</a>{% else %}<strong>{% if don.trang_thai == 'cho_duyet' %}Xem xét yêu cầu{% elif don.co_hop_dong %}Theo dõi hồ sơ{% else %}Kiểm tra chi tiết{% endif %}</strong><a class="ndt-button ndt-button--secondary" href="{% url 'chi_tiet_dat_phong' don.id %}">Xem chi tiết</a>{% endif %}</div>
+        </article>
+        {% endfor %}
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}<nav class="admin-booking-pagination" aria-label="Phân trang"><span>Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span><div>{% if page_obj.has_previous %}<a class="ndt-button ndt-button--secondary ndt-button--compact" href="?page={{ page_obj.previous_page_number }}&q={{ tu_khoa|urlencode }}&trang_thai={{ trang_thai }}&coc={{ coc }}&hop_dong={{ hop_dong }}">Trang trước</a>{% endif %}{% if page_obj.has_next %}<a class="ndt-button ndt-button--secondary ndt-button--compact" href="?page={{ page_obj.next_page_number }}&q={{ tu_khoa|urlencode }}&trang_thai={{ trang_thai }}&coc={{ coc }}&hop_dong={{ hop_dong }}">Trang sau</a>{% endif %}</div></nav>{% endif %}
+    {% else %}
+        {% url 'quan_ly_dat_phong' as reset_url %}{% if tu_khoa or trang_thai or coc or hop_dong %}{% include 'core/foundation/empty_state.html' with title='Không có yêu cầu phù hợp' description='Hãy điều chỉnh hoặc xóa bộ lọc để xem các yêu cầu khác.' action_url=reset_url action_label='Xóa bộ lọc' %}{% else %}{% include 'core/foundation/empty_state.html' with title='Chưa có yêu cầu đặt phòng' description='Các yêu cầu mới sẽ xuất hiện tại đây khi người thuê hoàn tất bước đặt phòng.' %}{% endif %}
+    {% endif %}
+</div>
+<script src="{% static 'js/admin_booking.js' %}" defer></script>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% load static %}
+<div id="ndtToastRegion" class="ndt-toast-region" aria-live="polite" aria-atomic="false">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="ndt-toast-seed" data-kind="{{ message.tags|default:'info' }}" data-title="Thong bao" data-body="{{ message|escape }}"></div>
+        {% endfor %}
+    {% endif %}
+</div>
+<script>
+    window.NDT_NOTIFICATION_POLL_URL = "{% if request.user.is_authenticated %}{% if request.user.is_staff or request.user.is_superuser %}{% url 'kiem_tra_thong_bao_admin_moi' %}{% else %}{% url 'kiem_tra_thong_bao_cua_toi_moi' %}{% endif %}{% endif %}";
+</script>

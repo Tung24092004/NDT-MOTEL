@@ -1,0 +1,66 @@
+{% extends 'core/tenant/booking/base.html' %}
+{% load bo_loc %}
+{% block title %}Yêu cầu đặt phòng - NDT MOTEL{% endblock %}
+{% block page_title %}Yêu cầu đặt phòng{% endblock %}
+{% block booking_content %}
+<div class="booking-create-page">
+<nav class="booking-local-breadcrumb" aria-label="Điều hướng đặt phòng">
+    <a href="{% url 'danh_sach_phong' %}">Tìm phòng</a>
+    <span aria-hidden="true">/</span>
+    <a href="{% url 'chi_tiet_phong' phong.pk %}">Phòng {{ phong.so_phong }}</a>
+    <span aria-hidden="true">/</span>
+    <span>Yêu cầu đặt phòng</span>
+</nav>
+<header class="booking-heading">
+    <div>
+        <p class="booking-kicker">Đặt phòng NDT MOTEL</p>
+        <h1>Yêu cầu đặt phòng</h1>
+        <p>Hoàn tất 6 bước để gửi yêu cầu giữ phòng và chuyển sang thanh toán cọc.</p>
+    </div>
+    <a class="booking-link-button" href="{% url 'dat_phong_cua_toi' %}">Đặt phòng của tôi</a>
+</header>
+{% if configuration_error %}<p class="booking-alert" role="alert">{{ configuration_error }}</p>{% endif %}
+{% if form.errors or companions.errors or companions.non_form_errors %}<div class="booking-alert" role="alert"><h2>Vui lòng kiểm tra thông tin</h2>{{ form.errors }}{{ companions.non_form_errors }}{% for occupant in companions %}{{ occupant.non_field_errors }}{% endfor %}</div>{% endif %}
+<ol class="booking-progress" aria-label="Tiến trình yêu cầu">
+    <li><span class="booking-progress-index">1</span><span>Phòng</span></li>
+    <li><span class="booking-progress-index">2</span><span>Người đặt</span></li>
+    <li><span class="booking-progress-index">3</span><span>Thời hạn</span></li>
+    <li><span class="booking-progress-index">4</span><span>Người đi cùng</span></li>
+    <li><span class="booking-progress-index">5</span><span>Điều khoản</span></li>
+    <li><span class="booking-progress-index">6</span><span>Xác nhận</span></li>
+</ol>
+<form method="post" id="booking-create" data-capacity="{{ phong.so_nguoi_toi_da }}" data-has-errors="{% if form.errors or companions.errors or companions.non_form_errors %}true{% else %}false{% endif %}">
+{% csrf_token %}
+<input type="hidden" name="ho_ten" value="{{ nguoi_thue.ho_ten }}">
+<input type="hidden" name="so_dien_thoai" value="{{ nguoi_thue.so_dien_thoai }}">
+<input type="hidden" name="cccd" value="{{ nguoi_thue.cccd }}">
+<div class="booking-workspace">
+<aside class="booking-persistent-summary" aria-label="Tóm tắt phòng đã chọn">
+    {% include 'core/tenant/booking/components/room_summary.html' %}
+    <p class="booking-summary-note">Giá và tiền cọc được lấy trực tiếp từ thông tin phòng hiện tại.</p>
+</aside>
+<div class="booking-flow">
+<section class="booking-section" data-step="0"><p class="booking-step-kicker">Bước 1</p><h2>Kiểm tra phòng đã chọn</h2><p>Hãy kiểm tra cơ sở, giá thuê, tiền cọc và sức chứa trong phần tóm tắt trước khi tiếp tục.</p><dl class="booking-facts booking-room-check"><div><dt>Phòng</dt><dd>{{ phong.so_phong }}</dd></div><div><dt>Cơ sở</dt><dd>{{ phong.co_so.ten_co_so }}</dd></div><div><dt>Sức chứa</dt><dd>{{ phong.so_nguoi_toi_da }} người</dd></div><div><dt>Trạng thái</dt><dd>{{ phong.get_trang_thai_display }}</dd></div></dl></section>
+<section class="booking-section" data-step="1"><h2>2. Người đặt</h2>{% include 'core/tenant/booking/components/tenant_information.html' %}</section>
+<section class="booking-section" data-step="2"><h2>3. Thông tin thuê</h2><div class="booking-fields">
+{% for field in form %}{% if field.name != 'da_dong_y_dieu_khoan' %}<div class="booking-field {% if field.name == 'dong_y_nhan_yeu_cau_ghep' %}checkbox-field{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}</div>
+<p>Ngày trả dự kiến: <output id="checkout-preview">Chưa chọn ngày</output></p><p>Số chỗ còn lại sau khai báo: <output id="remaining-preview">{{ phong.so_nguoi_toi_da }}</output></p></section>
+<section class="booking-section" data-step="3"><h2>4. Người đi cùng</h2><p>Người thuê chính được tính một người. Danh sách đã biết phải đủ số người đã chọn; nhu cầu ghép sau này không thay cho bản khai còn thiếu.</p>
+{{ companions.management_form }}<div id="companion-rows">{% for occupant in companions %}{% include 'core/tenant/booking/components/companion_row.html' %}{% endfor %}</div>
+<p id="companion-count" aria-live="polite">0 người đi cùng</p><button type="button" id="add-companion">Thêm người đi cùng</button>
+<button type="submit" id="prepare-companions" name="action" value="prepare_occupants" formnovalidate>Cập nhật danh sách theo số người</button>
+<template id="companion-template">{% include 'core/tenant/booking/components/companion_row.html' with occupant=companions.empty_form %}</template></section>
+<section class="booking-section" data-step="4"><h2>5. Chi phí và điều khoản</h2><dl class="booking-facts"><div><dt>Giá thuê mỗi tháng</dt><dd>{{ phong.gia_thue|vnd }} VNĐ</dd></div><div><dt>Cọc cần chuyển trước</dt><dd>{{ phong.tien_coc_mac_dinh|vnd }} VNĐ</dd></div><div><dt>Hạn thanh toán dự kiến</dt><dd>{{ deadline|date:'d/m/Y H:i' }}</dd></div><div><dt>Không thống nhất sau xem/trao đổi</dt><dd>Hoàn {{ refund }}%: {{ expected_refund|vnd }} VNĐ</dd></div><div><dt>Lỗi bên cho thuê/thông tin khác thực tế</dt><dd>Hoàn 100%: {{ phong.tien_coc_mac_dinh|vnd }} VNĐ</dd></div><div><dt>Thông tin giả/bỏ nhận sau hợp đồng</dt><dd>Hoàn 0%: 0 VNĐ</dd></div></dl>
+<div class="booking-terms">{{ terms|linebreaksbr }}</div><div class="booking-field checkbox-field">{{ form.da_dong_y_dieu_khoan }}<label for="{{ form.da_dong_y_dieu_khoan.id_for_label }}">{{ form.da_dong_y_dieu_khoan.label }}</label>{{ form.da_dong_y_dieu_khoan.errors }}</div></section>
+<section class="booking-section" data-step="5"><h2>6. Xác nhận yêu cầu</h2><dl class="booking-facts"><div><dt>Người đặt</dt><dd>{{ nguoi_thue.ho_ten }}</dd></div><div><dt>Phòng</dt><dd>{{ phong.co_so.ten_co_so }} / {{ phong.so_phong }}</dd></div><div><dt>Giá tháng</dt><dd>{{ phong.gia_thue|vnd }} VNĐ</dd></div><div><dt>Cọc</dt><dd>{{ phong.tien_coc_mac_dinh|vnd }} VNĐ</dd></div></dl><div id="confirmation-summary"></div><p>Yêu cầu chưa được chấp thuận. Cọc cần quản lý đối soát trước khi xử lý hợp đồng.</p>
+<button type="submit" id="booking-submit" {% if configuration_error %}disabled{% endif %}>Xác nhận thông tin và chuyển đến thanh toán cọc</button></section>
+<div class="booking-step-actions" hidden>
+    <button type="button" id="booking-prev" class="booking-btn-secondary">Quay lại</button>
+    <span id="step-position" class="booking-step-position" aria-live="polite"></span>
+    <button type="button" id="booking-next" class="booking-btn-primary">Tiếp tục</button>
+</div>
+</div>
+</div>
+</form>
+</div>
+{% endblock %}

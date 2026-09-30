@@ -1,0 +1,545 @@
+/* Chi tiet hoa don cua nguoi thue */
+.tenant-ui .invoice-page {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 12px 0 56px;
+    color: #18343b;
+}
+
+.tenant-ui .invoice-page .ndt-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.25;
+    text-decoration: none;
+}
+
+.tenant-ui .invoice-page .ndt-button--primary {
+    border-color: #087f8c;
+    background: #087f8c;
+    color: #fff;
+}
+
+.tenant-ui .invoice-page .ndt-button--secondary {
+    border-color: #c8d9dc;
+    background: #fff;
+    color: #234b54;
+}
+
+.tenant-ui .invoice-page .ndt-button:focus-visible {
+    outline: 3px solid rgba(8, 127, 140, 0.3);
+    outline-offset: 2px;
+}
+
+.tenant-ui .invoice-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+    color: #71858a;
+    font-size: 13px;
+}
+
+.tenant-ui .invoice-breadcrumb a {
+    color: #087f8c;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+/* Nhan dien va tong tien */
+.tenant-ui .invoice-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.8fr);
+    border: 1px solid #d6e3e5;
+    border-radius: 8px 8px 0 0;
+    background: #fff;
+    overflow: hidden;
+}
+
+.tenant-ui .invoice-header__identity,
+.tenant-ui .invoice-header-total {
+    padding: 30px 34px;
+}
+
+.tenant-ui .invoice-kicker,
+.tenant-ui .section-eyebrow {
+    margin: 0 0 7px;
+    color: #087f8c;
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.tenant-ui .invoice-header h1 {
+    margin: 0;
+    font-size: 36px;
+    line-height: 1.15;
+}
+
+.tenant-ui .invoice-header__identity > p:last-child {
+    margin: 10px 0 0;
+    color: #62787e;
+    font-size: 15px;
+}
+
+.tenant-ui .invoice-header-total {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: #087f8c;
+    color: #fff;
+}
+
+.tenant-ui .invoice-header-total > span {
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.tenant-ui .invoice-header-total > strong {
+    margin: 5px 0 9px;
+    font-size: 32px;
+    line-height: 1.15;
+}
+
+.tenant-ui .status {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    min-height: 28px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 900;
+}
+
+.tenant-ui .invoice-dates {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 0 0 24px;
+    border: 1px solid #d6e3e5;
+    border-top: 0;
+    border-radius: 0 0 8px 8px;
+    background: #fff;
+}
+
+.tenant-ui .invoice-dates div {
+    padding: 17px 22px;
+    border-left: 1px solid #e4ecee;
+}
+
+.tenant-ui .invoice-dates div:first-child {
+    border-left: 0;
+}
+
+.tenant-ui .invoice-dates dt,
+.tenant-ui .fact-list dt,
+.tenant-ui .payment-summary dt,
+.tenant-ui .invoice-action-summary dt {
+    color: #6d8085;
+    font-size: 12px;
+}
+
+.tenant-ui .invoice-dates dd {
+    margin: 5px 0 0;
+    font-size: 15px;
+    font-weight: 900;
+}
+
+/* Trang thai va hanh dong duoc dat truoc du lieu phu */
+.tenant-ui .invoice-priority {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(360px, 0.7fr);
+    margin-bottom: 24px;
+    border: 1px solid #cfe0e2;
+    border-radius: 8px;
+    background: #f5faf9;
+    overflow: hidden;
+}
+
+.tenant-ui .invoice-next-step {
+    padding: 24px 28px;
+}
+
+.tenant-ui .invoice-next-step h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.3;
+}
+
+.tenant-ui .invoice-next-step > p:last-child {
+    max-width: 700px;
+    margin: 9px 0 0;
+    color: #506b71;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.tenant-ui .invoice-action-summary {
+    padding: 20px 22px;
+    border-left: 1px solid #d8e6e7;
+    background: #fff;
+}
+
+.tenant-ui .invoice-action-summary dl {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 0 0 14px;
+}
+
+.tenant-ui .invoice-action-summary dd {
+    margin: 5px 0 0;
+    color: #164951;
+    font-size: 16px;
+    font-weight: 900;
+}
+
+.tenant-ui .invoice-primary-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.tenant-ui .invoice-primary-actions .ndt-button:only-child {
+    grid-column: 1 / -1;
+}
+
+.tenant-ui .invoice-primary-actions .ndt-button {
+    min-height: 46px;
+    padding-right: 12px;
+    padding-left: 12px;
+    text-align: center;
+}
+
+/* Noi dung hoa don */
+.tenant-ui .invoice-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.75fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.tenant-ui .invoice-main,
+.tenant-ui .invoice-side {
+    display: grid;
+    gap: 22px;
+}
+
+.tenant-ui .document-section,
+.tenant-ui .side-section {
+    border: 1px solid #d6e3e5;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.tenant-ui .section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px 26px;
+    border-bottom: 1px solid #e3ecee;
+}
+
+.tenant-ui .section-heading h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.tenant-ui .section-heading > span {
+    color: #6d8085;
+    font-size: 12px;
+}
+
+.tenant-ui .cost-table {
+    padding: 7px 26px 22px;
+}
+
+.tenant-ui .cost-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    padding: 15px 0;
+    border-bottom: 1px solid #edf2f3;
+    color: #536b71;
+    font-size: 15px;
+}
+
+.tenant-ui .cost-row strong {
+    color: #203f47;
+    text-align: right;
+}
+
+.tenant-ui .cost-head {
+    color: #71858a;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.tenant-ui .cost-total {
+    align-items: center;
+    margin-top: 6px;
+    padding: 18px 16px;
+    border: 0;
+    border-radius: 6px;
+    background: #eaf6f6;
+    color: #17434a;
+    font-weight: 900;
+}
+
+.tenant-ui .cost-total strong {
+    color: #087581;
+    font-size: 25px;
+}
+
+.tenant-ui .invoice-note {
+    margin: 0 26px 22px;
+    padding: 16px 18px;
+    border: 1px solid #dce8ea;
+    border-radius: 6px;
+    background: #f8fbfb;
+    color: #536b71;
+    font-size: 14px;
+}
+
+.tenant-ui .invoice-note--standalone {
+    margin: 0;
+}
+
+.tenant-ui .invoice-note p {
+    margin: 6px 0 0;
+    line-height: 1.65;
+}
+
+.tenant-ui .payment-history {
+    padding: 0 26px;
+}
+
+.tenant-ui .payment-history article {
+    display: grid;
+    grid-template-columns: 145px 160px minmax(0, 1fr);
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid #edf2f3;
+    font-size: 14px;
+}
+
+.tenant-ui .payment-history article:last-child {
+    border-bottom: 0;
+}
+
+.tenant-ui .payment-history p {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: #667c82;
+}
+
+.tenant-ui .empty-history {
+    margin: 0;
+    padding: 34px 26px;
+    color: #71858a;
+    text-align: center;
+}
+
+.tenant-ui .side-section {
+    padding: 22px;
+}
+
+.tenant-ui .side-label {
+    margin: 0 0 15px;
+    color: #17373f;
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.tenant-ui .fact-list,
+.tenant-ui .payment-summary dl {
+    margin: 0;
+}
+
+.tenant-ui .fact-list div,
+.tenant-ui .payment-summary dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 12px 0;
+    border-bottom: 1px solid #edf2f3;
+}
+
+.tenant-ui .fact-list div:last-child,
+.tenant-ui .payment-summary dl div:last-child {
+    border-bottom: 0;
+}
+
+.tenant-ui .fact-list dd,
+.tenant-ui .payment-summary dd {
+    max-width: 66%;
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-size: 14px;
+    font-weight: 800;
+    text-align: right;
+}
+
+.tenant-ui .pending-message {
+    margin: 14px 0 0;
+    padding: 13px;
+    border: 1px solid #cfe2e8;
+    border-radius: 6px;
+    background: #f1f8fa;
+    color: #426872;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+@media (max-width: 1050px) {
+    .tenant-ui .invoice-header {
+        grid-template-columns: minmax(0, 1fr) 330px;
+    }
+
+    .tenant-ui .invoice-priority {
+        grid-template-columns: minmax(0, 1fr) 340px;
+    }
+
+    .tenant-ui .invoice-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .tenant-ui .invoice-side {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .tenant-ui .invoice-header {
+        grid-template-columns: 1fr;
+    }
+
+    .tenant-ui .invoice-header__identity,
+    .tenant-ui .invoice-header-total {
+        padding: 22px;
+    }
+
+    .tenant-ui .invoice-header h1 {
+        font-size: 29px;
+    }
+
+    .tenant-ui .invoice-header-total > strong {
+        font-size: 28px;
+    }
+
+    .tenant-ui .invoice-dates {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .tenant-ui .invoice-dates div {
+        border-top: 1px solid #e4ecee;
+    }
+
+    .tenant-ui .invoice-dates div:nth-child(odd) {
+        border-left: 0;
+    }
+
+    .tenant-ui .invoice-priority {
+        grid-template-columns: 1fr;
+    }
+
+    .tenant-ui .invoice-action-summary {
+        border-top: 1px solid #d8e6e7;
+        border-left: 0;
+    }
+
+    .tenant-ui .invoice-primary-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .tenant-ui .invoice-primary-actions .ndt-button {
+        grid-column: 1;
+        width: 100%;
+    }
+
+    .tenant-ui .invoice-side {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .tenant-ui .invoice-page {
+        padding-top: 8px;
+    }
+
+    .tenant-ui .invoice-next-step,
+    .tenant-ui .invoice-action-summary {
+        padding: 20px;
+    }
+
+    .tenant-ui .invoice-next-step h2 {
+        font-size: 20px;
+    }
+
+    .tenant-ui .invoice-action-summary dl {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .tenant-ui .section-heading {
+        align-items: flex-start;
+        padding: 20px;
+    }
+
+    .tenant-ui .section-heading h2 {
+        font-size: 20px;
+    }
+
+    .tenant-ui .cost-table {
+        padding: 6px 20px 20px;
+    }
+
+    .tenant-ui .cost-head {
+        display: none;
+    }
+
+    .tenant-ui .cost-row {
+        gap: 14px;
+        font-size: 14px;
+    }
+
+    .tenant-ui .cost-total {
+        grid-template-columns: 1fr;
+    }
+
+    .tenant-ui .cost-total strong {
+        text-align: left;
+    }
+
+    .tenant-ui .invoice-note {
+        margin: 0 20px 20px;
+    }
+
+    .tenant-ui .invoice-note--standalone {
+        margin: 0;
+    }
+
+    .tenant-ui .payment-history {
+        padding: 0 20px;
+    }
+
+    .tenant-ui .payment-history article {
+        grid-template-columns: 1fr;
+        gap: 7px;
+    }
+
+    .tenant-ui .payment-history p {
+        grid-column: 1;
+    }
+}
