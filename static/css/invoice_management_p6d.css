@@ -1,0 +1,233 @@
+.ndt-f5.ndt-invoice-management {
+    width: 100%;
+    min-width: 0;
+}
+
+.ndt-f5.ndt-invoice-management .invoice-p6d-stack {
+    display: grid;
+    gap: var(--ndt-f5-space-6);
+}
+
+.ndt-f5.ndt-invoice-management .invoice-page-header .ndt-breadcrumb {
+    color: var(--ndt-f5-text-muted);
+}
+
+.ndt-f5.ndt-invoice-management .invoice-page-header .ndt-f5-page-header__title {
+    color: var(--ndt-f5-navy);
+}
+
+.ndt-f5.ndt-invoice-management .invoice-page-header .ndt-f5-page-header__description {
+    color: var(--ndt-f5-text-muted);
+}
+
+.ndt-f5.ndt-invoice-management .ndt-breadcrumb,
+.ndt-f5.ndt-invoice-management :is(.billing-breadcrumb, .invoice-breadcrumb, .payment-breadcrumb) {
+    margin: 0;
+    color: var(--ndt-f5-text-muted);
+    font-size: var(--ndt-f5-text-sm);
+}
+
+.ndt-f5.ndt-invoice-management .invoice-stats {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--ndt-f5-space-3);
+}
+
+.ndt-f5.ndt-invoice-management .invoice-stat {
+    min-width: 0;
+    padding: var(--ndt-f5-space-5);
+    border-top: 4px solid var(--ndt-f5-navy);
+    overflow: visible;
+}
+
+.ndt-f5.ndt-invoice-management .invoice-stat--warning { border-top-color: var(--ndt-f5-warning); }
+.ndt-f5.ndt-invoice-management .invoice-stat--info { border-top-color: var(--ndt-f5-pending); }
+.ndt-f5.ndt-invoice-management .invoice-stat--success { border-top-color: var(--ndt-f5-success); }
+.ndt-f5.ndt-invoice-management .invoice-stat--danger { border-top-color: var(--ndt-f5-danger); }
+
+.ndt-f5.ndt-invoice-management .invoice-filter {
+    display: grid;
+    gap: var(--ndt-f5-space-4);
+}
+
+.ndt-f5.ndt-invoice-management .invoice-filter__form {
+    display: grid;
+    grid-template-columns: minmax(240px, 2fr) minmax(190px, 1fr) auto;
+    gap: var(--ndt-f5-space-4);
+    align-items: end;
+}
+
+.ndt-f5.ndt-invoice-management .invoice-filter__actions,
+.ndt-f5.ndt-invoice-management .invoice-form-actions,
+.ndt-f5.ndt-invoice-management .invoice-actions,
+.ndt-f5.ndt-invoice-management .invoice-primary-actions,
+.ndt-f5.ndt-invoice-management .action-row,
+.ndt-f5.ndt-invoice-management .payment-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ndt-f5-space-3);
+    align-items: center;
+}
+
+.ndt-f5.ndt-invoice-management .invoice-table td:last-child .ndt-f5-button {
+    width: 100%;
+}
+
+.ndt-f5.ndt-invoice-management .invoice-admin-hero {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--ndt-f5-space-6);
+    padding: var(--ndt-f5-space-6);
+    overflow: visible;
+}
+
+.ndt-f5.ndt-invoice-management .invoice-admin-layout,
+.ndt-f5.ndt-invoice-management .invoice-layout,
+.ndt-f5.ndt-invoice-management .payment-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(280px, .8fr);
+    gap: var(--ndt-f5-space-6);
+    align-items: start;
+}
+
+.ndt-f5.ndt-invoice-management :is(.invoice-admin-main, .invoice-main, .invoice-admin-side, .invoice-side) {
+    display: grid;
+    min-width: 0;
+    gap: var(--ndt-f5-space-5);
+}
+
+.ndt-f5.ndt-invoice-management .invoice-panel,
+.ndt-f5.ndt-invoice-management .document-section,
+.ndt-f5.ndt-invoice-management .payment-card {
+    min-width: 0;
+}
+
+.ndt-f5.ndt-invoice-management .invoice-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ndt-f5-space-4);
+}
+
+.ndt-f5.ndt-invoice-management .invoice-action-panel form {
+    display: grid;
+    gap: var(--ndt-f5-space-4);
+}
+
+.ndt-f5.ndt-invoice-management .invoice-action-panel .ndt-f5-button {
+    width: 100%;
+}
+
+.ndt-f5.ndt-invoice-management .invoice-admin-status {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ndt-f5-space-2);
+    align-items: flex-end;
+}
+
+.ndt-f5.ndt-invoice-management .invoice-admin-form {
+    display: grid;
+    gap: var(--ndt-f5-space-5);
+}
+
+.ndt-f5.ndt-invoice-management .invoice-form-grid,
+.ndt-f5.ndt-invoice-management .invoice-money-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ndt-f5-space-4);
+}
+
+.ndt-f5.ndt-invoice-management .invoice-field--full {
+    grid-column: 1 / -1;
+}
+
+.ndt-f5.ndt-invoice-management :is(.invoice-row, .billing-overview, .invoice-register) {
+    min-width: 0;
+}
+
+.ndt-f5.ndt-invoice-management .invoice-row {
+    overflow: visible;
+}
+
+.ndt-f5.ndt-invoice-management .status {
+    font-style: normal;
+}
+
+.ndt-f5.ndt-invoice-management .payment-header,
+.ndt-f5.ndt-invoice-management .invoice-header,
+.ndt-f5.ndt-invoice-management .billing-heading {
+    margin: 0;
+}
+
+.ndt-f5.ndt-invoice-management .method-option-content,
+.ndt-f5.ndt-invoice-management .confirm-check {
+    min-height: 44px;
+}
+
+.ndt-f5.ndt-invoice-management .payment-warning {
+    border-color: var(--ndt-f5-warning);
+}
+
+.ndt-f5.ndt-invoice-management :is(.invoice-note, .invoice-help, .invoice-empty-line) {
+    overflow-wrap: anywhere;
+}
+
+.ndt-f5.ndt-invoice-management :is(.invoice-cost-table, .cost-table, .bank-details) {
+    max-width: 100%;
+}
+
+@media (max-width: 1100px) {
+    .ndt-f5.ndt-invoice-management .invoice-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .ndt-f5.ndt-invoice-management .invoice-admin-layout,
+    .ndt-f5.ndt-invoice-management .invoice-layout,
+    .ndt-f5.ndt-invoice-management .payment-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 720px) {
+    .ndt-f5.ndt-invoice-management .invoice-stats,
+    .ndt-f5.ndt-invoice-management .invoice-form-grid,
+    .ndt-f5.ndt-invoice-management .invoice-money-grid,
+    .ndt-f5.ndt-invoice-management .invoice-facts,
+    .ndt-f5.ndt-invoice-management .invoice-filter__form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ndt-f5.ndt-invoice-management .invoice-admin-hero {
+        flex-direction: column;
+    }
+
+    .ndt-f5.ndt-invoice-management .invoice-admin-status {
+        align-items: flex-start;
+    }
+
+    .ndt-f5.ndt-invoice-management :is(
+        .invoice-filter__actions,
+        .invoice-form-actions,
+        .invoice-actions,
+        .invoice-primary-actions,
+        .action-row,
+        .payment-actions
+    ) {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .ndt-f5.ndt-invoice-management :is(
+        .invoice-filter__actions,
+        .invoice-form-actions,
+        .invoice-actions,
+        .invoice-primary-actions,
+        .action-row,
+        .payment-actions
+    ) .ndt-f5-button {
+        width: 100%;
+    }
+
+    .ndt-f5.ndt-invoice-management .ndt-f5-table td {
+        grid-template-columns: minmax(92px, .8fr) minmax(0, 1.2fr);
+    }
+}

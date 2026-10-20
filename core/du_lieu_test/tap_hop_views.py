@@ -11,13 +11,13 @@ from core.views_hop_dong import (
     cap_nhat_trang_thai_phong_theo_hop_dong,
     quan_ly_hop_dong,
     chi_tiet_hop_dong,
-    tao_hop_dong,
     sua_hop_dong,
     xu_ly_hop_dong,
     hop_dong_cua_toi,
     chi_tiet_hop_dong_cua_toi,
     xuat_hop_dong_pdf,
 )
+from core.views_tao_hop_dong import tao_hop_dong
 from core.views_quan_tri import (
     home,
     dashboard_admin,
@@ -30,15 +30,15 @@ from core.views_quan_tri import (
     xu_ly_co_so,
 )
 from core.views_phong import (
-    danh_sach_phong,
-    chi_tiet_phong,
     quan_ly_phong,
     xoa_phong,
     tao_phong,
     sua_phong,
 )
+from core.views_danh_sach_phong import danh_sach_phong
+from core.views_chi_tiet_phong import chi_tiet_phong
+from core.views_dang_ky import dang_ky
 from core.views_dang_nhap import (
-    dang_ky,
     dang_nhap,
     dang_xuat,
 )

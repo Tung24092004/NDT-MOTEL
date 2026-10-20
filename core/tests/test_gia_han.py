@@ -8,9 +8,10 @@ from django.urls import reverse
 from django.utils import timezone
 
 from core.du_lieu_test import tap_hop_views as views
-from core.models import (YeuCauGiaHanHopDong, HopDong, Phong, NguoiOCungPhong,
+from core.models import (YeuCauGiaHanHopDong, HopDong, Phong, DatPhong, NguoiOCungPhong,
                      QuyenRaVao, FaceProfile, ThongBao, NhatKyThaoTac,
                      LichSuHopDong, HoaDon)
+from core.dich_vu.dong_y_sinh_trac_hoc import record_consent
 from core.du_lieu_test import du_lieu_test_nghiep_vu as baseline
 
 
@@ -72,9 +73,17 @@ class RenewalTests(baseline.BusinessFixture):
         for start, months, end in [(date(2024, 2, 1), 1, date(2024, 2, 29)),
                                     (date(2025, 2, 1), 1, date(2025, 2, 28)),
                                     (date(2024, 1, 31), 1, date(2024, 2, 29)),
+                                    (date(2024, 2, 29), 1, date(2024, 3, 28)),
+                                    (date(2025, 11, 30), 14, date(2027, 1, 29)),
                                     (date(2026, 12, 1), 1, date(2026, 12, 31))]:
             with self.subTest(start=start):
                 self.assertEqual(views.tinh_ngay_ket_thuc_theo_thang(start, months), end)
+
+    def test_renewal_extension_starts_after_old_inclusive_end(self):
+        old_end = date(2024, 2, 29)
+        extension_start = old_end + timedelta(days=1)
+        proposed_end = views.tinh_ngay_ket_thuc_theo_thang(extension_start, 1)
+        self.assertEqual((extension_start, proposed_end), (date(2024, 3, 1), date(2024, 3, 31)))
 
     def test_cancel_pending_twice_preserves_contract_and_access(self):
         renewal = self.renewal()
@@ -140,7 +149,10 @@ class RenewalTests(baseline.BusinessFixture):
         renewal = self.renewal()
         active = self.resident(self.hd)
         departed = self.resident(self.hd, 'da_roi')
-        profile = FaceProfile.objects.create(nguoi_o_cung=active, loai_chu_the='nguoi_o_cung')
+        profile = FaceProfile.objects.create(
+            danh_tinh_nguoi_o_cung=active.identity, nguoi_o_cung=active,
+            loai_chu_the='nguoi_o_cung',
+        )
         invoice = HoaDon.objects.create(hop_dong=self.hd, thang=9, nam=2026, han_thanh_toan=self.today)
         self.process(renewal)
         self.hd.refresh_from_db(); self.room.refresh_from_db()
@@ -215,7 +227,7 @@ class RenewalTests(baseline.BusinessFixture):
         renewal = self.renewal()
         other_room = Phong.objects.create(co_so=self.facility, so_phong='AUDIT-OTHER', gia_thue=1, dien_tich=1)
         for overrides in [{'phong': other_room}, {'nguoi_thue': self.other},
-                          {'loai_quyen': 'khach_tam_thoi'}, {'trang_thai': 'bi_thu_hoi'},
+                          {'loai_quyen': 'khach_tam_thoi', 'nguon_cap': 'legacy_unknown'}, {'trang_thai': 'bi_thu_hoi'},
                           {'trang_thai': 'het_han'}, {'ngay_ket_thuc': None},
                           {'ngay_ket_thuc': self.today+timedelta(days=3)}]:
             data = {'ngay_ket_thuc': self.hd.ngay_ket_thuc}; data.update(overrides)
@@ -237,7 +249,19 @@ class RenewalTests(baseline.BusinessFixture):
 
     def test_renewal_does_not_change_other_stay_legacy_or_manual(self):
         renewal = self.renewal()
-        other_stay = self.contract()
+        other_room = Phong.objects.create(
+            co_so=self.facility, so_phong='AUDIT-OTHER-STAY', gia_thue=1, dien_tich=1,
+        )
+        other_booking = DatPhong.objects.create(
+            nguoi_thue=self.other, phong=other_room, ngay_nhan_phong=self.today,
+            ngay_tra_du_kien=self.today + timedelta(days=90), so_thang_thue=3,
+            trang_thai='da_duyet',
+        )
+        other_stay = HopDong.objects.create(
+            dat_phong=other_booking, so_hop_dong='AUDIT-OTHER-STAY',
+            ngay_bat_dau=self.today, ngay_ket_thuc=self.today + timedelta(days=90),
+            tien_thue_thang=1, trang_thai='dang_hieu_luc',
+        )
         untouched = [
             self.permission(hop_dong=other_stay, ngay_ket_thuc=self.hd.ngay_ket_thuc),
             self.permission(hop_dong=None, nguon_cap='legacy_unknown', ngay_ket_thuc=self.hd.ngay_ket_thuc),
@@ -259,13 +283,16 @@ class RenewalTests(baseline.BusinessFixture):
         self.permission(ngay_ket_thuc=self.hd.ngay_ket_thuc)
         self.permission(nguoi_thue=None, nguoi_o_cung=active, loai_quyen='nguoi_o_cung',
                         ngay_ket_thuc=self.hd.ngay_ket_thuc)
+        record_consent(identity_id=active.identity_id, actor=self.admin)
         self.process(renewal)
         after_old_end = timezone.make_aware(datetime.combine(
             renewal.ngay_ket_thuc_cu+timedelta(days=1), time(12)))
         for fields in [dict(nguoi_thue=self.tenant, loai_chu_the='nguoi_thue'),
-                       dict(nguoi_o_cung=active, loai_chu_the='nguoi_o_cung')]:
+                       dict(danh_tinh_nguoi_o_cung=active.identity, nguoi_o_cung=active,
+                            loai_chu_the='nguoi_o_cung')]:
             profile = FaceProfile.objects.create(**fields, trang_thai='da_xac_thuc',
-                                                  face_encoding='audit-vector')
+                                                  face_encoding='audit-vector',
+                                                  dong_y_du_lieu_khuon_mat=True)
             with patch('django.utils.timezone.now', return_value=after_old_end):
                 self.assertEqual(access_tests.AccessTests.recognize(self)['access'], 'granted')
             profile.delete()

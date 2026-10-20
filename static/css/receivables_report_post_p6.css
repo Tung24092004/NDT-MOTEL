@@ -1,0 +1,136 @@
+.ndt-f5.ndt-receivables-report .receivables-stack {
+    display: grid;
+    gap: var(--ndt-f5-space-6);
+}
+
+.ndt-f5.ndt-receivables-report .receivables-summary {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--ndt-f5-space-3);
+}
+
+.ndt-f5.ndt-receivables-report :is(.receivables-total, .receivables-age) {
+    display: grid;
+    align-content: start;
+    gap: var(--ndt-f5-space-2);
+    min-width: 0;
+    padding: var(--ndt-f5-space-5);
+    border-top: 4px solid var(--ndt-f5-navy);
+}
+
+.ndt-f5.ndt-receivables-report :is(.receivables-total, .receivables-age) span,
+.ndt-f5.ndt-receivables-report :is(.receivables-total, .receivables-age) small {
+    color: var(--ndt-f5-text-muted);
+}
+
+.ndt-f5.ndt-receivables-report :is(.receivables-total, .receivables-age) strong {
+    color: var(--ndt-f5-navy);
+    font-size: var(--ndt-f5-text-lg);
+    overflow-wrap: anywhere;
+}
+
+.ndt-f5.ndt-receivables-report .receivables-age--current { border-top-color: var(--ndt-f5-success); }
+.ndt-f5.ndt-receivables-report .receivables-age--low { border-top-color: var(--ndt-f5-warning); }
+.ndt-f5.ndt-receivables-report .receivables-age--medium { border-top-color: var(--ndt-f5-pending); }
+.ndt-f5.ndt-receivables-report .receivables-age--high { border-top-color: var(--ndt-f5-danger); }
+
+.ndt-f5.ndt-receivables-report .receivables-filter {
+    display: grid;
+    gap: var(--ndt-f5-space-4);
+}
+
+.ndt-f5.ndt-receivables-report .receivables-filter__form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: var(--ndt-f5-space-4);
+    align-items: end;
+}
+
+.ndt-f5.ndt-receivables-report .receivables-filter__query {
+    grid-column: span 2;
+}
+
+.ndt-f5.ndt-receivables-report .receivables-filter__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ndt-f5-space-3);
+}
+
+.ndt-f5.ndt-receivables-report .receivables-result {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--ndt-f5-space-5);
+    align-items: end;
+}
+
+.ndt-f5.ndt-receivables-report .receivables-result :is(h2, p) {
+    margin: 0;
+}
+
+.ndt-f5.ndt-receivables-report .receivables-note {
+    max-width: 52rem;
+    color: var(--ndt-f5-text-muted);
+    font-size: var(--ndt-f5-text-sm);
+    text-align: right;
+}
+
+.ndt-f5.ndt-receivables-report .receivables-table td span {
+    display: block;
+    margin-top: var(--ndt-f5-space-1);
+    color: var(--ndt-f5-text-muted);
+    font-size: var(--ndt-f5-text-sm);
+}
+
+.ndt-f5.ndt-receivables-report .receivables-table td:last-child .ndt-f5-button {
+    width: 100%;
+}
+
+.ndt-f5.ndt-receivables-report .receivables-days--overdue,
+.ndt-f5.ndt-receivables-report .receivables-money {
+    color: var(--ndt-f5-danger);
+}
+
+.ndt-f5.ndt-receivables-report .receivables-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--ndt-f5-space-4);
+}
+
+@media (max-width: 1100px) {
+    .ndt-f5.ndt-receivables-report .receivables-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ndt-f5.ndt-receivables-report .receivables-total {
+        grid-column: span 2;
+    }
+
+    .ndt-f5.ndt-receivables-report .receivables-filter__form {
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .ndt-f5.ndt-receivables-report .receivables-summary,
+    .ndt-f5.ndt-receivables-report .receivables-filter__form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ndt-f5.ndt-receivables-report :is(.receivables-total, .receivables-filter__query) {
+        grid-column: auto;
+    }
+
+    .ndt-f5.ndt-receivables-report .receivables-result {
+        display: grid;
+        align-items: start;
+    }
+
+    .ndt-f5.ndt-receivables-report .receivables-note {
+        text-align: left;
+    }
+
+    .ndt-f5.ndt-receivables-report .receivables-filter__actions .ndt-f5-button {
+        flex: 1 1 9rem;
+    }
+}

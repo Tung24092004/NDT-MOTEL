@@ -1,119 +1,12 @@
-{% extends "core/tenant_base.html" %}
-{% load static bo_loc %}
-
-{% block title %}Hợp đồng của tôi - NDT MOTEL{% endblock %}
-{% block page_title %}Hợp đồng của tôi{% endblock %}
-
-{% block tenant_styles %}
-<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
-<link rel="stylesheet" href="{% static 'css/contract_management.css' %}">
-{% endblock %}
-
+{% extends "core/tenant_base.html" %}{% load static bo_loc %}
+{% block title %}Hợp đồng của tôi - NDT MOTEL{% endblock %}{% block page_title %}Hợp đồng của tôi{% endblock %}
+{% block tenant_styles %}<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}"><link rel="stylesheet" href="{% static 'css/contract_management.css' %}">{% endblock %}
 {% block tenant_content %}
-<div
-    class="contract-management contract-management--tenant ndt-foundation"
-    data-contract-screen="tenant-list"
->
-    {% url 'tai_khoan' as account_url %}
-    {% include 'core/foundation/page_header.html' with breadcrumb='Tài khoản / Hợp đồng' title='Hợp đồng của tôi' subtitle='Theo dõi phòng thuê, thời hạn, trạng thái và file PDF hợp đồng của bạn.' action_url=account_url action_label='Về tài khoản' %}
-
-    <section class="contract-stats" aria-label="Thống kê hợp đồng của tôi">
-        <article class="ndt-surface contract-stat">
-            <span>Tổng hợp đồng</span>
-            <strong>{{ hop_dongs|length }}</strong>
-        </article>
-        <article class="ndt-surface contract-stat">
-            <span>Đang thuê</span>
-            <strong>{{ so_hop_dong_dang_thue|default:'0' }}</strong>
-        </article>
-        <article class="ndt-surface contract-stat">
-            <span>Sắp hết hạn</span>
-            <strong>{{ so_hop_dong_sap_het_han|default:'0' }}</strong>
-        </article>
-    </section>
-
-    {% if hop_dongs %}
-    <section class="contract-card-list" aria-label="Danh sách hợp đồng">
-        {% for hd in hop_dongs %}
-        <article class="ndt-surface contract-card{% if hd.trang_thai == 'dang_hieu_luc' or hd.trang_thai == 'sap_het_han' %} is-current{% endif %}">
-            <div class="contract-card__head">
-                <div class="contract-card__identity">
-                    <span class="contract-eyebrow">Số hợp đồng</span>
-                    <h2>{{ hd.so_hop_dong }}</h2>
-                    <p>
-                        Phòng {{ hd.dat_phong.phong.so_phong }}
-                        · {{ hd.dat_phong.phong.co_so.ten_co_so|default:'NDT MOTEL' }}
-                    </p>
-                </div>
-                {% include 'core/partials/contract_status_badge.html' with contract=hd %}
-            </div>
-
-            <div class="contract-card__body">
-                <dl class="contract-facts contract-facts--compact">
-                    <div>
-                        <dt>Thời hạn</dt>
-                        <dd>{{ hd.ngay_bat_dau|date:'d/m/Y' }} đến {{ hd.ngay_ket_thuc|date:'d/m/Y' }}</dd>
-                    </div>
-                    <div>
-                        <dt>Tiền thuê / cọc</dt>
-                        <dd>{{ hd.tien_thue_thang|vnd }} VNĐ/tháng · {{ hd.tien_coc|vnd }} VNĐ</dd>
-                    </div>
-                    <div>
-                        <dt>Người thuê</dt>
-                        <dd>{{ nguoi_thue.ho_ten }}</dd>
-                    </div>
-                    <div>
-                        <dt>Bước tiếp theo</dt>
-                        <dd>
-                            {% if hd.trang_thai == 'sap_het_han' %}
-                                Xem chi tiết để gửi hoặc theo dõi gia hạn.
-                            {% elif hd.trang_thai == 'dang_hieu_luc' %}
-                                Theo dõi thời hạn, hóa đơn và file hợp đồng.
-                            {% elif hd.trang_thai == 'cho_hieu_luc' %}
-                                Chờ đến ngày bắt đầu hợp đồng.
-                            {% elif hd.trang_thai == 'da_het_han' %}
-                                Hợp đồng đã kết thúc, chỉ còn thông tin lưu trữ.
-                            {% elif hd.trang_thai == 'da_huy' %}
-                                Hợp đồng đã hủy, chỉ còn thông tin lưu trữ.
-                            {% else %}
-                                Xem chi tiết để kiểm tra trạng thái.
-                            {% endif %}
-                        </dd>
-                    </div>
-                </dl>
-
-                <div class="contract-card__actions" aria-label="Thao tác hợp đồng {{ hd.so_hop_dong }}">
-                    <a class="ndt-button ndt-button--primary" href="{% url 'chi_tiet_hop_dong_cua_toi' hd.id %}">
-                        Xem chi tiết
-                    </a>
-                    <a class="ndt-button ndt-button--secondary" href="{% url 'xuat_hop_dong_pdf' hd.id %}">
-                        Tải PDF
-                    </a>
-                </div>
-            </div>
-        </article>
-        {% endfor %}
-    </section>
-    {% else %}
-    <section class="ndt-surface contract-empty-panel" aria-labelledby="contract-empty-title">
-        <span class="contract-eyebrow">Trạng thái rỗng</span>
-        <h2 id="contract-empty-title">Chưa có hợp đồng</h2>
-        <p>
-            Hợp đồng sẽ xuất hiện sau khi yêu cầu đặt phòng được xác nhận và quản lý tạo hợp đồng.
-            Bạn có thể xem phòng phù hợp hoặc quay lại tài khoản để theo dõi đặt phòng hiện có.
-        </p>
-        <div class="contract-card__actions">
-            <a class="ndt-button ndt-button--primary" href="{% url 'danh_sach_phong' %}">
-                Tìm phòng
-            </a>
-            <a class="ndt-button ndt-button--secondary" href="{% url 'tai_khoan' %}">
-                Về tài khoản
-            </a>
-        </div>
-    </section>
-    {% endif %}
-</div>
+<main class="ndt-f5 ndt-contract-management ndt-f5-page" data-contract-screen="tenant-list"><div class="ndt-f5-container ndt-f5-container--full contract-stack">
+<header class="ndt-f5-page-header"><div class="ndt-f5-page-header__content"><h1 class="ndt-f5-page-header__title">Hợp đồng của tôi</h1><p class="ndt-f5-page-header__description">Theo dõi phòng thuê, thời hạn, trạng thái và tải bản PDF hợp đồng.</p></div><div class="ndt-f5-actions"><a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'tai_khoan' %}">Về tài khoản</a></div></header>
+<section class="contract-stats" aria-label="Tổng quan hợp đồng"><article class="ndt-f5-panel contract-stat"><span>Tổng hợp đồng</span><strong>{{ hop_dongs|length }}</strong></article><article class="ndt-f5-panel contract-stat"><span>Đang thuê</span><strong>{{ so_hop_dong_dang_thue }}</strong></article><article class="ndt-f5-panel contract-stat"><span>Sắp hết hạn</span><strong>{{ so_hop_dong_sap_het_han }}</strong></article><article class="ndt-f5-panel contract-stat contract-stat--name"><span>Hồ sơ</span><strong>{{ nguoi_thue.ho_ten }}</strong></article></section>
+{% if hop_dongs %}<div class="contract-card-list">
+{% for hd in hop_dongs %}<article class="ndt-f5-card {% if hd.trang_thai == 'dang_hieu_luc' or hd.trang_thai == 'sap_het_han' %}contract-card--current{% endif %}"><div class="ndt-f5-card__header"><div class="contract-summary"><div><h2 class="ndt-f5-card__title">{{ hd.so_hop_dong }}</h2><p class="contract-muted">Phòng {{ hd.dat_phong.phong.so_phong }} · {{ hd.dat_phong.phong.co_so.ten_co_so|default:'NDT MOTEL' }}</p></div>{% include 'core/partials/contract_status_badge.html' with contract=hd %}</div></div><div class="ndt-f5-card__body"><dl class="contract-facts contract-facts--three"><div><dt>Thời hạn</dt><dd>{{ hd.ngay_bat_dau|date:'d/m/Y' }} – {{ hd.ngay_ket_thuc|date:'d/m/Y' }}</dd></div><div><dt>Tiền thuê</dt><dd>{{ hd.tien_thue_thang|vnd }} VNĐ/tháng</dd></div><div><dt>Tiền cọc</dt><dd>{{ hd.tien_coc|vnd }} VNĐ</dd></div></dl></div><div class="ndt-f5-card__footer"><div class="contract-card-actions"><a class="ndt-f5-button ndt-f5-button--primary" href="{% url 'chi_tiet_hop_dong_cua_toi' hd.id %}">Xem chi tiết</a><a class="ndt-f5-button ndt-f5-button--secondary" href="{% url 'xuat_hop_dong_pdf' hd.id %}">Tải PDF</a></div></div></article>{% endfor %}
+</div>{% else %}<section class="ndt-f5-empty"><div class="ndt-f5-empty__icon" aria-hidden="true">HD</div><h2 class="ndt-f5-empty__title">Chưa có hợp đồng</h2><p class="ndt-f5-empty__description">Hợp đồng sẽ xuất hiện sau khi yêu cầu đặt phòng và khoản cọc được quản trị viên xác nhận.</p><div class="ndt-f5-empty__action"><a class="ndt-f5-button ndt-f5-button--primary" href="{% url 'danh_sach_phong' %}">Xem phòng</a></div></section>{% endif %}
+</div></main>
 {% endblock %}

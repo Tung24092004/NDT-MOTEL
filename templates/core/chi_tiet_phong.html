@@ -8,10 +8,26 @@
     <link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
     <link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
     <link rel="stylesheet" href="{% static 'css/room_detail.css' %}">
+    {% if user.is_staff or user.is_superuser %}<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+    <link rel="stylesheet" href="{% static 'css/room_management_p6a.css' %}">{% else %}<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+    <link rel="stylesheet" href="{% static 'css/public_discovery_support_post_p6.css' %}?v=post-p6-public-1">{% endif %}
 {% endblock %}
 
 {% block content %}
-<div class="stay-detail ndt-foundation">
+<div class="stay-detail ndt-foundation ndt-f5{% if user.is_staff or user.is_superuser %} ndt-f5-page ndt-room-admin-detail{% else %} ndt-public-discovery ndt-public-room-detail{% endif %}"{% if user.is_staff or user.is_superuser %} data-room-admin-detail{% else %} data-public-context="room-detail"{% endif %}>
+    {% if user.is_staff or user.is_superuser %}
+    <header class="ndt-f5-page-header">
+        <div class="ndt-f5-page-header__content">
+            <h1 class="ndt-f5-page-header__title">Phòng {{ phong.so_phong }}</h1>
+            <p class="ndt-f5-page-header__description">{{ phong.get_loai_phong_display }} · Tầng {{ phong.tang }} · {{ phong.dien_tich }} m² tại {{ phong.co_so.ten_co_so }}</p>
+            <div class="ndt-f5-page-header__meta"><span>Giá thuê {{ phong.gia_thue|vnd }} VNĐ/tháng</span><span>Sức chứa {% if suc_chua_da_cau_hinh %}{{ suc_chua }} người{% else %}chưa cấu hình{% endif %}</span></div>
+        </div>
+        <div class="ndt-f5-page-header__actions">
+            {% if phong.trang_thai == "trong" %}<span class="ndt-f5-badge ndt-f5-badge--success">{{ phong.get_trang_thai_display }}</span>{% elif phong.trang_thai == "da_dat" %}<span class="ndt-f5-badge ndt-f5-badge--warning">{{ phong.get_trang_thai_display }}</span>{% elif phong.trang_thai == "dang_thue" %}<span class="ndt-f5-badge ndt-f5-badge--info">{{ phong.get_trang_thai_display }}</span>{% elif phong.trang_thai == "bao_tri" %}<span class="ndt-f5-badge ndt-f5-badge--danger">{{ phong.get_trang_thai_display }}</span>{% else %}<span class="ndt-f5-badge">{{ phong.get_trang_thai_display }}</span>{% endif %}
+            <a href="{% url 'sua_phong' phong.id %}" class="ndt-f5-button ndt-f5-button--primary">Sửa thông tin phòng</a>
+        </div>
+    </header>
+    {% else %}
     <nav class="stay-breadcrumb" aria-label="Đường dẫn trang">
         <a href="{% url 'home' %}">Trang chủ</a>
         <span aria-hidden="true">/</span>
@@ -31,10 +47,11 @@
                 {{ phong.get_loai_phong_display }} · Tầng {{ phong.tang }} · {{ phong.dien_tich }} m²
             </p>
         </div>
-        <span class="ndt-badge stay-status stay-status--{{ phong.trang_thai }}">
-            {{ phong.get_trang_thai_display }}
+        <span class="ndt-badge stay-status stay-status--{{ phong.lop_trang_thai_cong_khai }}">
+            {{ phong.trang_thai_hien_thi }}
         </span>
     </header>
+    {% endif %}
 
     <section class="stay-gallery" aria-label="Thư viện ảnh phòng">
         {% if anh_dai_dien %}
@@ -82,7 +99,7 @@
         </div>
         <div>
             <dt>Giá thuê</dt>
-            <dd>{{ phong.gia_thue|vnd }} VNĐ</dd>
+            <dd>{% if user.is_staff or user.is_superuser or phong.gia_thue_hop_le %}{{ phong.gia_thue|vnd }} VNĐ{% else %}Liên hệ quản lý{% endif %}</dd>
         </div>
         <div>
             <dt>Tiền cọc</dt>
@@ -122,7 +139,7 @@
                     </div>
                     <div>
                         <dt>Tiền nước</dt>
-                        <dd>{{ phong.tien_nuoc_moi_khoi|vnd }} VNĐ/m³</dd>
+                        <dd>{{ phong.tien_nuoc_moi_khoi|vnd }} VNĐ/người/tháng</dd>
                     </div>
                     <div>
                         <dt>Phí dịch vụ</dt>
@@ -220,15 +237,22 @@
             {% endif %}
         </main>
 
-        <aside class="stay-booking" aria-label="Giá và hành động phòng">
+        <aside class="stay-booking{% if user.is_staff or user.is_superuser %} ndt-f5-panel{% endif %}" aria-label="Giá và hành động phòng">
             <p class="stay-booking-label">Giá thuê hàng tháng</p>
-            <p class="stay-booking-price">{{ phong.gia_thue|vnd }} <span>VNĐ</span></p>
+            <p class="stay-booking-price">{% if user.is_staff or user.is_superuser or phong.gia_thue_hop_le %}{{ phong.gia_thue|vnd }} <span>VNĐ</span>{% else %}Liên hệ quản lý{% endif %}</p>
             <div class="stay-booking-deposit">
                 <span>Tiền cọc</span>
                 <strong>{{ phong.tien_coc_mac_dinh|vnd }} VNĐ</strong>
             </div>
 
-            {% if phong.trang_thai == 'trong' and suc_chua_da_cau_hinh %}
+            {% if user.is_staff or user.is_superuser %}
+            {% if availability_period %}
+                <p class="stay-availability stay-availability--ready">Có thể thuê theo thời gian đã chọn</p>
+                <p>Ngày nhận phòng {{ availability_period.ngay_nhan_phong|date:'d/m/Y' }}, thời hạn {{ availability_period.so_thang_thue }} tháng.</p>
+                {% if not user.is_staff and not user.is_superuser %}
+                <a href="{% url 'dat_phong' phong.id %}?{{ availability_query }}" class="ndt-button ndt-button--primary">Tiếp tục đặt phòng</a>
+                {% endif %}
+            {% elif phong.trang_thai == 'trong' and suc_chua_da_cau_hinh %}
                 <p class="stay-availability stay-availability--ready">Phòng đang sẵn sàng</p>
                 <p>Phòng chưa có người thuê và có thể gửi yêu cầu đặt phòng.</p>
                 {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
@@ -267,14 +291,28 @@
                 <p class="stay-availability stay-availability--maintenance">Phòng đang bảo trì</p>
                 <p>Phòng tạm thời không tiếp nhận khách thuê.</p>
             {% endif %}
+            {% else %}
+                {% if availability_period %}
+                    <p class="stay-availability stay-availability--ready">Có thể đặt cho thời gian đã chọn</p>
+                    <p>Ngày nhận phòng {{ availability_period.ngay_nhan_phong|date:'d/m/Y' }}, thời hạn {{ availability_period.so_thang_thue }} tháng.</p>
+                    <div class="room-actions">
+                        <a href="{% url 'dat_phong' phong.id %}?{{ availability_query }}" class="ndt-button ndt-button--primary room-primary-action">Tiếp tục đặt phòng</a>
+                    </div>
+                {% else %}
+                <p class="stay-availability stay-availability--{{ phong.lop_trang_thai_cong_khai }}">{{ phong.trang_thai_hien_thi }}</p>
+                {% if phong.co_the_thue_cong_khai %}
+                    <p>{{ phong.ly_do_trang_thai_cong_khai }}</p>
+                    <div class="room-actions">
+                    <a href="{% url 'dat_phong' phong.id %}{% if availability_query %}?{{ availability_query }}{% endif %}" class="ndt-button ndt-button--primary room-primary-action">Chọn phòng</a>
+                    </div>
+                {% else %}
+                    <p class="room-unavailable-reason">{{ phong.ly_do_trang_thai_cong_khai }}</p>
+                {% endif %}
+                {% endif %}
+            {% endif %}
 
             <div class="stay-actions">
-                {% if user.is_staff or user.is_superuser %}
-                    <a href="{% url 'sua_phong' phong.id %}" class="ndt-button ndt-button--primary">
-                        Sửa thông tin phòng
-                    </a>
-                {% endif %}
-                <a href="{% url 'danh_sach_phong' %}" class="ndt-button ndt-button--secondary">
+                <a href="{% if user.is_staff or user.is_superuser %}{% url 'quan_ly_phong' %}{% else %}{% url 'danh_sach_phong' %}{% if availability_query %}?{{ availability_query }}{% endif %}{% endif %}" class="{% if user.is_staff or user.is_superuser %}ndt-f5-button ndt-f5-button--neutral{% else %}ndt-contextual-back{% endif %}">
                     Quay lại danh sách
                 </a>
                 {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}

@@ -1,13 +1,18 @@
 """Nghiep vu hop dong."""
 from decimal import Decimal, InvalidOperation
+from datetime import date
 import logging
+from uuid import uuid4
+from xml.sax.saxutils import escape
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Count, Exists, OuterRef, Case, When, Value, IntegerField
 from django.db import transaction
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import A4
@@ -34,6 +39,10 @@ from core.models import (
     HopDong,
     LichSuHopDong,
     YeuCauGiaHanHopDong,
+    BanChupHopDong,
+    BanChupNguoiOCungHopDong,
+    PhuLucHopDong,
+    PhanHoiHopDong,
     HoaDon,
     YeuCauSuaChua,
     ChinhSachHoTro,
@@ -49,9 +58,32 @@ from core.models import (
 
     # Nhật ký thao tác
     NhatKyThaoTac,
+    YeuCauNguoiOCung,
+    ChungTuDanhTinhNguoiOCung,
 )
 from core.dich_vu.phan_quyen import la_admin
 from core.dich_vu.ngay_thue import tinh_ngay_ket_thuc_theo_thang
+from core.dich_vu.vong_doi_hop_dong import (
+    dong_bo_vong_doi_hop_dong,
+    gan_trang_thai_hien_thi_hop_dong,
+)
+from core.dich_vu.luu_tru import (
+    danh_gia_hop_dong,
+    ly_do_nguoi_o_cung_chua_du_dieu_kien,
+    nguoi_o_cung_du_dieu_kien,
+    quyen_ra_vao_con_hieu_luc,
+    trang_thai_xac_minh_nguoi_o_cung,
+)
+from core.dich_vu.phu_luc_hop_dong import (
+    dam_bao_ban_chup_hop_dong,
+    snapshot_nguoi_o_cung_khi_ky,
+)
+from core.dich_vu.yeu_cau_nguoi_o_cung import (
+    cancel_request,
+    create_request,
+    resubmit_request,
+)
+from core.dich_vu.chung_tu_danh_tinh_nguoi_o_cung import upload_identity_evidence
 
 
 def _status_label(value):
@@ -59,6 +91,8 @@ def _status_label(value):
 
 
 def cap_nhat_trang_thai_hop_dong(hop_dong):
+    return dong_bo_vong_doi_hop_dong(hop_dong)
+
     """
     Đồng bộ trạng thái hợp đồng theo ngày hiện tại và xử lý
     các dữ liệu phụ thuộc khi hợp đồng chuyển trạng thái.
@@ -339,25 +373,6 @@ def quan_ly_hop_dong(request):
     # CẬP NHẬT TRẠNG THÁI HỢP ĐỒNG
     # -----------------------------------------------------
 
-    cac_hop_dong = (
-        HopDong.objects
-        .exclude(
-            trang_thai="da_huy"
-        )
-        .select_related(
-            "dat_phong",
-            "dat_phong__nguoi_thue",
-            "dat_phong__phong",
-            "dat_phong__phong__co_so"
-        )
-    )
-
-    for hop_dong in cac_hop_dong:
-
-        cap_nhat_trang_thai_hop_dong(
-            hop_dong
-        )
-
     # -----------------------------------------------------
     # LẤY LẠI DANH SÁCH
     # -----------------------------------------------------
@@ -368,7 +383,8 @@ def quan_ly_hop_dong(request):
             "dat_phong",
             "dat_phong__nguoi_thue",
             "dat_phong__phong",
-            "dat_phong__phong__co_so"
+            "dat_phong__phong__co_so",
+            "phien_ban_hien_tai",
         )
         .order_by("-ngay_tao")
     )
@@ -378,10 +394,7 @@ def quan_ly_hop_dong(request):
     # -----------------------------------------------------
 
     for hop_dong in danh_sach_hop_dong:
-
-        cap_nhat_trang_thai_phong_theo_hop_dong(
-            hop_dong
-        )
+        gan_trang_thai_hien_thi_hop_dong(hop_dong)
 
     # -----------------------------------------------------
     # TÌM KIẾM
@@ -428,6 +441,7 @@ def quan_ly_hop_dong(request):
     ).strip()
 
     cac_trang_thai = [
+        "cho_nguoi_thue_xac_nhan",
         "cho_hieu_luc",
         "dang_hieu_luc",
         "sap_het_han",
@@ -455,6 +469,10 @@ def quan_ly_hop_dong(request):
 
     cho_hieu_luc = HopDong.objects.filter(
         trang_thai="cho_hieu_luc"
+    ).count()
+
+    cho_nguoi_thue_xac_nhan = HopDong.objects.filter(
+        trang_thai="cho_nguoi_thue_xac_nhan"
     ).count()
 
     dang_hieu_luc = HopDong.objects.filter(
@@ -509,6 +527,7 @@ def quan_ly_hop_dong(request):
 
     "tong_hop_dong": tong_hop_dong,
         "cho_hieu_luc": cho_hieu_luc,
+        "cho_nguoi_thue_xac_nhan": cho_nguoi_thue_xac_nhan,
         "dang_hieu_luc": dang_hieu_luc,
         "sap_het_han": sap_het_han,
         "da_het_han": da_het_han,
@@ -541,20 +560,15 @@ def chi_tiet_hop_dong(request, id):
             "dat_phong__nguoi_thue",
             "dat_phong__phong",
             "dat_phong__phong__co_so",
+            "phien_ban_hien_tai",
         ).prefetch_related("dat_phong__nguoi_di_cung_khai_bao"),
         id=id,
     )
 
     # Cập nhật trạng thái mới nhất của hợp đồng.
-    cap_nhat_trang_thai_hop_dong(hop_dong)
+    gan_trang_thai_hien_thi_hop_dong(hop_dong)
 
     # Đồng bộ trạng thái phòng theo hợp đồng.
-    cap_nhat_trang_thai_phong_theo_hop_dong(
-        hop_dong
-    )
-
-    hop_dong.refresh_from_db()
-
     # -----------------------------------------------------
     # YÊU CẦU GIA HẠN
     # -----------------------------------------------------
@@ -589,6 +603,45 @@ def chi_tiet_hop_dong(request, id):
         .order_by("ho_ten", "id")
     )
 
+    nguoi_o_cung_tai_luc_ky = hop_dong.ban_chup_nguoi_o_cung.filter(
+        loai_su_kien="co_mat_khi_ky"
+    ).order_by("ho_ten", "id")
+    thay_doi_cu_tru = hop_dong.ban_chup_nguoi_o_cung.exclude(
+        loai_su_kien="co_mat_khi_ky"
+    ).select_related("phu_luc").order_by("ngay_hieu_luc", "id")
+    nguoi_o_cung_hien_tai = NguoiOCungPhong.objects.filter(
+        hop_dong=hop_dong,
+        trang_thai="dang_o",
+        da_xac_minh_boi_admin=True,
+    ).order_by("ho_ten", "id")
+
+    phan_hoi_hop_dong = (
+        PhanHoiHopDong.objects.filter(phien_ban=hop_dong.phien_ban_hien_tai)
+        .select_related("nguoi_phan_hoi").first()
+        if hop_dong.phien_ban_hien_tai_id else None
+    )
+    coc_hien_tai = hop_dong.dat_phong.giao_dich_coc.filter(active_slot=1).first()
+    hom_nay = timezone.localdate()
+    activation_room_conflict = HopDong.objects.filter(
+        dat_phong__phong=hop_dong.dat_phong.phong,
+        trang_thai__in=("dang_hieu_luc", "sap_het_han"),
+    ).exclude(pk=hop_dong.pk).exists()
+    activation_eligible = bool(
+        hop_dong.trang_thai == "cho_kich_hoat"
+        and hop_dong.phien_ban_hien_tai_id
+        and phan_hoi_hop_dong
+        and phan_hoi_hop_dong.hanh_dong == "chap_thuan"
+        and phan_hoi_hop_dong.ma_bam_phien_ban == hop_dong.phien_ban_hien_tai.ma_bam_sha256
+        and hop_dong.ngay_bat_dau <= hom_nay <= hop_dong.ngay_ket_thuc
+        and hop_dong.dat_phong.trang_thai in ("cho_duyet", "da_duyet")
+        and coc_hien_tai and coc_hien_tai.trang_thai == "da_xac_nhan"
+        and coc_hien_tai.so_tien_thuc_nhan and coc_hien_tai.so_tien_thuc_nhan > 0
+        and hop_dong.tien_coc_thuc_nhan and hop_dong.tien_coc_thuc_nhan > 0
+        and hop_dong.dat_phong.phong.co_so.trang_thai == "hoat_dong"
+        and hop_dong.dat_phong.phong.trang_thai != "bao_tri"
+        and not activation_room_conflict
+    )
+
     return render(
         request,
         "core/chi_tiet_hop_dong.html",
@@ -598,11 +651,20 @@ def chi_tiet_hop_dong(request, id):
             "yeu_cau_gia_han_dang_cho":
                 yeu_cau_gia_han_dang_cho,
             "lich_su_gia_han": lich_su_gia_han,
+            "phu_luc_hop_dong": hop_dong.phu_luc.select_related("nguoi_duyet").all(),
+            "nguoi_o_cung_tai_luc_ky": nguoi_o_cung_tai_luc_ky,
+            "thay_doi_cu_tru": thay_doi_cu_tru,
+            "nguoi_o_cung_hien_tai": nguoi_o_cung_hien_tai,
+            "phan_hoi_hop_dong": phan_hoi_hop_dong,
+            "coc_hien_tai": coc_hien_tai,
+            "activation_eligible": activation_eligible,
+            "activation_earliest_date": hop_dong.ngay_bat_dau if hom_nay < hop_dong.ngay_bat_dau else None,
+            "activation_room_conflict": activation_room_conflict,
         }
     )
 
 
-def tao_hop_dong(request, dat_phong_id):
+def _legacy_tao_hop_dong(request, dat_phong_id):
 
     if not request.user.is_authenticated:
         return redirect("dang_nhap")
@@ -921,6 +983,9 @@ def tao_hop_dong(request, dat_phong_id):
                 nguoi_cap_nhat=request.user,
             )
 
+            dam_bao_ban_chup_hop_dong(hop_dong, actor=request.user)
+            snapshot_nguoi_o_cung_khi_ky(hop_dong)
+
             cap_nhat_trang_thai_hop_dong(hop_dong)
 
             ghi_nhat_ky(
@@ -1036,6 +1101,10 @@ def sua_hop_dong(request, id):
     dat_phong = hop_dong.dat_phong
     phong = dat_phong.phong
     nguoi_thue = dat_phong.nguoi_thue
+
+    if request.method == "POST" and hop_dong.trang_thai != "nhap":
+        messages.error(request, "Chỉ hợp đồng nháp mới được chỉnh sửa trực tiếp.")
+        return redirect("chi_tiet_hop_dong", id=id)
 
     # -----------------------------------------------------
     # KHÔNG CHO SỬA HỢP ĐỒNG ĐÃ KẾT THÚC VÒNG ĐỜI
@@ -1511,6 +1580,20 @@ def xu_ly_hop_dong(request, id):
 
         if hanh_dong == "kich_hoat":
 
+            if hop_dong.trang_thai == "cho_kich_hoat":
+                messages.error(
+                    request,
+                    "Hop dong da duoc nguoi thue chap thuan phai kich hoat qua luong xac minh rieng.",
+                )
+                return redirect("chi_tiet_hop_dong", id=id)
+
+            if hop_dong.trang_thai == "nhap":
+                messages.error(
+                    request,
+                    "Hop dong nhap chua the kich hoat trong buoc nay.",
+                )
+                return redirect("chi_tiet_hop_dong", id=id)
+
             if hop_dong.trang_thai == "da_huy":
                 messages.error(
                     request,
@@ -1680,6 +1763,29 @@ def xu_ly_hop_dong(request, id):
 
         elif hanh_dong == "huy":
 
+            if hop_dong.trang_thai in {"nhap", "cho_nguoi_thue_xac_nhan", "yeu_cau_chinh_sua"}:
+                from core.dich_vu.hop_dong import close_pre_activation_contract
+                try:
+                    _closed_contract, closed = close_pre_activation_contract(
+                        actor=request.user,
+                        contract_id=hop_dong.pk,
+                        reason=request.POST.get("ly_do_huy", ""),
+                        ip_address=request.META.get("REMOTE_ADDR"),
+                    )
+                except ValidationError as error:
+                    messages.error(request, " ".join(error.messages))
+                else:
+                    messages.success(
+                        request,
+                        "Da dong hop dong truoc kich hoat va giai phong booking."
+                        if closed else "Hop dong da duoc dong truoc kich hoat.",
+                    )
+                return redirect("chi_tiet_hop_dong", id=id)
+
+            if hop_dong.trang_thai == "cho_kich_hoat":
+                messages.error(request, "Hop dong da duoc nguoi thue chap thuan khong duoc dong theo luong truoc kich hoat.")
+                return redirect("chi_tiet_hop_dong", id=id)
+
             if hop_dong.trang_thai == "da_huy":
                 messages.warning(
                     request,
@@ -1755,9 +1861,9 @@ def xu_ly_hop_dong(request, id):
             # Đơn là lịch sử của giao dịch đã được duyệt; hợp đồng da_huy
             # sẽ không còn giữ phòng theo logic trạng thái nghiệp vụ.
 
-            NguoiOCungPhong.objects.filter(
-                hop_dong=hop_dong, trang_thai="dang_o",
-            ).update(trang_thai="da_roi", ngay_ra=ngay_hom_nay)
+            # Co-tenant closure is performed by dong_bo_vong_doi_hop_dong
+            # through the canonical identity/access-aware primitive below.
+            cap_nhat_trang_thai_hop_dong(hop_dong)
 
             # Đồng bộ lại phòng từ nguồn sự thật nghiệp vụ.
             cap_nhat_trang_thai_phong_theo_hop_dong(
@@ -1986,10 +2092,7 @@ def hop_dong_cua_toi(request):
     # -----------------------------------------------------
 
     for hop_dong in danh_sach_hop_dong:
-
-        cap_nhat_trang_thai_hop_dong(
-            hop_dong
-        )
+        gan_trang_thai_hien_thi_hop_dong(hop_dong)
 
     # -----------------------------------------------------
     # THỐNG KÊ HỢP ĐỒNG
@@ -2039,6 +2142,144 @@ def hop_dong_cua_toi(request):
     )
 
 
+def _tenant_for_cotenant_request(request):
+    if not request.user.is_authenticated:
+        return None, redirect("dang_nhap")
+    if request.user.is_staff or request.user.is_superuser:
+        return None, redirect("dashboard_admin")
+    try:
+        return NguoiThue.objects.get(tai_khoan=request.user), None
+    except NguoiThue.DoesNotExist:
+        messages.error(request, "Tài khoản chưa được liên kết với thông tin người thuê.")
+        return None, redirect("tai_khoan")
+
+
+def _cotenant_candidate_from_post(request):
+    required = {field: request.POST.get(field, "").strip() for field in ("ho_ten", "cccd", "ngay_vao")}
+    if not all(required.values()):
+        raise ValidationError("Vui lòng nhập họ tên, CCCD và ngày vào.")
+    ngay_vao = parse_date(required.pop("ngay_vao"))
+    if not ngay_vao:
+        raise ValidationError("Ngày vào không hợp lệ.")
+    ngay_sinh_raw = request.POST.get("ngay_sinh", "").strip()
+    ngay_sinh = parse_date(ngay_sinh_raw) if ngay_sinh_raw else None
+    if ngay_sinh_raw and not ngay_sinh:
+        raise ValidationError("Ngày sinh không hợp lệ.")
+    return {
+        **required,
+        "ngay_vao": ngay_vao,
+        "ngay_sinh": ngay_sinh,
+        "gioi_tinh": request.POST.get("gioi_tinh", "").strip(),
+        "so_dien_thoai": request.POST.get("so_dien_thoai", "").strip(),
+        "quan_he": request.POST.get("quan_he", "").strip(),
+    }
+
+
+def tao_yeu_cau_nguoi_o_cung_cua_toi(request, id):
+    tenant, redirect_response = _tenant_for_cotenant_request(request)
+    if redirect_response:
+        return redirect_response
+    if request.method != "POST":
+        return redirect("chi_tiet_hop_dong_cua_toi", id=id)
+    contract = get_object_or_404(HopDong, id=id, dat_phong__nguoi_thue=tenant)
+    try:
+        idempotency_key = request.POST.get("idempotency_key", "").strip()
+        candidate = _cotenant_candidate_from_post(request)
+        _, created = create_request(
+            contract_id=contract.pk, actor=request.user,
+            idempotency_key=idempotency_key, **candidate,
+        )
+    except ValidationError as exc:
+        messages.error(request, str(exc))
+    except Exception:
+        logger.exception("Tenant co-tenant request creation failed")
+        messages.error(request, "Không thể gửi yêu cầu lúc này. Vui lòng kiểm tra dữ liệu và thử lại.")
+    else:
+        messages.success(request, "Đã gửi yêu cầu người ở cùng." if created else "Yêu cầu này đã được ghi nhận trước đó.")
+    return redirect("chi_tiet_hop_dong_cua_toi", id=contract.pk)
+
+
+def huy_yeu_cau_nguoi_o_cung_cua_toi(request, request_id):
+    tenant, redirect_response = _tenant_for_cotenant_request(request)
+    if redirect_response:
+        return redirect_response
+    request_obj = get_object_or_404(YeuCauNguoiOCung, id=request_id, nguoi_yeu_cau=tenant)
+    if request.method != "POST":
+        return redirect("chi_tiet_hop_dong_cua_toi", id=request_obj.hop_dong_id)
+    try:
+        _, changed = cancel_request(
+            request_id=request_obj.pk, actor=request.user,
+            expected_revision=int(request.POST.get("expected_revision", "")),
+        )
+    except (TypeError, ValueError, ValidationError) as exc:
+        messages.error(request, str(exc) or "Yêu cầu không hợp lệ hoặc đã thay đổi.")
+    except Exception:
+        logger.exception("Tenant co-tenant request cancellation failed")
+        messages.error(request, "Không thể hủy yêu cầu lúc này.")
+    else:
+        if changed:
+            messages.success(request, "Đã hủy yêu cầu người ở cùng.")
+        else:
+            messages.warning(request, "Yêu cầu đã thay đổi hoặc không còn có thể hủy; không có dữ liệu nào được cập nhật.")
+    return redirect("chi_tiet_hop_dong_cua_toi", id=request_obj.hop_dong_id)
+
+
+def gui_lai_yeu_cau_nguoi_o_cung_cua_toi(request, request_id):
+    tenant, redirect_response = _tenant_for_cotenant_request(request)
+    if redirect_response:
+        return redirect_response
+    request_obj = get_object_or_404(YeuCauNguoiOCung, id=request_id, nguoi_yeu_cau=tenant)
+    if request.method != "POST":
+        return redirect("chi_tiet_hop_dong_cua_toi", id=request_obj.hop_dong_id)
+    try:
+        candidate = _cotenant_candidate_from_post(request)
+        _, changed = resubmit_request(
+            request_id=request_obj.pk, actor=request.user,
+            expected_revision=int(request.POST.get("expected_revision", "")), **candidate,
+        )
+    except (TypeError, ValueError, ValidationError) as exc:
+        messages.error(request, str(exc) or "Yêu cầu không hợp lệ hoặc đã thay đổi.")
+    except Exception:
+        logger.exception("Tenant co-tenant request resubmission failed")
+        messages.error(request, "Không thể gửi lại yêu cầu lúc này. Vui lòng kiểm tra dữ liệu và thử lại.")
+    else:
+        if changed:
+            messages.success(request, "Đã bổ sung và gửi lại yêu cầu.")
+        else:
+            messages.warning(request, "Yêu cầu đã thay đổi hoặc không còn có thể gửi lại; không có dữ liệu nào được cập nhật.")
+    return redirect("chi_tiet_hop_dong_cua_toi", id=request_obj.hop_dong_id)
+
+
+def tai_chung_tu_danh_tinh_nguoi_o_cung_cua_toi(request, request_id):
+    """Tenant PRG upload; storage and immutable versioning live in the service."""
+    tenant, redirect_response = _tenant_for_cotenant_request(request)
+    if redirect_response:
+        return redirect_response
+    request_obj = get_object_or_404(
+        YeuCauNguoiOCung, id=request_id, nguoi_yeu_cau=tenant,
+    )
+    if request.method != "POST":
+        return redirect("chi_tiet_hop_dong_cua_toi", id=request_obj.hop_dong_id)
+    try:
+        _evidence, created = upload_identity_evidence(
+            request_id=request_obj.pk,
+            actor=request.user,
+            idempotency_key=request.POST.get("idempotency_key", "").strip(),
+            uploaded=request.FILES.get("evidence"),
+        )
+    except (PermissionDenied, ValidationError) as exc:
+        messages.error(request, str(exc) or "Khong the tai chung tu danh tinh.")
+    except Exception:
+        logger.exception("Tenant co-tenant identity-evidence upload failed")
+        messages.error(request, "Khong the tai chung tu luc nay. Vui long thu lai.")
+    else:
+        messages.success(
+            request,
+            "Da tai chung tu danh tinh." if created else "Chung tu nay da duoc ghi nhan truoc do.",
+        )
+    return redirect("chi_tiet_hop_dong_cua_toi", id=request_obj.hop_dong_id)
+
+
 def chi_tiet_hop_dong_cua_toi(request, id):
 
     if not request.user.is_authenticated:
@@ -2064,22 +2305,32 @@ def chi_tiet_hop_dong_cua_toi(request, id):
             "dat_phong__nguoi_thue",
             "dat_phong__phong",
             "dat_phong__phong__co_so",
+            "phien_ban_hien_tai",
         ),
         id=id,
         dat_phong__nguoi_thue=nguoi_thue,
     )
 
-    cap_nhat_trang_thai_hop_dong(hop_dong)
+    gan_trang_thai_hien_thi_hop_dong(hop_dong)
 
-    cap_nhat_trang_thai_phong_theo_hop_dong(
-        hop_dong
+    phan_hoi_hop_dong = (
+        PhanHoiHopDong.objects.filter(phien_ban=hop_dong.phien_ban_hien_tai)
+        .select_related("phien_ban").first()
+        if hop_dong.phien_ban_hien_tai_id else None
     )
+
+    if hop_dong.trang_thai == "cho_nguoi_thue_xac_nhan" and hop_dong.phien_ban_hien_tai_id:
+        return render(request, "core/chi_tiet_hop_dong_cua_toi.html", {
+            "hop_dong": hop_dong,
+            "nguoi_thue": nguoi_thue,
+            "phien_ban_review": hop_dong.phien_ban_hien_tai,
+            "phan_hoi_hop_dong": phan_hoi_hop_dong,
+        })
 
     hom_nay = timezone.localdate()
 
-    so_ngay_con_lai = (
-        hop_dong.ngay_ket_thuc - hom_nay
-    ).days
+    danh_gia_thoi_han = danh_gia_hop_dong(hop_dong, hom_nay)
+    so_ngay_con_lai = (hop_dong.ngay_ket_thuc - hom_nay).days
 
     yeu_cau_gia_han_dang_cho = (
         YeuCauGiaHanHopDong.objects
@@ -2107,18 +2358,65 @@ def chi_tiet_hop_dong_cua_toi(request, id):
         and yeu_cau_gia_han_dang_cho is None
     )
 
+    nguoi_o_cung = list(
+        NguoiOCungPhong.objects
+        .filter(hop_dong=hop_dong)
+        .prefetch_related("quyen_ra_vao")
+        .order_by("ho_ten", "id")
+    )
+    for resident in nguoi_o_cung:
+        resident.trang_thai_xac_minh_hien_thi = (
+            trang_thai_xac_minh_nguoi_o_cung(resident)
+        )
+        resident.dang_luu_tru_hien_tai = nguoi_o_cung_du_dieu_kien(resident)
+        resident.ly_do_chua_du_dieu_kien = (
+            ly_do_nguoi_o_cung_chua_du_dieu_kien(resident)
+        )
+        resident.face_profile_hien_thi = FaceProfile.objects.filter(
+            nguoi_o_cung=resident
+        ).first()
+        resident.quyen_ra_vao_hien_thi = (
+            resident.quyen_ra_vao.order_by("-id").first()
+        )
+        resident.quyen_con_hieu_luc = bool(
+            resident.quyen_ra_vao_hien_thi
+            and quyen_ra_vao_con_hieu_luc(resident.quyen_ra_vao_hien_thi)
+        )
+
+    yeu_cau_nguoi_o_cung = list(
+        YeuCauNguoiOCung.objects
+        .filter(hop_dong=hop_dong, nguoi_yeu_cau=nguoi_thue)
+        .select_related("residency")
+        .prefetch_related("chung_tu_danh_tinh_gui_len")
+        .order_by("-ngay_tao", "-id")
+    )
+    for cotenant_request in yeu_cau_nguoi_o_cung:
+        cotenant_request.evidence_idempotency_key = uuid4().hex
+
     context = {
         "hop_dong": hop_dong,
         "nguoi_thue": nguoi_thue,
 
         "hom_nay": hom_nay,
         "so_ngay_con_lai": so_ngay_con_lai,
+        "danh_gia_thoi_han": danh_gia_thoi_han,
 
         "co_the_gia_han": co_the_gia_han,
         "yeu_cau_gia_han_dang_cho":
             yeu_cau_gia_han_dang_cho,
 
         "lich_su_gia_han": lich_su_gia_han,
+        "nguoi_o_cung": nguoi_o_cung,
+        "yeu_cau_nguoi_o_cung": yeu_cau_nguoi_o_cung,
+        "cotenant_idempotency_key": uuid4().hex,
+        "phu_luc_hop_dong": hop_dong.phu_luc.select_related("nguoi_duyet").all(),
+        "nguoi_o_cung_tai_luc_ky": hop_dong.ban_chup_nguoi_o_cung.filter(
+            loai_su_kien="co_mat_khi_ky"
+        ).order_by("ho_ten", "id"),
+        "thay_doi_cu_tru": hop_dong.ban_chup_nguoi_o_cung.exclude(
+            loai_su_kien="co_mat_khi_ky"
+        ).select_related("phu_luc").order_by("ngay_hieu_luc", "id"),
+        "phan_hoi_hop_dong": phan_hoi_hop_dong,
     }
 
     return render(
@@ -2126,6 +2424,85 @@ def chi_tiet_hop_dong_cua_toi(request, id):
         "core/chi_tiet_hop_dong_cua_toi.html",
         context
     )
+
+
+@login_required(login_url="dang_nhap")
+def xuat_phu_luc_hop_dong_pdf(request, id):
+    appendix = get_object_or_404(
+        PhuLucHopDong.objects.select_related(
+            "hop_dong__dat_phong__nguoi_thue", "nguoi_duyet"
+        ).prefetch_related("thay_doi_nguoi_o_cung"),
+        id=id,
+    )
+    contract = appendix.hop_dong
+    tenant = contract.dat_phong.nguoi_thue
+    if not la_admin(request) and tenant.tai_khoan_id != request.user.id:
+        messages.error(request, "Bạn không có quyền xuất phụ lục này.")
+        return redirect("hop_dong_cua_toi")
+
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = (
+        f'attachment; filename="PhuLuc_{appendix.ma_phu_luc}.pdf"'
+    )
+    font_regular, font_bold = "Helvetica", "Helvetica-Bold"
+    try:
+        pdfmetrics.registerFont(TTFont("ArialNDT", r"C:\Windows\Fonts\arial.ttf"))
+        pdfmetrics.registerFont(TTFont("ArialNDT-Bold", r"C:\Windows\Fonts\arialbd.ttf"))
+        font_regular, font_bold = "ArialNDT", "ArialNDT-Bold"
+    except Exception as exc:
+        logger.warning("Khong the nap font Arial (%s).", type(exc).__name__)
+
+    styles = getSampleStyleSheet()
+    title = ParagraphStyle(
+        "AppendixTitle", parent=styles["Title"], fontName=font_bold,
+        fontSize=16, leading=21, alignment=TA_CENTER, textColor=colors.HexColor("#215B42"),
+    )
+    normal = ParagraphStyle(
+        "AppendixNormal", parent=styles["Normal"], fontName=font_regular,
+        fontSize=10, leading=14, textColor=colors.HexColor("#1F2933"),
+    )
+    doc = SimpleDocTemplate(
+        response, pagesize=A4, rightMargin=18 * mm, leftMargin=18 * mm,
+        topMargin=18 * mm, bottomMargin=18 * mm,
+        title=f"Phụ lục {appendix.ma_phu_luc}", author="NDT MOTEL",
+    )
+    rows = [
+        ("Mã phụ lục", appendix.ma_phu_luc),
+        ("Hợp đồng gốc", contract.ban_chup_goc.du_lieu.get("so_hop_dong", contract.so_hop_dong)),
+        ("Loại", appendix.get_loai_display()),
+        ("Ngày hiệu lực", appendix.ngay_hieu_luc.strftime("%d/%m/%Y")),
+        ("Trạng thái", appendix.get_trang_thai_display()),
+        (
+            "Người duyệt",
+            appendix.du_lieu_snapshot.get("nguoi_duyet") or "Dữ liệu legacy",
+        ),
+    ]
+    if appendix.loai == "gia_han":
+        rows.extend([
+            ("Ngày kết thúc cũ", appendix.ngay_ket_thuc_cu.strftime("%d/%m/%Y")),
+            ("Ngày kết thúc mới", appendix.ngay_ket_thuc_moi.strftime("%d/%m/%Y")),
+        ])
+    else:
+        for person in appendix.thay_doi_nguoi_o_cung.all():
+            rows.append((person.get_loai_su_kien_display(), f"{person.ho_ten} · {person.cccd or 'Chưa có CCCD'}"))
+    rows.extend([("Nội dung", appendix.noi_dung or "—"), ("Lý do", appendix.ly_do or "—")])
+    table = Table(
+        [[Paragraph(f"<b>{escape(str(label))}</b>", normal), Paragraph(escape(str(value)), normal)] for label, value in rows],
+        colWidths=[48 * mm, 118 * mm], hAlign="LEFT",
+    )
+    table.setStyle(TableStyle([
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#D9E6DE")),
+        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#E8F4EE")),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("PADDING", (0, 0), (-1, -1), 7),
+    ]))
+    doc.build([
+        Paragraph("PHỤ LỤC HỢP ĐỒNG THUÊ PHÒNG", title),
+        Spacer(1, 4 * mm), table,
+        Spacer(1, 5 * mm),
+        Paragraph("Tài liệu được dựng từ snapshot bất biến; không chứa ảnh hoặc đường dẫn dữ liệu riêng tư.", normal),
+    ])
+    return response
 
 
 @login_required(login_url="dang_nhap")
@@ -2187,11 +2564,19 @@ def xuat_hop_dong_pdf(request, id):
     # HTTP RESPONSE
     # =====================================================
 
+    review_version = None
+    if hop_dong.trang_thai == "cho_nguoi_thue_xac_nhan" and hop_dong.phien_ban_hien_tai_id:
+        review_version = hop_dong.phien_ban_hien_tai
+        snapshot = review_version.du_lieu
+    else:
+        snapshot = hop_dong.ban_chup_goc.du_lieu
+    so_hop_dong_snapshot = snapshot.get("so_hop_dong") or hop_dong.so_hop_dong
+
     response = HttpResponse(
         content_type="application/pdf"
     )
     response["Content-Disposition"] = (
-        f'attachment; filename="HopDong_{hop_dong.so_hop_dong}.pdf"'
+        f'attachment; filename="HopDong_{so_hop_dong_snapshot}.pdf"'
     )
 
     # =====================================================
@@ -2239,7 +2624,7 @@ def xuat_hop_dong_pdf(request, id):
         leftMargin=16 * mm,
         topMargin=17 * mm,
         bottomMargin=20 * mm,
-        title=f"Hợp đồng {hop_dong.so_hop_dong}",
+        title=f"Hợp đồng {so_hop_dong_snapshot}",
         author="NDT MOTEL",
         subject="Hợp đồng thuê phòng",
     )
@@ -2454,66 +2839,66 @@ def xuat_hop_dong_pdf(request, id):
     # DỮ LIỆU HIỂN THỊ
     # =====================================================
 
+    tenant_snapshot = snapshot.get("nguoi_thue", {})
+    room_snapshot = snapshot.get("phong", {})
+    ngay_bat_dau_snapshot = date.fromisoformat(snapshot["ngay_bat_dau"])
+    ngay_ket_thuc_snapshot = date.fromisoformat(snapshot.get("ngay_ket_thuc") or snapshot["ngay_ket_thuc_goc"])
+    ngay_thanh_toan_snapshot = snapshot["ngay_thanh_toan_hang_thang"]
+    so_nguoi_snapshot = snapshot["so_nguoi_o"]
+    tien_thue_snapshot = Decimal(snapshot["tien_thue_thang"])
+    tien_coc_snapshot = Decimal(snapshot["tien_coc"])
+    tien_phat_snapshot = Decimal(snapshot["tien_phat_tre_han"])
+
     so_hop_dong = (
-        hop_dong.so_hop_dong
+        snapshot.get("so_hop_dong")
         or "Chưa có"
     )
 
     ho_ten = (
-        nguoi_thue.ho_ten
+        tenant_snapshot.get("ho_ten")
         or "Chưa cập nhật"
     )
 
     cccd = (
-        nguoi_thue.cccd
+        tenant_snapshot.get("cccd")
         or "Chưa cập nhật"
     )
 
     so_dien_thoai = (
-        nguoi_thue.so_dien_thoai
+        tenant_snapshot.get("so_dien_thoai")
         or "Chưa cập nhật"
     )
 
     email = (
-        getattr(nguoi_thue, "email", "")
+        tenant_snapshot.get("email", "")
         or ""
     )
-
-    if not email:
-        try:
-            if nguoi_thue.tai_khoan:
-                email = (
-                    nguoi_thue.tai_khoan.email
-                    or "Chưa cập nhật"
-                )
-        except Exception:
-            email = "Chưa cập nhật"
 
     if not email:
         email = "Chưa cập nhật"
 
     ten_phong = (
-        phong.so_phong
+        room_snapshot.get("so_phong")
         or "Chưa cập nhật"
     )
 
     ten_co_so = (
-        co_so.ten_co_so
+        room_snapshot.get("co_so")
         or "Chưa cập nhật"
     )
 
     dia_chi_co_so = (
-        getattr(co_so, "dia_chi", "")
+        room_snapshot.get("dia_chi", "")
         or "Chưa cập nhật"
     )
 
     phuong_thuc = (
-        hop_dong.get_phuong_thuc_thanh_toan_display()
+        dict(HopDong._meta.get_field("phuong_thuc_thanh_toan").choices).get(
+            snapshot.get("phuong_thuc_thanh_toan"), snapshot.get("phuong_thuc_thanh_toan", "")
+        )
     )
 
-    trang_thai = (
-        hop_dong.get_trang_thai_display()
-    )
+    trang_thai = "Bản chờ xác nhận — chưa có hiệu lực" if review_version else "Bản gốc tại thời điểm ký"
 
     ngay_lap = (
         hop_dong.ngay_tao.date()
@@ -2529,10 +2914,10 @@ def xuat_hop_dong_pdf(request, id):
         else "Chưa ký"
     )
 
-    nguoi_di_cung_khai_bao = list(
-        dat_phong.nguoi_di_cung_khai_bao
-        .exclude(trang_thai_xac_minh="da_huy")
-        .order_by("ho_ten", "id")
+    nguoi_di_cung_khai_bao = (
+        snapshot.get("nguoi_o_cung", []) if review_version else list(
+            hop_dong.ban_chup_nguoi_o_cung.filter(loai_su_kien="co_mat_khi_ky").order_by("ho_ten", "id")
+        )
     )
 
     # =====================================================
@@ -2612,7 +2997,7 @@ def xuat_hop_dong_pdf(request, id):
             (
                 "Hợp đồng này ghi nhận thông tin thuê phòng giữa "
                 "NDT MOTEL và người thuê theo dữ liệu đã được xác nhận "
-                "trên hệ thống tại thời điểm xuất file."
+                "trên hệ thống tại thời điểm ký."
             ),
             normal_style,
         )
@@ -2636,14 +3021,14 @@ def xuat_hop_dong_pdf(request, id):
                 (
                     "Thời hạn thuê",
                     (
-                        f"{dinh_dang_ngay(hop_dong.ngay_bat_dau)} "
-                        f"đến {dinh_dang_ngay(hop_dong.ngay_ket_thuc)}"
+                        f"{dinh_dang_ngay(ngay_bat_dau_snapshot)} "
+                        f"đến {dinh_dang_ngay(ngay_ket_thuc_snapshot)}"
                     ),
                 ),
                 ("Trạng thái", trang_thai),
                 (
                     "Ngày thanh toán hàng tháng",
-                    f"Ngày {hop_dong.ngay_thanh_toan_hang_thang}",
+                    f"Ngày {ngay_thanh_toan_snapshot}",
                 ),
                 ("Phương thức thanh toán", phuong_thuc),
             ]
@@ -2691,7 +3076,7 @@ def xuat_hop_dong_pdf(request, id):
                 ("Phòng", ten_phong),
                 (
                     "Số người ở theo hợp đồng",
-                    f"{hop_dong.so_nguoi_o} người",
+                    f"{so_nguoi_snapshot} người",
                 ),
             ]
         )
@@ -2711,11 +3096,15 @@ def xuat_hop_dong_pdf(request, id):
             Paragraph("<b>Trạng thái</b>", normal_style),
         ]]
         for companion in nguoi_di_cung_khai_bao:
+            companion_name = companion.get("ho_ten") if review_version else companion.ho_ten
+            companion_cccd = "—" if review_version else companion.cccd
+            companion_relation = companion.get("quan_he") if review_version else companion.quan_he
+            companion_status = companion.get("trang_thai_xac_minh") if review_version else companion.trang_thai_xac_minh
             companion_rows.append([
-                Paragraph(pdf_text(companion.ho_ten), normal_style),
-                Paragraph(pdf_text(companion.cccd), normal_style),
-                Paragraph(pdf_text(companion.quan_he or "—"), normal_style),
-                Paragraph(pdf_text(_status_label(companion.trang_thai_xac_minh)), normal_style),
+                Paragraph(pdf_text(companion_name), normal_style),
+                Paragraph(pdf_text(companion_cccd), normal_style),
+                Paragraph(pdf_text(companion_relation or "—"), normal_style),
+                Paragraph(pdf_text(_status_label(companion_status)), normal_style),
             ])
         companion_table = Table(
             companion_rows,
@@ -2755,19 +3144,19 @@ def xuat_hop_dong_pdf(request, id):
                 (
                     "Tiền thuê phòng / tháng",
                     dinh_dang_tien(
-                        hop_dong.tien_thue_thang
+                        tien_thue_snapshot
                     ),
                 ),
                 (
                     "Tiền cọc",
                     dinh_dang_tien(
-                        hop_dong.tien_coc
+                        tien_coc_snapshot
                     ),
                 ),
                 (
                     "Tiền phạt trễ hạn",
                     dinh_dang_tien(
-                        hop_dong.tien_phat_tre_han
+                        tien_phat_snapshot
                     ),
                 ),
                 (
@@ -2778,7 +3167,7 @@ def xuat_hop_dong_pdf(request, id):
                     "Kỳ thanh toán",
                     (
                         "Thanh toán vào ngày "
-                        f"{hop_dong.ngay_thanh_toan_hang_thang} "
+                        f"{ngay_thanh_toan_snapshot} "
                         "hàng tháng"
                     ),
                 ),
@@ -2810,7 +3199,7 @@ def xuat_hop_dong_pdf(request, id):
     )
 
     dieu_khoan = (
-        hop_dong.dieu_khoan
+        snapshot.get("dieu_khoan", "")
         or "Không có điều khoản bổ sung."
     )
 
@@ -2873,7 +3262,7 @@ def xuat_hop_dong_pdf(request, id):
     # 7. GHI CHÚ
     # =====================================================
 
-    if hop_dong.ghi_chu:
+    if snapshot.get("ghi_chu"):
         story.append(
             Paragraph(
                 "7. GHI CHÚ",
@@ -2881,7 +3270,7 @@ def xuat_hop_dong_pdf(request, id):
             )
         )
 
-        for line in hop_dong.ghi_chu.splitlines():
+        for line in snapshot["ghi_chu"].splitlines():
             line = line.strip()
             if line:
                 story.append(

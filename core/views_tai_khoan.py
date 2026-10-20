@@ -9,6 +9,9 @@ from django.contrib.auth import (
 from django.contrib import messages
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+from core.dich_vu.buoc_tiep_theo import lay_viec_tiep_theo
+from core.dich_vu.luu_tru import lay_hop_dong_luu_tru_hien_tai
 from core.models import (
     CoSo,
     Phong,
@@ -140,6 +143,17 @@ def cap_nhat_thong_tin(request):
         tai_khoan=request.user
     )
 
+    profile_values = {
+        "ho_ten": nguoi_thue.ho_ten,
+        "so_dien_thoai": nguoi_thue.so_dien_thoai,
+        "email": nguoi_thue.email,
+        "que_quan": nguoi_thue.que_quan,
+        "dia_chi_thuong_tru": nguoi_thue.dia_chi_thuong_tru,
+        "nghe_nghiep": nguoi_thue.nghe_nghiep,
+        "nguoi_lien_he": nguoi_thue.nguoi_lien_he,
+        "sdt_nguoi_lien_he": nguoi_thue.sdt_nguoi_lien_he,
+    }
+
     if request.method == "POST":
 
         ho_ten = request.POST.get("ho_ten", "").strip()
@@ -172,6 +186,17 @@ def cap_nhat_thong_tin(request):
             ""
         ).strip()
 
+        profile_values = {
+            "ho_ten": ho_ten,
+            "so_dien_thoai": so_dien_thoai,
+            "email": email,
+            "que_quan": que_quan,
+            "dia_chi_thuong_tru": dia_chi_thuong_tru,
+            "nghe_nghiep": nghe_nghiep,
+            "nguoi_lien_he": nguoi_lien_he,
+            "sdt_nguoi_lien_he": sdt_nguoi_lien_he,
+        }
+
         if not ho_ten:
             messages.error(
                 request,
@@ -181,7 +206,11 @@ def cap_nhat_thong_tin(request):
                 request,
                 "core/cap_nhat_thong_tin.html",
                 {
-                    "nguoi_thue": nguoi_thue
+                    "nguoi_thue": nguoi_thue,
+                    "profile_values": profile_values,
+                    "profile_errors": {
+                        "ho_ten": "Họ tên không được để trống."
+                    },
                 }
             )
 
@@ -199,7 +228,11 @@ def cap_nhat_thong_tin(request):
                     request,
                     "core/cap_nhat_thong_tin.html",
                     {
-                        "nguoi_thue": nguoi_thue
+                        "nguoi_thue": nguoi_thue,
+                        "profile_values": profile_values,
+                        "profile_errors": {
+                            "email": "Email không đúng định dạng."
+                        },
                     }
                 )
 
@@ -225,7 +258,9 @@ def cap_nhat_thong_tin(request):
         request,
         "core/cap_nhat_thong_tin.html",
         {
-            "nguoi_thue": nguoi_thue
+            "nguoi_thue": nguoi_thue,
+            "profile_values": profile_values,
+            "profile_errors": {},
         }
     )
 
@@ -305,16 +340,7 @@ def tai_khoan(request):
         )
     )
 
-    hop_dong_hien_tai = (
-        danh_sach_hop_dong
-        .filter(
-            trang_thai__in=[
-                "dang_hieu_luc",
-                "sap_het_han",
-            ]
-        )
-        .first()
-    )
+    hop_dong_hien_tai = lay_hop_dong_luu_tru_hien_tai(nguoi_thue=nguoi_thue)
 
     so_hop_dong = (
         danh_sach_hop_dong
@@ -472,6 +498,9 @@ def tai_khoan(request):
         # Sửa chữa
         "danh_sach_sua_chua": danh_sach_sua_chua,
         "so_sua_chua_dang_xu_ly": so_sua_chua_dang_xu_ly,
+
+        # Việc ưu tiên tiếp theo
+        "viec_tiep_theo": lay_viec_tiep_theo(nguoi_thue),
     }
 
     return render(

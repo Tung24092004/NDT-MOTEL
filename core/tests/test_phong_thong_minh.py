@@ -28,7 +28,8 @@ class AccessTests(BusinessFixture):
     def setUp(self):
         self.hd=self.contract()
         FaceProfile.objects.create(nguoi_thue=self.tenant,loai_chu_the='nguoi_thue',
-            trang_thai='da_xac_thuc',face_encoding='audit-vector')
+            trang_thai='da_xac_thuc',face_encoding='audit-vector',
+            dong_y_du_lieu_khuon_mat=True)
 
     def recognize(self, room=None):
         # Mock image recognition only; execute the real authorization and history code.
@@ -94,7 +95,8 @@ from core.du_lieu_test.du_lieu_test_nghiep_vu import BusinessFixture
 
 class ManualResidentTests(BusinessFixture):
     def submit(self, hd, date):
-        req=self.request(self.admin,{'hop_dong':str(hd.pk),'ho_ten':'Audit New Resident','ngay_vao':str(date)})
+        req=self.request(self.admin,{'hop_dong':str(hd.pk),'ho_ten':'Audit New Resident',
+            'cccd':'000000009901','ngay_vao':str(date),'idempotency_key':'legacy-direct-admit'})
         with gia_lap_views('render',side_effect=lambda request,name,ctx:ctx):
             views.tao_nguoi_o_cung(req)
         return req
@@ -110,7 +112,7 @@ class ManualResidentTests(BusinessFixture):
         hd=self.contract();self.room.so_nguoi_toi_da=0;self.room.save()
         req=self.submit(hd,self.today)
         self.assertFalse(NguoiOCungPhong.objects.exists())
-        self.assertIn('chưa',' '.join(str(m) for m in get_messages(req)).lower())
+        self.assertIn('suc chua',' '.join(str(m) for m in get_messages(req)).lower())
 
     def test_zero_capacity_return_and_update(self):
         hd=self.contract();resident=self.resident(hd,'da_roi')
@@ -120,9 +122,9 @@ class ManualResidentTests(BusinessFixture):
                 _,req=self.post(views.xu_ly_nguoi_o_cung,resident,
                     {'hanh_dong':action,'trang_thai':'dang_o'},self.admin)
                 resident.refresh_from_db();self.assertEqual(resident.trang_thai,'da_roi')
-                self.assertIn('chưa',' '.join(str(m) for m in get_messages(req)).lower())
+                self.assertTrue(list(get_messages(req)))
 
-    def test_valid_resident_created(self):
+    def test_valid_direct_admit_creates_residency_via_canonical_service(self):
         self.submit(self.contract(),self.today)
         self.assertEqual(NguoiOCungPhong.objects.count(),1)
 

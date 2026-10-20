@@ -40,9 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Third-party apps
+    'django_extensions',
+
+    # NDT MOTEL
     'core',
 ]
-
 
 # =========================================================
 # MIDDLEWARE
@@ -179,6 +182,10 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Payment evidence is never exposed by the development /media/ route.
+PRIVATE_PAYMENT_EVIDENCE_ROOT = BASE_DIR / 'private_uploads' / 'payment_evidence'
+PRIVATE_COTENANT_IDENTITY_EVIDENCE_ROOT = BASE_DIR / 'private_uploads' / 'cotenant_identity_evidence'
 
 
 # =========================================================

@@ -1,152 +1,28 @@
 {% extends 'core/tenant/booking/base.html' %}
 {% load bo_loc %}
-
 {% block title %}Đặt phòng của tôi - NDT MOTEL{% endblock %}
 {% block page_title %}Đặt phòng của tôi{% endblock %}
-
 {% block booking_content %}
 <div class="booking-page" data-booking-screen="list">
     {% url 'danh_sach_phong' as rooms_url %}
-    {% include 'core/foundation/page_header.html' with breadcrumb='Lưu trú của tôi' title='Đặt phòng của tôi' subtitle='Theo dõi yêu cầu, tiền cọc và bước cần thực hiện tiếp theo.' action_url=rooms_url action_label='Đặt phòng mới' %}
-
-    <section class="ndt-filter-bar booking-filter" aria-labelledby="booking-filter-title">
-        <div>
-            <h2 class="ndt-filter-bar__title" id="booking-filter-title">Lọc yêu cầu</h2>
-            <p class="booking-filter__hint">Tập trung vào nhóm yêu cầu đang cần theo dõi.</p>
-        </div>
-        <form method="get" class="ndt-filter-bar__form booking-filter__form">
-            <div class="ndt-field booking-filter__field">
-                <label class="ndt-label" for="booking-status">Trạng thái</label>
-                <select class="ndt-control" id="booking-status" name="status">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="unpaid" {% if selected == 'unpaid' %}selected{% endif %}>Chờ thanh toán</option>
-                    <option value="pending" {% if selected == 'pending' %}selected{% endif %}>Chờ xác nhận</option>
-                    <option value="confirmed" {% if selected == 'confirmed' %}selected{% endif %}>Đã xác nhận / duyệt</option>
-                    <option value="rejected" {% if selected == 'rejected' %}selected{% endif %}>Từ chối</option>
-                    <option value="cancelled" {% if selected == 'cancelled' %}selected{% endif %}>Đã hủy</option>
-                    <option value="expired" {% if selected == 'expired' %}selected{% endif %}>Hết hạn</option>
-                </select>
-            </div>
-            <div class="booking-filter__actions">
-                <button type="submit" class="ndt-button ndt-button--secondary">Áp dụng bộ lọc</button>
-                {% if selected %}
-                    <a class="ndt-button ndt-button--ghost" href="{% url 'dat_phong_cua_toi' %}">Xóa bộ lọc</a>
-                {% endif %}
-            </div>
-        </form>
-    </section>
-
-    <div class="booking-list-heading">
-        <div>
-            <span class="booking-eyebrow">Danh sách</span>
-            <h2>Các yêu cầu đặt phòng</h2>
-        </div>
-        <span>{{ rows.paginator.count }} yêu cầu{% if selected %} phù hợp{% endif %}</span>
-    </div>
-
-    <section class="booking-records" aria-label="Danh sách yêu cầu đặt phòng">
-    {% for row in rows %}
-        <article class="ndt-card booking-record">
-            <div class="booking-record__main">
-                <div class="booking-record__identity">
-                    <span class="booking-eyebrow">{{ row.booking.ma_yeu_cau }}</span>
-                    <h3>{{ row.booking.phong.co_so.ten_co_so }} / Phòng {{ row.booking.phong.so_phong }}</h3>
-                    <dl class="booking-record__meta">
-                        <div>
-                            <dt>Đặt ngày</dt>
-                            <dd class="booking-record__date">
-                                <span>{{ row.booking.ngay_dat|date:'d/m/Y' }}</span>
-                                <span>{{ row.booking.ngay_dat|date:'H:i' }}</span>
-                            </dd>
-                        </div>
-                        <div>
-                            <dt>Nhận phòng</dt>
-                            <dd>{{ row.booking.ngay_nhan_phong|date:'d/m/Y' }}</dd>
-                        </div>
-                        <div>
-                            <dt>Số người</dt>
-                            <dd>{{ row.booking.so_nguoi_o }}</dd>
-                        </div>
-                    </dl>
-                </div>
-                <div class="booking-record__states" aria-label="Trạng thái yêu cầu và tiền cọc">
-                    <div class="booking-state-item">
-                        <span class="booking-state-item__label">Yêu cầu</span>
-                        {% if row.booking.trang_thai == 'da_duyet' %}
-                            <span class="ndt-badge ndt-badge--success">{{ row.booking.get_trang_thai_display }}</span>
-                        {% elif row.booking.trang_thai == 'tu_choi' or row.booking.trang_thai == 'da_huy' %}
-                            <span class="ndt-badge ndt-badge--danger">{{ row.booking.get_trang_thai_display }}</span>
-                        {% else %}
-                            <span class="ndt-badge ndt-badge--warning">{{ row.booking.get_trang_thai_display }}</span>
-                        {% endif %}
-                    </div>
-
-                    <div class="booking-state-item">
-                        <span class="booking-state-item__label">Tiền cọc</span>
-                        {% if row.payment and row.payment.trang_thai == 'da_xac_nhan' %}
-                            <span class="ndt-badge ndt-badge--success">{{ row.payment_status }}</span>
-                        {% elif row.payment and row.payment.trang_thai == 'tu_choi' %}
-                            <span class="ndt-badge ndt-badge--danger">{{ row.payment_status }}</span>
-                        {% elif row.payment and row.payment.trang_thai == 'cho_xac_nhan' %}
-                            <span class="ndt-badge ndt-badge--warning">{{ row.payment_status }}</span>
-                        {% else %}
-                            <span class="ndt-badge ndt-badge--info">{{ row.payment_status }}</span>
-                        {% endif %}
-                    </div>
-
-                    {% if row.expired %}
-                        <span class="ndt-badge ndt-badge--danger">Hết hạn thanh toán</span>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="booking-record__footer">
-                <div class="booking-next-action">
-                    <span>Bước tiếp theo</span>
-                    {% if row.can_pay %}
-                        <strong>Chuyển khoản tiền cọc</strong>
-                    {% elif row.payment and row.payment.trang_thai == 'cho_xac_nhan' %}
-                        <strong>Chờ quản lý xác nhận</strong>
-                    {% elif row.contract %}
-                        <strong>Theo dõi hợp đồng</strong>
-                    {% else %}
-                        <strong>Xem thông tin yêu cầu</strong>
-                    {% endif %}
-                </div>
-                <div class="booking-record__deposit">
-                    <span>Tiền cọc</span>
-                    <strong>{{ row.booking.tien_coc_du_kien|vnd }} VNĐ</strong>
-                </div>
-                <div class="booking-record__actions">
-                    <a class="ndt-button ndt-button--secondary" href="{% url 'chi_tiet_dat_phong_cua_toi' row.booking.pk %}">Xem chi tiết</a>
-                    {% if row.can_pay or row.can_view_qr %}
-                        <a class="ndt-button ndt-button--primary" href="{% url 'thanh_toan_coc_cua_toi' row.booking.pk %}">
-                            {% if row.can_pay %}Chuyển khoản cọc{% else %}Xem thông tin cọc{% endif %}
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-        </article>
-    {% empty %}
-        {% if selected %}
-            {% url 'dat_phong_cua_toi' as empty_action_url %}
-            {% include 'core/foundation/empty_state.html' with title='Không có yêu cầu phù hợp' description='Hãy chọn trạng thái khác hoặc xem lại toàn bộ yêu cầu đặt phòng.' action_url=empty_action_url action_label='Xem tất cả yêu cầu' %}
-        {% else %}
-            {% include 'core/foundation/empty_state.html' with title='Bạn chưa có yêu cầu đặt phòng' description='Khám phá các phòng đang trống để bắt đầu.' action_url=rooms_url action_label='Xem phòng' %}
-        {% endif %}
-    {% endfor %}
-    </section>
-
-    {% if rows.has_other_pages %}
-        <nav class="booking-pagination" aria-label="Phân trang">
-            {% if rows.has_previous %}
-                <a class="ndt-button ndt-button--secondary" href="?status={{ selected|urlencode }}&page={{ rows.previous_page_number }}">Trang trước</a>
-            {% endif %}
-            <span>Trang {{ rows.number }} / {{ rows.paginator.num_pages }}</span>
-            {% if rows.has_next %}
-                <a class="ndt-button ndt-button--secondary" href="?status={{ selected|urlencode }}&page={{ rows.next_page_number }}">Trang sau</a>
-            {% endif %}
-        </nav>
-    {% endif %}
+    <header class="ndt-f5-page-header">
+        <div class="ndt-f5-page-header__content"><h1 class="ndt-f5-page-header__title">Đặt phòng của tôi</h1><p class="ndt-f5-page-header__description">Theo dõi yêu cầu, tiền cọc và bước cần thực hiện tiếp theo.</p><div class="ndt-f5-page-header__meta"><span>{{ rows.paginator.count }} yêu cầu{% if selected %} phù hợp{% endif %}</span></div></div>
+        <div class="ndt-f5-page-header__actions"><a class="ndt-f5-button ndt-f5-button--primary" href="{{ rooms_url }}">Đặt phòng mới</a></div>
+    </header>
+    <form method="get" class="ndt-f5-filter booking-filter" aria-label="Lọc yêu cầu đặt phòng">
+        <div class="ndt-f5-field"><label class="ndt-f5-label" for="booking-status">Trạng thái</label><select class="ndt-f5-control" id="booking-status" name="status"><option value="">Tất cả trạng thái</option><option value="unpaid" {% if selected == 'unpaid' %}selected{% endif %}>Chờ thanh toán</option><option value="pending" {% if selected == 'pending' %}selected{% endif %}>Chờ xác nhận</option><option value="confirmed" {% if selected == 'confirmed' %}selected{% endif %}>Đã xác nhận / duyệt</option><option value="rejected" {% if selected == 'rejected' %}selected{% endif %}>Từ chối</option><option value="cancelled" {% if selected == 'cancelled' %}selected{% endif %}>Đã hủy</option><option value="expired" {% if selected == 'expired' %}selected{% endif %}>Hết hạn</option></select></div>
+        <div class="ndt-f5-filter__actions"><button type="submit" class="ndt-f5-button ndt-f5-button--secondary">Áp dụng bộ lọc</button>{% if selected %}<a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'dat_phong_cua_toi' %}">Xóa bộ lọc</a>{% endif %}</div>
+    </form>
+    {% if rows %}
+    <div class="ndt-f5-table-wrap booking-table-wrap"><table class="ndt-f5-table booking-table"><thead><tr><th>Yêu cầu / phòng</th><th>Thời gian</th><th>Tiền cọc</th><th>Trạng thái</th><th>Hành động</th></tr></thead><tbody>
+    {% for row in rows %}<tr>
+        <td data-label="Yêu cầu / phòng"><strong>{{ row.booking.ma_yeu_cau }}</strong><span class="booking-cell-note">{{ row.booking.phong.co_so.ten_co_so }} · Phòng {{ row.booking.phong.so_phong }}</span></td>
+        <td data-label="Thời gian"><strong>Nhận {{ row.booking.ngay_nhan_phong|date:'d/m/Y' }}</strong><span class="booking-cell-note">Gửi {{ row.booking.ngay_dat|date:'d/m/Y H:i' }} · {{ row.booking.so_nguoi_o }} người</span></td>
+        <td data-label="Tiền cọc"><strong class="booking-money">{{ row.booking.tien_coc_du_kien|vnd }} VNĐ</strong></td>
+        <td data-label="Trạng thái"><div class="booking-badges">{% if row.booking.trang_thai == 'da_duyet' %}<span class="ndt-f5-badge ndt-f5-badge--success">{{ row.booking.get_trang_thai_display }}</span>{% elif row.booking.trang_thai == 'tu_choi' or row.booking.trang_thai == 'da_huy' %}<span class="ndt-f5-badge ndt-f5-badge--danger">{{ row.booking.get_trang_thai_display }}</span>{% else %}<span class="ndt-f5-badge ndt-f5-badge--warning">{{ row.booking.get_trang_thai_display }}</span>{% endif %}{% if row.payment and row.payment.trang_thai == 'da_xac_nhan' %}<span class="ndt-f5-badge ndt-f5-badge--success">{{ row.payment_status }}</span>{% elif row.payment and row.payment.trang_thai == 'tu_choi' %}<span class="ndt-f5-badge ndt-f5-badge--danger">{{ row.payment_status }}</span>{% elif row.payment and row.payment.trang_thai == 'cho_xac_nhan' %}<span class="ndt-f5-badge ndt-f5-badge--warning">{{ row.payment_status }}</span>{% else %}<span class="ndt-f5-badge ndt-f5-badge--info">{{ row.payment_status }}</span>{% endif %}{% if row.expired %}<span class="ndt-f5-badge ndt-f5-badge--danger">Hết hạn thanh toán</span>{% endif %}</div></td>
+        <td data-label="Hành động"><div class="ndt-f5-table__actions"><a class="ndt-f5-button ndt-f5-button--secondary ndt-f5-button--small" href="{% url 'chi_tiet_dat_phong_cua_toi' row.booking.pk %}">Xem chi tiết</a>{% if row.can_pay or row.can_view_qr %}<a class="ndt-f5-button ndt-f5-button--primary ndt-f5-button--small" href="{% url 'thanh_toan_coc_cua_toi' row.booking.pk %}">{% if row.can_pay %}Chuyển khoản tiền cọc{% else %}Xem thông tin cọc{% endif %}</a>{% endif %}</div></td>
+    </tr>{% endfor %}</tbody></table></div>
+    {% else %}<div class="ndt-f5-empty"><div class="ndt-f5-empty__icon" aria-hidden="true">0</div><h2 class="ndt-f5-empty__title">{% if selected %}Không có yêu cầu phù hợp{% else %}Bạn chưa có yêu cầu đặt phòng{% endif %}</h2><p class="ndt-f5-empty__description">{% if selected %}Hãy chọn trạng thái khác hoặc xem lại toàn bộ yêu cầu đặt phòng.{% else %}Khám phá các phòng đang trống để bắt đầu.{% endif %}</p><div class="ndt-f5-empty__action"><a class="ndt-f5-button ndt-f5-button--primary" href="{% if selected %}{% url 'dat_phong_cua_toi' %}{% else %}{{ rooms_url }}{% endif %}">{% if selected %}Xem tất cả yêu cầu{% else %}Xem phòng{% endif %}</a></div></div>{% endif %}
+    {% if rows.has_other_pages %}<nav class="ndt-f5-pagination booking-pagination" aria-label="Phân trang">{% if rows.has_previous %}<a href="?status={{ selected|urlencode }}&page={{ rows.previous_page_number }}">Trước</a>{% endif %}<span aria-current="page">{{ rows.number }} / {{ rows.paginator.num_pages }}</span>{% if rows.has_next %}<a href="?status={{ selected|urlencode }}&page={{ rows.next_page_number }}">Sau</a>{% endif %}</nav>{% endif %}
 </div>
 {% endblock %}

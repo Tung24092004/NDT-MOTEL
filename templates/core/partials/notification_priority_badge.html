@@ -1,0 +1,7 @@
+{% if notice.muc_do == 'khancap' %}
+<span class="ndt-f5-badge ndt-f5-badge--danger">Khẩn cấp</span>
+{% elif notice.muc_do == 'quan_trong' %}
+<span class="ndt-f5-badge ndt-f5-badge--warning">Quan trọng</span>
+{% else %}
+<span class="ndt-f5-badge">Bình thường</span>
+{% endif %}

@@ -1,0 +1,100 @@
+.ndt-f5.ndt-tenant-access-read-model {
+    --tenant-access-ink: #13243b;
+    --tenant-access-muted: #5d6c80;
+    color: var(--tenant-access-ink);
+}
+
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-metrics {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-metric {
+    padding: 1.25rem;
+}
+
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-metric span,
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-note,
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-section-head p {
+    color: var(--tenant-access-muted);
+}
+
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-metric strong {
+    display: block;
+    font-size: clamp(1.65rem, 3vw, 2.25rem);
+    line-height: 1.15;
+    margin-top: .35rem;
+}
+
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-metric p {
+    color: var(--tenant-access-muted);
+    font-size: .875rem;
+    margin: .4rem 0 0;
+}
+
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-filter {
+    align-items: end;
+}
+
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-section-head {
+    align-items: end;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-section-head h2,
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-section-head p {
+    margin: 0;
+}
+
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-section-head p {
+    margin-top: .3rem;
+}
+
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-count {
+    background: #edf3f8;
+    border-radius: 999px;
+    color: #33465e;
+    flex: 0 0 auto;
+    font-size: .8rem;
+    font-weight: 750;
+    padding: .45rem .75rem;
+}
+
+.ndt-f5.ndt-tenant-access-read-model .tenant-access-note {
+    display: block;
+    font-size: .8rem;
+    margin-top: .25rem;
+    max-width: 32rem;
+}
+
+.ndt-f5.ndt-tenant-access-read-model .ndt-f5-button,
+.ndt-f5.ndt-tenant-access-read-model .ndt-f5-control {
+    min-height: 44px;
+}
+
+@media (max-width: 900px) {
+    .ndt-f5.ndt-tenant-access-read-model .tenant-access-metrics {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .ndt-f5.ndt-tenant-access-read-model .tenant-access-section-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ndt-f5.ndt-tenant-access-read-model .ndt-f5-page-header__actions,
+    .ndt-f5.ndt-tenant-access-read-model .ndt-f5-page-header__actions .ndt-f5-button {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ndt-f5.ndt-tenant-access-read-model * {
+        scroll-behavior: auto;
+    }
+}

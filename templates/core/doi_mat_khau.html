@@ -5,71 +5,63 @@
 {% block page_title %}Đổi mật khẩu{% endblock %}
 
 {% block tenant_styles %}
-<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
-<link rel="stylesheet" href="{% static 'css/tenant/doi_mat_khau.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/account_auth_p6i.css' %}">
 {% endblock %}
 
 {% block tenant_content %}
-<div class="account-password ndt-foundation">
-    {% if request.user.is_staff or request.user.is_superuser %}
-        {% url 'dashboard_admin' as return_url %}
-        <header class="ndt-page-header">
-            <div class="ndt-page-header__content">
-                <p class="ndt-breadcrumb">Khu quản trị / Bảo mật</p>
+<main class="ndt-f5 ndt-account-auth ndt-f5-page">
+    <div class="ndt-f5-container ndt-f5-container--form">
+        {% if request.user.is_staff or request.user.is_superuser %}{% url 'dashboard_admin' as return_url %}{% else %}{% url 'tai_khoan' as return_url %}{% endif %}
+        <header class="ndt-f5-page-header">
+            <div class="ndt-f5-page-header__content">
+                <p class="ndt-f5-breadcrumb">{% if request.user.is_staff or request.user.is_superuser %}Khu quản trị{% else %}Tài khoản{% endif %} / Bảo mật</p>
                 <h1>Đổi mật khẩu</h1>
-                <p class="ndt-page-header__subtitle">Cập nhật mật khẩu để bảo vệ tài khoản quản trị.</p>
+                <p class="ndt-f5-page-header__description">Cập nhật mật khẩu để bảo vệ tài khoản{% if request.user.is_staff or request.user.is_superuser %} quản trị{% endif %}.</p>
             </div>
-            <div class="ndt-page-header__actions">
-                <a class="ndt-button ndt-button--primary" href="{{ return_url }}">Về dashboard</a>
+            <div class="ndt-f5-page-header__actions">
+                <a class="ndt-f5-button ndt-f5-button--secondary" href="{{ return_url }}">{% if request.user.is_staff or request.user.is_superuser %}Về dashboard{% else %}Về tài khoản{% endif %}</a>
             </div>
         </header>
-    {% else %}
-        {% url 'tai_khoan' as return_url %}
-        <header class="ndt-page-header">
-            <div class="ndt-page-header__content">
-                <p class="ndt-breadcrumb">Tài khoản / Bảo mật</p>
-                <h1>Đổi mật khẩu</h1>
-                <p class="ndt-page-header__subtitle">Cập nhật mật khẩu để bảo vệ tài khoản của bạn.</p>
+
+        <section class="ndt-f5-card" aria-labelledby="password-form-title">
+            <div class="ndt-f5-card__header">
+                <h2 class="ndt-f5-card__title" id="password-form-title">Thông tin bảo mật</h2>
+                <p>Mật khẩu mới phải có ít nhất 6 ký tự và phải khác mật khẩu hiện tại.</p>
             </div>
-            <div class="ndt-page-header__actions">
-                <a class="ndt-button ndt-button--primary" href="{{ return_url }}">Về tài khoản</a>
+            <div class="ndt-f5-card__body">
+                <form method="post" class="p6i-form" data-p6i-form>
+                    {% csrf_token %}
+                    <div class="ndt-f5-field">
+                        <label class="ndt-f5-label" for="mat_khau_hien_tai">Mật khẩu hiện tại <span class="ndt-f5-required">*</span></label>
+                        <div class="p6i-password-control">
+                            <input class="ndt-f5-control" type="password" id="mat_khau_hien_tai" name="mat_khau_hien_tai" autocomplete="current-password" required>
+                            <button class="ndt-f5-button ndt-f5-button--neutral p6i-password-toggle" type="button" data-password-toggle="mat_khau_hien_tai" aria-label="Hiện mật khẩu">Hiện</button>
+                        </div>
+                    </div>
+                    <div class="ndt-f5-field">
+                        <label class="ndt-f5-label" for="mat_khau_moi">Mật khẩu mới <span class="ndt-f5-required">*</span></label>
+                        <div class="p6i-password-control">
+                            <input class="ndt-f5-control" type="password" id="mat_khau_moi" name="mat_khau_moi" autocomplete="new-password" minlength="6" required aria-describedby="mat-khau-moi-help">
+                            <button class="ndt-f5-button ndt-f5-button--neutral p6i-password-toggle" type="button" data-password-toggle="mat_khau_moi" aria-label="Hiện mật khẩu">Hiện</button>
+                        </div>
+                        <p class="ndt-f5-help" id="mat-khau-moi-help">Dùng ít nhất 6 ký tự và không dùng lại mật khẩu hiện tại.</p>
+                    </div>
+                    <div class="ndt-f5-field">
+                        <label class="ndt-f5-label" for="xac_nhan_mat_khau">Xác nhận mật khẩu mới <span class="ndt-f5-required">*</span></label>
+                        <div class="p6i-password-control">
+                            <input class="ndt-f5-control" type="password" id="xac_nhan_mat_khau" name="xac_nhan_mat_khau" autocomplete="new-password" minlength="6" required>
+                            <button class="ndt-f5-button ndt-f5-button--neutral p6i-password-toggle" type="button" data-password-toggle="xac_nhan_mat_khau" aria-label="Hiện mật khẩu">Hiện</button>
+                        </div>
+                    </div>
+                    <div class="ndt-f5-actions">
+                        <a href="{{ return_url }}" class="ndt-f5-button ndt-f5-button--secondary">Quay lại</a>
+                        <button type="submit" class="ndt-f5-button ndt-f5-button--primary">Đổi mật khẩu</button>
+                    </div>
+                </form>
             </div>
-        </header>
-    {% endif %}
-
-    <section class="ndt-card account-form-card" aria-labelledby="password-form-title">
-        <div class="ndt-card__header">
-            <h2 id="password-form-title">Thông tin bảo mật</h2>
-            <p>Mật khẩu mới phải có ít nhất 6 ký tự và phải khác mật khẩu hiện tại.</p>
-        </div>
-        <div class="ndt-card__body">
-            <form method="post" class="account-form">
-                {% csrf_token %}
-
-                <div class="ndt-field">
-                    <label class="ndt-label" for="mat_khau_hien_tai">Mật khẩu hiện tại <span class="ndt-required">*</span></label>
-                    <input class="ndt-control" type="password" id="mat_khau_hien_tai" name="mat_khau_hien_tai" autocomplete="current-password" required>
-                </div>
-
-                <div class="ndt-field">
-                    <label class="ndt-label" for="mat_khau_moi">Mật khẩu mới <span class="ndt-required">*</span></label>
-                    <input class="ndt-control" type="password" id="mat_khau_moi" name="mat_khau_moi" autocomplete="new-password" minlength="6" required>
-                </div>
-
-                <div class="ndt-field">
-                    <label class="ndt-label" for="xac_nhan_mat_khau">Xác nhận mật khẩu mới <span class="ndt-required">*</span></label>
-                    <input class="ndt-control" type="password" id="xac_nhan_mat_khau" name="xac_nhan_mat_khau" autocomplete="new-password" minlength="6" required>
-                </div>
-
-                <div class="ndt-actions account-form-actions">
-                    <a href="{{ return_url }}" class="ndt-button ndt-button--secondary">Quay lại</a>
-                    <button type="submit" class="ndt-button ndt-button--primary">Đổi mật khẩu</button>
-                </div>
-            </form>
-        </div>
-    </section>
-</div>
+        </section>
+    </div>
+</main>
+<script src="{% static 'js/account_auth_p6i.js' %}" defer></script>
 {% endblock %}

@@ -12,6 +12,7 @@ def thong_bao_header(request):
         return {
             "so_thong_bao_chua_doc": 0,
             "so_thong_bao_admin_chua_doc": 0,
+            "hien_thi_lien_ket_face_id": False,
         }
 
     if request.user.is_staff or request.user.is_superuser:
@@ -21,6 +22,7 @@ def thong_bao_header(request):
                 nguoi_nhan_user=request.user,
                 da_doc=False,
             ).count(),
+            "hien_thi_lien_ket_face_id": False,
         }
 
     nguoi_thue = (
@@ -45,4 +47,7 @@ def thong_bao_header(request):
     return {
         "so_thong_bao_chua_doc": so_thong_bao_chua_doc,
         "so_thong_bao_admin_chua_doc": 0,
+        "hien_thi_lien_ket_face_id": bool(
+            nguoi_thue and nguoi_thue.trang_thai_luu_tru != "da_tra_phong"
+        ),
     }

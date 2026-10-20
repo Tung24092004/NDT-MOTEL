@@ -66,6 +66,7 @@
     white-space: nowrap;
 }
 .ndt-foundation .ndt-badge::before { width: 6px; height: 6px; flex: none; border-radius: 50%; background: currentColor; content: ""; }
+.ndt-foundation .ndt-badge--neutral { background: var(--ndt-surface-muted); color: var(--ndt-text-secondary); }
 .ndt-foundation .ndt-badge--info { background: var(--ndt-info-bg); color: var(--ndt-info); }
 .ndt-foundation .ndt-badge--success { background: var(--ndt-success-bg); color: var(--ndt-success); }
 .ndt-foundation .ndt-badge--warning { background: var(--ndt-warning-bg); color: var(--ndt-warning); }
@@ -108,9 +109,17 @@
 /* Page headers */
 .ndt-foundation .ndt-page-header { margin-bottom: var(--ndt-space-6); display: flex; align-items: flex-end; justify-content: space-between; gap: var(--ndt-space-6); }
 .ndt-foundation .ndt-page-header__content { min-width: 0; }
-.ndt-foundation .ndt-breadcrumb { margin: 0 0 var(--ndt-space-3); color: var(--ndt-text-muted); font-size: var(--ndt-text-xs); font-weight: 600; line-height: 1.5; }
+.ndt-foundation .ndt-breadcrumb { margin: 0 0 var(--ndt-space-3); color: var(--ndt-text-muted); font-size: var(--ndt-text-xs); font-weight: 500; line-height: 1.5; }
+.ndt-foundation .ndt-breadcrumb__list { display: flex; flex-wrap: wrap; gap: var(--ndt-space-2); margin: 0; padding: 0; list-style: none; }
+.ndt-foundation .ndt-breadcrumb__item { display: inline-flex; align-items: center; gap: var(--ndt-space-2); }
+.ndt-foundation .ndt-breadcrumb__item + .ndt-breadcrumb__item::before { color: var(--ndt-text-muted); content: "›"; }
+.ndt-foundation .ndt-breadcrumb a { color: var(--ndt-text-secondary); text-decoration: none; }
+.ndt-foundation .ndt-breadcrumb a:hover { color: var(--ndt-primary-hover); text-decoration: underline; }
+.ndt-foundation .ndt-contextual-back { display: inline-flex; min-height: var(--ndt-touch-target); align-items: center; margin: 0 0 var(--ndt-space-2); color: var(--ndt-primary-hover); font-size: var(--ndt-text-sm); font-weight: 600; text-decoration: none; }
+.ndt-foundation .ndt-contextual-back:hover { text-decoration: underline; }
 .ndt-foundation .ndt-page-header__title { margin: 0; color: var(--ndt-text); font-size: var(--ndt-text-2xl); font-weight: 700; line-height: 1.2; letter-spacing: 0; }
 .ndt-foundation .ndt-page-header__subtitle { max-width: 68ch; margin: var(--ndt-space-2) 0 0; color: var(--ndt-text-muted); font-size: var(--ndt-text-sm); line-height: 1.6; }
+.ndt-foundation .ndt-page-header__metadata { margin: var(--ndt-space-3) 0 0; color: var(--ndt-text-secondary); font-size: var(--ndt-text-sm); line-height: 1.5; }
 .ndt-foundation .ndt-page-header__actions { display: flex; align-items: center; gap: var(--ndt-space-2); flex-wrap: wrap; }
 
 /* Cards and surfaces */
@@ -136,6 +145,8 @@
 .ndt-foundation .ndt-empty-state__title { margin: 0; font-size: var(--ndt-text-lg); font-weight: 700; }
 .ndt-foundation .ndt-empty-state__description { max-width: 52ch; margin: var(--ndt-space-2) auto 0; color: var(--ndt-text-muted); font-size: var(--ndt-text-sm); line-height: 1.6; }
 .ndt-foundation .ndt-empty-state__action { margin-top: var(--ndt-space-6); }
+.ndt-foundation .ndt-empty-state__secondary { display: inline-flex; min-height: var(--ndt-touch-target); align-items: center; margin-left: var(--ndt-space-3); color: var(--ndt-primary-hover); font-size: var(--ndt-text-sm); font-weight: 600; text-decoration: none; }
+.ndt-foundation .ndt-empty-state__secondary:hover { text-decoration: underline; }
 
 /* Dialog infrastructure */
 .ndt-dialog[hidden] { display: none; }
@@ -149,6 +160,8 @@
 @media (max-width: 767px) {
     .ndt-foundation .ndt-page-header { align-items: stretch; flex-direction: column; }
     .ndt-foundation .ndt-page-header__actions .ndt-button { width: 100%; }
+    .ndt-foundation .ndt-breadcrumb__list { gap: var(--ndt-space-1) var(--ndt-space-2); }
+    .ndt-foundation .ndt-empty-state__secondary { margin: var(--ndt-space-3) 0 0; }
     .ndt-foundation .ndt-filter-bar { padding: var(--ndt-space-4); }
     .ndt-foundation .ndt-filter-bar__form { align-items: stretch; flex-direction: column; }
     .ndt-foundation .ndt-filter-bar__form > * { width: 100%; }

@@ -17,6 +17,9 @@ class BookingForm(forms.Form):
 
     def __init__(self, *args, capacity, **kwargs):
         super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if not isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs['class'] = 'ndt-f5-control'
         self.fields['so_nguoi_o'].max_value = capacity
         self.fields['so_nguoi_o'].validators.append(MaxValueValidator(capacity))
         self.fields['so_nguoi_o'].widget.attrs['max'] = capacity
@@ -29,6 +32,27 @@ class BookingForm(forms.Form):
         return value
 
 
+class RentalQuoteForm(forms.Form):
+    """The read-only rental-selection inputs, before a booking is submitted."""
+
+    ngay_nhan_phong = forms.DateField(
+        label='Ngày bắt đầu dự kiến', widget=forms.DateInput(attrs={'type': 'date'})
+    )
+    so_thang_thue = forms.IntegerField(label='Thời hạn thuê (tháng)', min_value=1, max_value=36, initial=3)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'ndt-f5-control'
+        self.fields['ngay_nhan_phong'].widget.attrs['min'] = timezone.localdate().isoformat()
+
+    def clean_ngay_nhan_phong(self):
+        value = self.cleaned_data['ngay_nhan_phong']
+        if value < timezone.localdate():
+            raise forms.ValidationError('Ngày bắt đầu không được ở quá khứ.')
+        return value
+
+
 class CompanionForm(forms.Form):
     ho_ten = forms.CharField(label='Họ tên', max_length=150)
     ngay_sinh = forms.DateField(label='Ngày sinh', required=False, widget=forms.DateInput(attrs={'type': 'date'}))
@@ -38,6 +62,11 @@ class CompanionForm(forms.Form):
     email = forms.EmailField(label='Email', required=False)
     quan_he = forms.CharField(label='Quan hệ', required=False, max_length=50)
     ghi_chu = forms.CharField(label='Ghi chú', required=False, max_length=500)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'ndt-f5-control'
 
     def clean_cccd(self):
         value = normalize_cccd(self.cleaned_data['cccd'])

@@ -3,54 +3,58 @@
 {% block title %}Thêm phòng - NDT MOTEL{% endblock %}
 {% block page_title %}Thêm phòng{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
-<link rel="stylesheet" href="{% static 'css/room_management.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/room_management_p6a.css' %}">
 {% endblock %}
 {% block content %}
-<main class="room-management room-management--form ndt-foundation" data-room-management-page="create">
-    {% include "core/foundation/page_header.html" with breadcrumb="Quản trị / Phòng / Thêm mới" title="Thêm phòng" subtitle="Thiết lập thông tin vận hành, chi phí và hình ảnh cho phòng mới." %}
-    <form class="room-form" method="post" enctype="multipart/form-data">
+<main class="ndt-f5 ndt-f5-page ndt-room-management ndt-room-management--form" data-room-management-page="create">
+<div class="ndt-f5-container ndt-f5-container--form">
+    <header class="ndt-f5-page-header">
+        <div class="ndt-f5-page-header__content"><h1 class="ndt-f5-page-header__title">Thêm phòng</h1><p class="ndt-f5-page-header__description">Thiết lập thông tin vận hành, chi phí và hình ảnh cho phòng mới.</p></div>
+        <div class="ndt-f5-page-header__actions"><a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'quan_ly_phong' %}">Quay lại danh sách</a></div>
+    </header>
+    <form class="room-form ndt-room-form" data-room-save-form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <section class="room-form-section" aria-labelledby="basic-heading">
-            <header class="room-form-section__header"><h2 id="basic-heading">Thông tin cơ bản</h2><p>Thông tin nhận diện và sức chứa của phòng.</p></header>
-            <div class="room-form-section__body"><div class="room-form-grid">
-                <div class="ndt-field"><label class="ndt-label" for="co_so">Cơ sở <span class="ndt-required">*</span></label><select class="ndt-control" id="co_so" name="co_so" required><option value="">Chọn cơ sở</option>{% for cs in co_so_list %}<option value="{{ cs.id }}" {% if request.POST.co_so == cs.id|stringformat:"s" %}selected{% endif %}>{{ cs.ten_co_so }}</option>{% endfor %}</select><p class="ndt-helper">Chỉ hiển thị cơ sở đang hoạt động.</p></div>
-                <div class="ndt-field"><label class="ndt-label" for="so_phong">Số phòng <span class="ndt-required">*</span></label><input class="ndt-control" id="so_phong" name="so_phong" type="text" maxlength="50" value="{{ request.POST.so_phong }}" placeholder="Ví dụ: P101" required><p class="ndt-helper">Không được trùng trong cùng cơ sở.</p></div>
-                <div class="ndt-field"><label class="ndt-label" for="tang">Tầng <span class="ndt-required">*</span></label><input class="ndt-control" id="tang" name="tang" type="number" min="1" step="1" value="{{ request.POST.tang|default:'1' }}" required></div>
-                <div class="ndt-field"><label class="ndt-label" for="loai_phong">Loại phòng <span class="ndt-required">*</span></label><select class="ndt-control" id="loai_phong" name="loai_phong" required><option value="">Chọn loại phòng</option>{% for value, label in loai_phong_choices %}<option value="{{ value }}" {% if request.POST.loai_phong == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-                <div class="ndt-field"><label class="ndt-label" for="dien_tich">Diện tích <span class="ndt-required">*</span></label><div class="room-field-unit"><input class="ndt-control" id="dien_tich" name="dien_tich" type="number" min="0.01" step="0.01" value="{{ request.POST.dien_tich }}" required><span class="room-field-unit__label">m²</span></div></div>
-                <div class="ndt-field"><label class="ndt-label" for="so_nguoi_toi_da">Số người tối đa <span class="ndt-required">*</span></label><input class="ndt-control" id="so_nguoi_toi_da" name="so_nguoi_toi_da" type="number" min="1" step="1" value="{{ request.POST.so_nguoi_toi_da|default:'2' }}" required></div>
+        <section class="ndt-f5-form-section room-form-section" aria-labelledby="basic-heading">
+            <header class="ndt-room-form-section__header"><h2 id="basic-heading">Thông tin cơ bản</h2><p>Thông tin nhận diện và sức chứa của phòng.</p></header>
+            <div class="ndt-room-form-section__body"><div class="ndt-room-form-grid">
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="co_so">Cơ sở <span class="ndt-f5-required" aria-hidden="true">*</span></label><select class="ndt-f5-control" id="co_so" name="co_so" required><option value="">Chọn cơ sở</option>{% for cs in co_so_list %}<option value="{{ cs.id }}" {% if request.POST.co_so == cs.id|stringformat:"s" %}selected{% endif %}>{{ cs.ten_co_so }}</option>{% endfor %}</select><p class="ndt-f5-help">Chỉ hiển thị cơ sở đang hoạt động.</p></div>
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="so_phong">Số phòng <span class="ndt-f5-required" aria-hidden="true">*</span></label><input class="ndt-f5-control" id="so_phong" name="so_phong" type="text" maxlength="50" value="{{ request.POST.so_phong }}" placeholder="Ví dụ: P101" required><p class="ndt-f5-help">Không được trùng trong cùng cơ sở.</p></div>
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="tang">Tầng <span class="ndt-f5-required" aria-hidden="true">*</span></label><input class="ndt-f5-control" id="tang" name="tang" type="number" min="1" step="1" value="{{ request.POST.tang|default:'1' }}" required></div>
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="loai_phong">Loại phòng <span class="ndt-f5-required" aria-hidden="true">*</span></label><select class="ndt-f5-control" id="loai_phong" name="loai_phong" required><option value="">Chọn loại phòng</option>{% for value, label in loai_phong_choices %}<option value="{{ value }}" {% if request.POST.loai_phong == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="dien_tich">Diện tích <span class="ndt-f5-required" aria-hidden="true">*</span></label><div class="ndt-room-field-unit"><input class="ndt-f5-control" id="dien_tich" name="dien_tich" type="number" min="0.01" step="0.01" value="{{ request.POST.dien_tich }}" required><span class="ndt-room-field-unit__label">m²</span></div></div>
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="so_nguoi_toi_da">Số người tối đa <span class="ndt-f5-required" aria-hidden="true">*</span></label><input class="ndt-f5-control" id="so_nguoi_toi_da" name="so_nguoi_toi_da" type="number" min="1" step="1" value="{{ request.POST.so_nguoi_toi_da|default:'2' }}" required></div>
             </div></div>
         </section>
-        <section class="room-form-section" aria-labelledby="pricing-heading">
-            <header class="room-form-section__header"><h2 id="pricing-heading">Giá và chi phí</h2><p>Các mức thu áp dụng cho phòng.</p></header>
-            <div class="room-form-section__body"><div class="room-form-grid">
-                <div class="ndt-field"><label class="ndt-label" for="gia_thue">Giá thuê <span class="ndt-required">*</span></label><div class="room-field-unit"><input class="ndt-control" id="gia_thue" name="gia_thue" type="number" min="1" step="1" value="{{ request.POST.gia_thue }}" required><span class="room-field-unit__label">đ/tháng</span></div></div>
-                <div class="ndt-field"><label class="ndt-label" for="tien_coc_mac_dinh">Tiền cọc mặc định</label><div class="room-field-unit"><input class="ndt-control" id="tien_coc_mac_dinh" name="tien_coc_mac_dinh" type="number" min="0" step="1" value="{{ request.POST.tien_coc_mac_dinh|default:'0' }}"><span class="room-field-unit__label">đ</span></div></div>
-                <div class="ndt-field"><label class="ndt-label" for="tien_dien_moi_so">Tiền điện</label><div class="room-field-unit"><input class="ndt-control" id="tien_dien_moi_so" name="tien_dien_moi_so" type="number" min="0" step="1" value="{{ request.POST.tien_dien_moi_so|default:'0' }}"><span class="room-field-unit__label">đ/kWh</span></div></div>
-                <div class="ndt-field"><label class="ndt-label" for="tien_nuoc_moi_khoi">Tiền nước</label><div class="room-field-unit"><input class="ndt-control" id="tien_nuoc_moi_khoi" name="tien_nuoc_moi_khoi" type="number" min="0" step="1" value="{{ request.POST.tien_nuoc_moi_khoi|default:'0' }}"><span class="room-field-unit__label">đ/m³</span></div></div>
-                <div class="ndt-field"><label class="ndt-label" for="phi_dich_vu">Phí dịch vụ</label><div class="room-field-unit"><input class="ndt-control" id="phi_dich_vu" name="phi_dich_vu" type="number" min="0" step="1" value="{{ request.POST.phi_dich_vu|default:'0' }}"><span class="room-field-unit__label">đ/tháng</span></div></div>
-                <div class="ndt-field"><label class="ndt-label" for="trang_thai">Trạng thái ban đầu <span class="ndt-required">*</span></label><select class="ndt-control" id="trang_thai" name="trang_thai" required><option value="trong" {% if request.POST.trang_thai != 'bao_tri' %}selected{% endif %}>Trống</option><option value="bao_tri" {% if request.POST.trang_thai == 'bao_tri' %}selected{% endif %}>Bảo trì</option></select><p class="ndt-helper">Đã đặt và Đang thuê được cập nhật bởi nghiệp vụ.</p></div>
+
+        <section class="ndt-f5-form-section room-form-section" aria-labelledby="pricing-heading">
+            <header class="ndt-room-form-section__header"><h2 id="pricing-heading">Giá và chi phí</h2><p>Các mức thu áp dụng cho phòng.</p></header>
+            <div class="ndt-room-form-section__body"><div class="ndt-room-form-grid">
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="gia_thue">Giá thuê <span class="ndt-f5-required" aria-hidden="true">*</span></label><div class="ndt-room-field-unit"><input class="ndt-f5-control" id="gia_thue" name="gia_thue" type="number" min="1" step="1" value="{{ request.POST.gia_thue }}" required><span class="ndt-room-field-unit__label">đ/tháng</span></div></div>
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="tien_coc_mac_dinh">Tiền cọc mặc định</label><div class="ndt-room-field-unit"><input class="ndt-f5-control" id="tien_coc_mac_dinh" name="tien_coc_mac_dinh" type="number" min="0" step="1" value="{{ request.POST.tien_coc_mac_dinh|default:'0' }}"><span class="ndt-room-field-unit__label">đ</span></div></div>
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="tien_dien_moi_so">Tiền điện</label><div class="ndt-room-field-unit"><input class="ndt-f5-control" id="tien_dien_moi_so" name="tien_dien_moi_so" type="number" min="0" step="1" value="{{ request.POST.tien_dien_moi_so|default:'0' }}"><span class="ndt-room-field-unit__label">đ/kWh</span></div></div>
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="tien_nuoc_moi_khoi">Tiền nước</label><div class="ndt-room-field-unit"><input class="ndt-f5-control" id="tien_nuoc_moi_khoi" name="tien_nuoc_moi_khoi" type="number" min="0" step="1" value="{{ request.POST.tien_nuoc_moi_khoi|default:'0' }}"><span class="ndt-room-field-unit__label">VNĐ/người/tháng</span></div></div>
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="phi_dich_vu">Phí dịch vụ</label><div class="ndt-room-field-unit"><input class="ndt-f5-control" id="phi_dich_vu" name="phi_dich_vu" type="number" min="0" step="1" value="{{ request.POST.phi_dich_vu|default:'0' }}"><span class="ndt-room-field-unit__label">đ/tháng</span></div></div>
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="trang_thai">Trạng thái ban đầu <span class="ndt-f5-required" aria-hidden="true">*</span></label><select class="ndt-f5-control" id="trang_thai" name="trang_thai" required><option value="trong" {% if request.POST.trang_thai != 'bao_tri' %}selected{% endif %}>Trống</option><option value="bao_tri" {% if request.POST.trang_thai == 'bao_tri' %}selected{% endif %}>Bảo trì</option></select><p class="ndt-f5-help">Đã đặt và Đang thuê được cập nhật bởi nghiệp vụ.</p></div>
             </div></div>
         </section>
-        <section class="room-form-section" aria-labelledby="details-heading">
-            <header class="room-form-section__header"><h2 id="details-heading">Tiện ích và mô tả</h2><p>Nội dung hiển thị trên các trang dành cho khách thuê.</p></header>
-            <div class="room-form-section__body"><div class="room-form-grid">
-                <div class="ndt-field room-field--full"><label class="ndt-label" for="tien_ich">Tiện ích</label><textarea class="ndt-control" id="tien_ich" name="tien_ich" placeholder="WiFi, máy lạnh, giường, tủ quần áo...">{{ request.POST.tien_ich }}</textarea><p class="ndt-helper">Phân cách các tiện ích bằng dấu phẩy.</p></div>
-                <div class="ndt-field room-field--full"><label class="ndt-label" for="mo_ta">Mô tả phòng</label><textarea class="ndt-control" id="mo_ta" name="mo_ta" placeholder="Mô tả ngắn về không gian và điểm nổi bật...">{{ request.POST.mo_ta }}</textarea></div>
+
+        <section class="ndt-f5-form-section room-form-section" aria-labelledby="details-heading">
+            <header class="ndt-room-form-section__header"><h2 id="details-heading">Tiện ích và mô tả</h2><p>Nội dung hiển thị trên các trang dành cho khách thuê.</p></header>
+            <div class="ndt-room-form-section__body"><div class="ndt-room-form-grid">
+                <div class="ndt-f5-field ndt-room-field--full"><label class="ndt-f5-label" for="tien_ich">Tiện ích</label><textarea class="ndt-f5-control" id="tien_ich" name="tien_ich" placeholder="WiFi, máy lạnh, giường, tủ quần áo...">{{ request.POST.tien_ich }}</textarea><p class="ndt-f5-help">Phân cách các tiện ích bằng dấu phẩy.</p></div>
+                <div class="ndt-f5-field ndt-room-field--full"><label class="ndt-f5-label" for="mo_ta">Mô tả phòng</label><textarea class="ndt-f5-control" id="mo_ta" name="mo_ta" placeholder="Mô tả ngắn về không gian và điểm nổi bật...">{{ request.POST.mo_ta }}</textarea></div>
             </div></div>
         </section>
-        <section class="room-form-section" aria-labelledby="images-heading">
-            <header class="room-form-section__header"><h2 id="images-heading">Hình ảnh</h2><p>Ảnh đầu tiên tải lên sẽ làm ảnh đại diện.</p></header>
-            <div class="room-form-section__body"><div class="room-upload"><div class="ndt-field"><label class="ndt-label" for="hinh_anh">Ảnh phòng</label><input class="ndt-control ndt-file" id="hinh_anh" name="hinh_anh" type="file" accept="image/jpeg,image/png,image/webp" multiple><p class="ndt-helper">Chọn nhiều ảnh JPG, PNG hoặc WEBP; ưu tiên ảnh ngang rõ nét.</p></div><div id="image-preview-grid" class="image-preview-grid"></div></div></div>
+
+        <section class="ndt-f5-form-section room-form-section" aria-labelledby="images-heading">
+            <header class="ndt-room-form-section__header"><h2 id="images-heading">Hình ảnh</h2><p>Ảnh đầu tiên tải lên sẽ làm ảnh đại diện.</p></header>
+            <div class="ndt-room-form-section__body"><div class="ndt-room-upload"><div class="ndt-f5-field"><label class="ndt-f5-label" for="hinh_anh">Ảnh phòng</label><input class="ndt-f5-control" id="hinh_anh" name="hinh_anh" type="file" accept="image/jpeg,image/png,image/webp" multiple><p class="ndt-f5-help">Chọn nhiều ảnh JPG, PNG hoặc WEBP; ưu tiên ảnh ngang rõ nét.</p></div><div id="image-preview-grid" class="ndt-room-image-preview-grid"></div></div></div>
         </section>
-        <div class="room-form-actions"><p class="room-form-actions__note">Các trường có dấu * là bắt buộc.</p><div class="room-form-actions__buttons"><a class="ndt-button ndt-button--secondary" href="{% url 'quan_ly_phong' %}">Hủy</a><button class="ndt-button ndt-button--primary" type="submit">Tạo phòng</button></div></div>
+
+        <div class="ndt-room-form-actions"><p class="ndt-room-form-actions__note">Các trường có dấu * là bắt buộc.</p><div class="ndt-room-form-actions__buttons"><a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'quan_ly_phong' %}">Hủy</a><button class="ndt-f5-button ndt-f5-button--primary" type="submit">Tạo phòng</button></div></div>
     </form>
+</div>
 </main>
-<script>
-document.addEventListener("DOMContentLoaded",function(){const input=document.getElementById("hinh_anh"),grid=document.getElementById("image-preview-grid");if(!input||!grid)return;input.addEventListener("change",function(){grid.innerHTML="";Array.from(this.files).forEach(function(file){if(!file.type.startsWith("image/"))return;const item=document.createElement("div"),image=document.createElement("img"),name=document.createElement("div"),reader=new FileReader();item.className="image-preview-item";image.alt=file.name;name.className="image-preview-name";name.textContent=file.name;item.append(image,name);grid.appendChild(item);reader.onload=function(event){image.src=event.target.result};reader.readAsDataURL(file)})})});
-</script>
+<script src="{% static 'js/room_management_p6a.js' %}" defer></script>
 {% endblock %}

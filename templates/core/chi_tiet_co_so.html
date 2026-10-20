@@ -5,172 +5,82 @@
 {% block page_title %}Chi tiết cơ sở{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
-<link rel="stylesheet" href="{% static 'css/room_management.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin_facilities_post_p6.css' %}">
 {% endblock %}
 
 {% block content %}
-<main class="facility-detail ndt-foundation" data-facility-detail-page>
-    {% url 'quan_ly_co_so' as facility_list_url %}
-    {% include "core/foundation/page_header.html" with breadcrumb="Quản trị / Cơ sở" title=co_so.ten_co_so subtitle=co_so.dia_chi action_url=facility_list_url action_label="Về danh sách" %}
+<main class="ndt-f5 ndt-f5-page ndt-admin-facilities" data-facility-screen="detail">
+    <div class="ndt-f5-container ndt-f5-container--full ndt-f5-stack">
+        <header class="ndt-f5-page-header">
+            <div class="ndt-f5-page-header__content"><p class="ndt-f5-breadcrumb">Quản trị / Cơ sở / Chi tiết</p><h1 class="ndt-f5-page-header__title">{{ co_so.ten_co_so }}</h1><p class="ndt-f5-page-header__description">{{ co_so.dia_chi }}{% if co_so.quan %} · {{ co_so.quan }}{% endif %}</p></div>
+            <div class="ndt-f5-page-header__actions ndt-f5-actions"><a class="ndt-f5-button ndt-f5-button--secondary" href="{% url 'quan_ly_co_so' %}">Về danh sách</a></div>
+        </header>
 
-    <section class="facility-hero-panel ndt-surface" aria-labelledby="facility-overview-title">
-        <div>
-            <span class="facility-eyebrow">Thông tin cơ sở</span>
-            <h2 id="facility-overview-title">{{ co_so.ten_co_so }}</h2>
-            <p>{{ co_so.dia_chi }}{% if co_so.quan %} · {{ co_so.quan }}{% endif %}</p>
-        </div>
-        {% if co_so.trang_thai == "hoat_dong" %}
-            <span class="ndt-badge ndt-badge--success">Đang hoạt động</span>
-        {% elif co_so.trang_thai == "tam_ngung" %}
-            <span class="ndt-badge ndt-badge--warning">Tạm ngưng</span>
-        {% else %}
-            <span class="ndt-badge ndt-badge--danger">{{ co_so.get_trang_thai_display }}</span>
-        {% endif %}
-    </section>
+        <section class="facility-overview" aria-labelledby="facility-overview-title">
+            <div><p class="ndt-f5-eyebrow">Trạng thái vận hành</p><h2 id="facility-overview-title">Tổng quan cơ sở</h2><p>Đối chiếu quy mô khai báo với số phòng đang được quản lý thực tế.</p></div>
+            {% if co_so.trang_thai == "hoat_dong" %}<span class="ndt-f5-badge ndt-f5-badge--success">Đang hoạt động</span>{% elif co_so.trang_thai == "tam_ngung" %}<span class="ndt-f5-badge ndt-f5-badge--warning">Tạm ngưng</span>{% elif co_so.trang_thai == "dong_cua" %}<span class="ndt-f5-badge ndt-f5-badge--danger">Đóng cửa</span>{% else %}<span class="ndt-f5-badge">{{ co_so.get_trang_thai_display }}</span>{% endif %}
+        </section>
 
-    <section class="facility-stat-grid" aria-label="Thống kê phòng theo cơ sở">
-        <article class="facility-stat-card"><span>Tổng phòng</span><strong>{{ tong_phong }}</strong></article>
-        <article class="facility-stat-card"><span>Phòng trống</span><strong>{{ phong_trong }}</strong></article>
-        <article class="facility-stat-card"><span>Đã đặt</span><strong>{{ phong_da_dat }}</strong></article>
-        <article class="facility-stat-card"><span>Đang thuê</span><strong>{{ phong_dang_thue }}</strong></article>
-        <article class="facility-stat-card"><span>Bảo trì</span><strong>{{ phong_bao_tri }}</strong></article>
-    </section>
+        <section class="facility-stat-grid" aria-label="Thống kê phòng theo cơ sở">
+            <article class="ndt-f5-panel facility-stat"><span>Tổng phòng</span><strong>{{ tong_phong }}</strong></article>
+            <article class="ndt-f5-panel facility-stat facility-stat--success"><span>Phòng trống</span><strong>{{ phong_trong }}</strong></article>
+            <article class="ndt-f5-panel facility-stat facility-stat--warning"><span>Đã đặt</span><strong>{{ phong_da_dat }}</strong></article>
+            <article class="ndt-f5-panel facility-stat facility-stat--info"><span>Đang thuê</span><strong>{{ phong_dang_thue }}</strong></article>
+            <article class="ndt-f5-panel facility-stat facility-stat--danger"><span>Bảo trì</span><strong>{{ phong_bao_tri }}</strong></article>
+        </section>
 
-    <section class="facility-layout">
-        <article class="ndt-surface facility-info-panel" aria-labelledby="facility-info-title">
-            <div class="facility-section-head">
-                <div>
-                    <span class="facility-eyebrow">Hồ sơ</span>
-                    <h2 id="facility-info-title">Thông tin vận hành</h2>
+        <section class="facility-detail-grid" aria-label="Thông tin và thao tác cơ sở">
+            <article class="ndt-f5-panel facility-profile" aria-labelledby="facility-profile-title">
+                <div class="facility-section-heading"><div><p class="ndt-f5-eyebrow">Hồ sơ</p><h2 id="facility-profile-title">Thông tin vận hành</h2></div></div>
+                <dl class="facility-facts">
+                    <div><dt>Tên cơ sở</dt><dd>{{ co_so.ten_co_so }}</dd></div><div><dt>Địa chỉ</dt><dd>{{ co_so.dia_chi }}</dd></div><div><dt>Quận / khu vực</dt><dd>{{ co_so.quan|default:"Chưa cập nhật" }}</dd></div><div><dt>Số điện thoại</dt><dd>{{ co_so.so_dien_thoai|default:"Chưa cập nhật" }}</dd></div><div><dt>Email</dt><dd>{{ co_so.email|default:"Chưa cập nhật" }}</dd></div><div><dt>Người quản lý</dt><dd>{{ co_so.nguoi_quan_ly|default:"Chưa cập nhật" }}</dd></div><div><dt>SĐT quản lý</dt><dd>{{ co_so.sdt_quan_ly|default:"Chưa cập nhật" }}</dd></div><div><dt>Số tầng</dt><dd>{{ co_so.so_tang }}</dd></div><div><dt>Số phòng khai báo</dt><dd>{{ co_so.so_phong }}</dd></div><div class="facility-facts__full"><dt>Tiện ích chung</dt><dd>{{ co_so.tien_ich_chung|default:"Chưa cập nhật" }}</dd></div><div class="facility-facts__full"><dt>Mô tả</dt><dd>{{ co_so.mo_ta|default:"Chưa cập nhật" }}</dd></div>
+                </dl>
+            </article>
+
+            <aside class="ndt-f5-panel facility-operations" aria-labelledby="facility-operations-title">
+                <div class="facility-section-heading"><div><p class="ndt-f5-eyebrow">Thao tác</p><h2 id="facility-operations-title">Trạng thái cơ sở</h2><p>Chọn trạng thái phù hợp với hoạt động thực tế.</p></div></div>
+                <div class="facility-operation-list">
+                    {% if co_so.trang_thai != "hoat_dong" %}<form method="post" action="{% url 'xu_ly_co_so' co_so.id %}">{% csrf_token %}<input type="hidden" name="hanh_dong" value="hoat_dong"><button class="ndt-f5-button ndt-f5-button--primary" type="submit">Đưa vào hoạt động</button></form>{% endif %}
+                    {% if co_so.trang_thai == "hoat_dong" %}<form method="post" action="{% url 'xu_ly_co_so' co_so.id %}" data-facility-confirm data-dialog-title="Tạm ngưng cơ sở" data-dialog-message="Cơ sở sẽ chuyển sang trạng thái tạm ngưng. Các kiểm tra nghiệp vụ phía máy chủ vẫn được giữ nguyên." data-dialog-confirm-label="Tạm ngưng">{% csrf_token %}<input type="hidden" name="hanh_dong" value="tam_ngung"><button class="ndt-f5-button ndt-f5-button--secondary" type="submit">Tạm ngưng cơ sở</button></form>{% endif %}
+                    {% if co_so.trang_thai != "dong_cua" %}<form method="post" action="{% url 'xu_ly_co_so' co_so.id %}" data-facility-confirm data-dialog-title="Đóng cửa cơ sở" data-dialog-message="Cơ sở sẽ chuyển sang trạng thái đóng cửa. Dữ liệu phòng liên quan không bị xóa." data-dialog-confirm-label="Đóng cửa">{% csrf_token %}<input type="hidden" name="hanh_dong" value="dong_cua"><button class="ndt-f5-button ndt-f5-button--secondary" type="submit">Đóng cửa cơ sở</button></form>{% endif %}
+                    {% if tong_phong == 0 %}<form method="post" action="{% url 'xu_ly_co_so' co_so.id %}" data-facility-confirm data-dialog-title="Xóa cơ sở" data-dialog-message="Thao tác này xóa vĩnh viễn cơ sở khi không còn phòng liên quan." data-dialog-confirm-label="Xóa cơ sở">{% csrf_token %}<input type="hidden" name="hanh_dong" value="xoa"><button class="ndt-f5-button ndt-f5-button--danger" type="submit">Xóa cơ sở</button></form>{% else %}<div class="ndt-f5-alert ndt-f5-alert--warning" role="status"><span class="ndt-f5-alert__mark" aria-hidden="true">!</span><p><strong>Chưa thể xóa cơ sở</strong>Cơ sở vẫn còn {{ tong_phong }} phòng liên quan.</p></div>{% endif %}
                 </div>
-            </div>
-            <dl class="facility-info-list">
-                <div><dt>Tên cơ sở</dt><dd>{{ co_so.ten_co_so }}</dd></div>
-                <div><dt>Địa chỉ</dt><dd>{{ co_so.dia_chi }}</dd></div>
-                <div><dt>Quận</dt><dd>{{ co_so.quan|default:"Chưa cập nhật" }}</dd></div>
-                <div><dt>Số điện thoại</dt><dd>{{ co_so.so_dien_thoai|default:"Chưa cập nhật" }}</dd></div>
-                <div><dt>Email</dt><dd>{{ co_so.email|default:"Chưa cập nhật" }}</dd></div>
-                <div><dt>Người quản lý</dt><dd>{{ co_so.nguoi_quan_ly|default:"Chưa cập nhật" }}</dd></div>
-                <div><dt>SĐT quản lý</dt><dd>{{ co_so.sdt_quan_ly|default:"Chưa cập nhật" }}</dd></div>
-                <div><dt>Số tầng</dt><dd>{{ co_so.so_tang }}</dd></div>
-                <div><dt>Số phòng khai báo</dt><dd>{{ co_so.so_phong }}</dd></div>
-                <div><dt>Tiện ích chung</dt><dd>{{ co_so.tien_ich_chung|default:"Chưa cập nhật" }}</dd></div>
-                <div class="facility-info-list__full"><dt>Mô tả</dt><dd>{{ co_so.mo_ta|default:"Chưa cập nhật" }}</dd></div>
-            </dl>
-        </article>
+            </aside>
+        </section>
 
-        <aside class="ndt-surface facility-action-panel" aria-labelledby="facility-actions-title">
-            <div class="facility-section-head">
-                <div>
-                    <span class="facility-eyebrow">Thao tác</span>
-                    <h2 id="facility-actions-title">Quản lý cơ sở</h2>
+        <section class="ndt-f5-form-section facility-edit" aria-labelledby="facility-edit-title">
+            <div class="facility-section-heading"><div><p class="ndt-f5-eyebrow">Chỉnh sửa</p><h2 id="facility-edit-title">Cập nhật thông tin cơ sở</h2><p>Form được hiển thị trực tiếp để thao tác quan trọng luôn dễ tìm.</p></div></div>
+            <form class="facility-edit-form" method="post" action="{% url 'xu_ly_co_so' co_so.id %}">
+                {% csrf_token %}<input type="hidden" name="hanh_dong" value="cap_nhat">
+                <div class="ndt-f5-form-grid">
+                    <div class="ndt-f5-field ndt-f5-field--full"><label class="ndt-f5-label" for="ten_co_so">Tên cơ sở <span class="ndt-f5-required">*</span></label><input class="ndt-f5-control" id="ten_co_so" name="ten_co_so" value="{{ co_so.ten_co_so }}" required></div>
+                    <div class="ndt-f5-field ndt-f5-field--full"><label class="ndt-f5-label" for="dia_chi">Địa chỉ <span class="ndt-f5-required">*</span></label><input class="ndt-f5-control" id="dia_chi" name="dia_chi" value="{{ co_so.dia_chi }}" required></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="quan">Quận / khu vực <span class="ndt-f5-required">*</span></label><input class="ndt-f5-control" id="quan" name="quan" value="{{ co_so.quan }}" required></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="so_tang">Số tầng</label><input class="ndt-f5-control" id="so_tang" name="so_tang" type="number" min="1" step="1" value="{{ co_so.so_tang }}"></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="so_phong">Số phòng khai báo</label><input class="ndt-f5-control" id="so_phong" name="so_phong" type="number" min="0" step="1" value="{{ co_so.so_phong }}"></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="so_dien_thoai">Số điện thoại cơ sở</label><input class="ndt-f5-control" id="so_dien_thoai" name="so_dien_thoai" value="{{ co_so.so_dien_thoai }}"></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="email">Email</label><input class="ndt-f5-control" id="email" name="email" type="email" value="{{ co_so.email }}"></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="nguoi_quan_ly">Người quản lý</label><input class="ndt-f5-control" id="nguoi_quan_ly" name="nguoi_quan_ly" value="{{ co_so.nguoi_quan_ly }}"></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="sdt_quan_ly">SĐT quản lý</label><input class="ndt-f5-control" id="sdt_quan_ly" name="sdt_quan_ly" value="{{ co_so.sdt_quan_ly }}"></div>
+                    <div class="ndt-f5-field ndt-f5-field--full"><label class="ndt-f5-label" for="tien_ich_chung">Tiện ích chung</label><textarea class="ndt-f5-control" id="tien_ich_chung" name="tien_ich_chung">{{ co_so.tien_ich_chung }}</textarea></div>
+                    <div class="ndt-f5-field ndt-f5-field--full"><label class="ndt-f5-label" for="mo_ta">Mô tả</label><textarea class="ndt-f5-control" id="mo_ta" name="mo_ta">{{ co_so.mo_ta }}</textarea></div>
                 </div>
-            </div>
-            <div class="facility-action-stack">
-                <details class="facility-edit-panel">
-                    <summary class="ndt-button ndt-button--secondary">Sửa thông tin</summary>
-                    <form class="facility-edit-form" method="post" action="{% url 'xu_ly_co_so' co_so.id %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="hanh_dong" value="cap_nhat">
-                        <div class="ndt-field"><label class="ndt-label" for="ten_co_so">Tên cơ sở <span class="ndt-required">*</span></label><input class="ndt-control" id="ten_co_so" name="ten_co_so" value="{{ co_so.ten_co_so }}" required></div>
-                        <div class="ndt-field"><label class="ndt-label" for="dia_chi">Địa chỉ <span class="ndt-required">*</span></label><input class="ndt-control" id="dia_chi" name="dia_chi" value="{{ co_so.dia_chi }}" required></div>
-                        <div class="facility-edit-grid">
-                            <div class="ndt-field"><label class="ndt-label" for="quan">Quận <span class="ndt-required">*</span></label><input class="ndt-control" id="quan" name="quan" value="{{ co_so.quan }}" required></div>
-                            <div class="ndt-field"><label class="ndt-label" for="so_tang">Số tầng</label><input class="ndt-control" id="so_tang" name="so_tang" type="number" min="1" step="1" value="{{ co_so.so_tang }}"></div>
-                        </div>
-                        <div class="facility-edit-grid">
-                            <div class="ndt-field"><label class="ndt-label" for="so_dien_thoai">Số điện thoại</label><input class="ndt-control" id="so_dien_thoai" name="so_dien_thoai" value="{{ co_so.so_dien_thoai }}"></div>
-                            <div class="ndt-field"><label class="ndt-label" for="email">Email</label><input class="ndt-control" id="email" name="email" type="email" value="{{ co_so.email }}"></div>
-                        </div>
-                        <div class="facility-edit-grid">
-                            <div class="ndt-field"><label class="ndt-label" for="nguoi_quan_ly">Người quản lý</label><input class="ndt-control" id="nguoi_quan_ly" name="nguoi_quan_ly" value="{{ co_so.nguoi_quan_ly }}"></div>
-                            <div class="ndt-field"><label class="ndt-label" for="sdt_quan_ly">SĐT quản lý</label><input class="ndt-control" id="sdt_quan_ly" name="sdt_quan_ly" value="{{ co_so.sdt_quan_ly }}"></div>
-                        </div>
-                        <div class="ndt-field"><label class="ndt-label" for="tien_ich_chung">Tiện ích chung</label><textarea class="ndt-control" id="tien_ich_chung" name="tien_ich_chung">{{ co_so.tien_ich_chung }}</textarea></div>
-                        <div class="ndt-field"><label class="ndt-label" for="mo_ta">Mô tả</label><textarea class="ndt-control" id="mo_ta" name="mo_ta">{{ co_so.mo_ta }}</textarea></div>
-                        <button class="ndt-button ndt-button--primary" type="submit">Lưu thông tin</button>
-                    </form>
-                </details>
+                <div class="facility-form-actions"><button class="ndt-f5-button ndt-f5-button--primary" type="submit">Lưu thông tin</button></div>
+            </form>
+        </section>
 
-                {% if co_so.trang_thai == "hoat_dong" %}
-                <form method="post" action="{% url 'xu_ly_co_so' co_so.id %}" data-ndt-confirm-form data-confirm-title="Tạm ngưng cơ sở" data-confirm-message="Cơ sở sẽ chuyển sang trạng thái tạm ngưng. Các kiểm tra nghiệp vụ vẫn được backend giữ nguyên.">
-                    {% csrf_token %}
-                    <input type="hidden" name="hanh_dong" value="tam_ngung">
-                    <button class="ndt-button ndt-button--secondary" type="submit">Tạm ngưng cơ sở</button>
-                </form>
-                {% else %}
-                <form method="post" action="{% url 'xu_ly_co_so' co_so.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="hanh_dong" value="hoat_dong">
-                    <button class="ndt-button ndt-button--primary" type="submit">Đưa vào hoạt động</button>
-                </form>
-                {% endif %}
-
-                {% if tong_phong == 0 %}
-                <form method="post" action="{% url 'xu_ly_co_so' co_so.id %}" data-ndt-confirm-form data-confirm-title="Xóa cơ sở" data-confirm-message="Thao tác này xóa cơ sở khi không còn phòng liên quan." data-confirm-label="Xóa cơ sở">
-                    {% csrf_token %}
-                    <input type="hidden" name="hanh_dong" value="xoa">
-                    <button class="ndt-button ndt-button--danger" type="submit">Xóa cơ sở</button>
-                </form>
-                {% else %}
-                <p class="facility-warning" role="status">Không thể xóa vì cơ sở vẫn còn <strong>{{ tong_phong }}</strong> phòng.</p>
-                {% endif %}
-            </div>
-        </aside>
-    </section>
-
-    <section class="ndt-surface facility-room-section" aria-labelledby="facility-room-title">
-        <div class="facility-section-head">
-            <div>
-                <span class="facility-eyebrow">Danh sách</span>
-                <h2 id="facility-room-title">Phòng thuộc cơ sở</h2>
-            </div>
-            <span class="facility-count-note">{{ tong_phong }} phòng</span>
-        </div>
-
-        {% if phong %}
-        <div class="ndt-table-wrap">
-            <table class="ndt-table facility-room-table">
-                <thead>
-                    <tr>
-                        <th scope="col">Phòng</th>
-                        <th scope="col">Tầng</th>
-                        <th scope="col">Giá thuê</th>
-                        <th scope="col">Diện tích</th>
-                        <th scope="col">Trạng thái</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for p in phong %}
-                    <tr>
-                        <td data-label="Phòng"><strong>P{{ p.so_phong }}</strong></td>
-                        <td data-label="Tầng">{{ p.tang }}</td>
-                        <td data-label="Giá thuê"><span class="room-price">{{ p.gia_thue|vnd }} đ</span></td>
-                        <td data-label="Diện tích">{{ p.dien_tich|floatformat:0 }} m²</td>
-                        <td data-label="Trạng thái">
-                            {% if p.trang_thai == "trong" %}<span class="ndt-badge ndt-badge--success">Phòng trống</span>
-                            {% elif p.trang_thai == "da_dat" %}<span class="ndt-badge ndt-badge--warning">Đã đặt</span>
-                            {% elif p.trang_thai == "dang_thue" %}<span class="ndt-badge ndt-badge--info">Đang thuê</span>
-                            {% elif p.trang_thai == "bao_tri" %}<span class="ndt-badge ndt-badge--danger">Bảo trì</span>
-                            {% else %}<span class="ndt-badge">{{ p.get_trang_thai_display }}</span>{% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="ndt-empty-state" role="status">
-            <h2 class="ndt-empty-state__title">Cơ sở chưa có phòng</h2>
-            <p class="ndt-empty-state__description">Bạn có thể xóa cơ sở này nếu không còn nhu cầu sử dụng.</p>
-        </div>
-        {% endif %}
-    </section>
+        <section class="ndt-f5-stack facility-room-section" aria-labelledby="facility-room-title">
+            <div class="facility-section-heading"><div><p class="ndt-f5-eyebrow">Danh sách</p><h2 id="facility-room-title">Phòng thuộc cơ sở</h2><p>Đang quản lý {{ tong_phong }} phòng tại địa điểm này.</p></div></div>
+            {% if phong %}
+            <div class="ndt-f5-table-wrap facility-room-table-wrap"><table class="ndt-f5-table facility-room-table"><thead><tr><th scope="col">Phòng</th><th scope="col">Tầng</th><th scope="col">Giá thuê</th><th scope="col">Diện tích</th><th scope="col">Trạng thái</th></tr></thead><tbody>{% for p in phong %}<tr><td data-label="Phòng"><strong>P{{ p.so_phong }}</strong></td><td data-label="Tầng">{{ p.tang }}</td><td data-label="Giá thuê"><strong>{{ p.gia_thue|vnd }} đ</strong></td><td data-label="Diện tích">{{ p.dien_tich|floatformat:0 }} m²</td><td data-label="Trạng thái">{% if p.trang_thai == "trong" %}<span class="ndt-f5-badge ndt-f5-badge--success">Phòng trống</span>{% elif p.trang_thai == "da_dat" %}<span class="ndt-f5-badge ndt-f5-badge--warning">Đã đặt</span>{% elif p.trang_thai == "dang_thue" %}<span class="ndt-f5-badge ndt-f5-badge--info">Đang thuê</span>{% elif p.trang_thai == "bao_tri" %}<span class="ndt-f5-badge ndt-f5-badge--danger">Bảo trì</span>{% else %}<span class="ndt-f5-badge">{{ p.get_trang_thai_display }}</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+            {% else %}
+            <div class="ndt-f5-empty" role="status"><div class="ndt-f5-empty__icon" aria-hidden="true">P</div><h2 class="ndt-f5-empty__title">Cơ sở chưa có phòng</h2><p class="ndt-f5-empty__description">Chưa có bản ghi phòng liên kết với cơ sở này.</p></div>
+            {% endif %}
+        </section>
+    </div>
 </main>
-{% include 'core/foundation/dialog_root.html' %}
-<script src="{% static 'js/foundation/dialog.js' %}" defer></script>
+{% include 'core/foundation/p5_dialog_root.html' %}
+<script src="{% static 'js/foundation/p5-dialog.js' %}" defer></script>
+<script src="{% static 'js/admin_facilities_post_p6.js' %}" defer></script>
 {% endblock %}

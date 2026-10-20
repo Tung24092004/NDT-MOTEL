@@ -21,15 +21,20 @@
                 form.reportValidity();
                 return;
             }
-            var confirmed = await window.NDTDialog.confirm({
+            var trigger = event.submitter || document.activeElement;
+            var confirmation = window.NDTFoundationDialog.confirm({
                 title: form.dataset.confirmTitle,
                 message: form.dataset.confirmMessage,
                 confirmLabel: form.dataset.confirmDanger === "true" ? "Xác nhận từ chối" : "Xác nhận",
-                danger: form.dataset.confirmDanger === "true"
+                danger: form.dataset.confirmDanger === "true",
+                trigger: trigger
             });
+            var cancel = document.querySelector(".ndt-f5-dialog__actions [data-ndt-f5-dialog-cancel]");
+            if (cancel) cancel.focus();
+            var confirmed = await confirmation;
             if (confirmed) {
                 form.dataset.confirmed = "true";
-                form.requestSubmit();
+                form.requestSubmit(trigger && trigger.form === form ? trigger : undefined);
             }
         });
     });

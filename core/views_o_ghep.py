@@ -838,6 +838,15 @@ def xu_ly_yeu_cau_ghep(request, id):
             "yeu_cau_ghep_cua_toi"
         )
 
+    # 0037 retired the pending legacy workflow.  Preserve every legacy row for
+    # historical viewing, but fail closed: it cannot create residency, Face,
+    # access, an appendix, or a replacement co-tenant request.
+    messages.warning(
+        request,
+        "Luồng yêu cầu ở ghép cũ đã ngừng xử lý; người thuê chính cần gửi yêu cầu người ở cùng mới.",
+    )
+    return redirect("yeu_cau_ghep_cua_toi")
+
     # -----------------------------------------------------
     # Lấy yêu cầu ban đầu để kiểm tra quyền
     # -----------------------------------------------------
@@ -1136,6 +1145,7 @@ def xu_ly_yeu_cau_ghep(request, id):
         # Tạo người ở cùng
         # -------------------------------------------------
 
+        trang_thai_nguoi_o_cung = "dang_o" if la_admin_user else "cho_xac_minh"
         nguoi_o_cung = NguoiOCungPhong.objects.create(
             hop_dong=hop_dong,
             ho_ten=yeu_cau.ho_ten,
@@ -1145,7 +1155,7 @@ def xu_ly_yeu_cau_ghep(request, id):
             so_dien_thoai=yeu_cau.so_dien_thoai,
             quan_he=yeu_cau.quan_he,
             ngay_vao=yeu_cau.ngay_du_kien_vao,
-            trang_thai="dang_o",
+            trang_thai=trang_thai_nguoi_o_cung,
             ghi_chu=yeu_cau.ly_do,
         )
 
@@ -1162,16 +1172,17 @@ def xu_ly_yeu_cau_ghep(request, id):
         # Tạo quyền ra vào cho người ở cùng
         # -------------------------------------------------
 
-        QuyenRaVao.objects.create(
-            hop_dong=hop_dong, nguon_cap="duyet_ghep",
-            phong=phong,
-            nguoi_o_cung=nguoi_o_cung,
-            loai_quyen="nguoi_o_cung",
-            trang_thai="hoat_dong",
-            ngay_bat_dau=nguoi_o_cung.ngay_vao,
-            ngay_ket_thuc=hop_dong.ngay_ket_thuc,
-            nguoi_tao=request.user,
-        )
+        if la_admin_user:
+            QuyenRaVao.objects.create(
+                hop_dong=hop_dong, nguon_cap="duyet_ghep",
+                phong=phong,
+                nguoi_o_cung=nguoi_o_cung,
+                loai_quyen="nguoi_o_cung",
+                trang_thai="hoat_dong",
+                ngay_bat_dau=nguoi_o_cung.ngay_vao,
+                ngay_ket_thuc=hop_dong.ngay_ket_thuc,
+                nguoi_tao=request.user,
+            )
 
         # -------------------------------------------------
         # Cập nhật yêu cầu

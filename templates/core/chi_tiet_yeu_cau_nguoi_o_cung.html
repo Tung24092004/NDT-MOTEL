@@ -1,0 +1,131 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Yêu cầu người ở cùng #{{ yeu_cau.id }} - NDT MOTEL{% endblock %}
+{% block page_title %}Chi tiết yêu cầu người ở cùng{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/community_management_p6j.css' %}">{% endblock %}
+{% block content %}
+<main class="ndt-f5 ndt-community-management ndt-f5-page">
+<div class="community" data-community-screen="cotenant-request-detail">{% url 'quan_ly_yeu_cau_nguoi_o_cung' as queue_url %}
+{% include 'core/community/p6j_page_header.html' with breadcrumb='Quản trị / Dịch vụ / Yêu cầu người ở cùng / Chi tiết' title=yeu_cau.ho_ten subtitle='Xem hồ sơ và xử lý theo trạng thái hiện tại.' action_url=queue_url action_label='Về danh sách' %}
+<div class="community-detail-grid">
+<main class="community-main">
+<section class="ndt-f5-card">
+<div class="community-panel__head">
+<div>
+<span class="community-eyebrow">Request #{{ yeu_cau.id }}</span>
+<h2>Thông tin ứng viên</h2>
+</div>
+<span class="ndt-f5-badge">{{ yeu_cau.get_trang_thai_display }}</span>
+</div>
+<dl class="community-facts">
+<div>
+<dt>Hợp đồng / phòng</dt>
+<dd>{{ yeu_cau.hop_dong.so_hop_dong }} · {{ yeu_cau.hop_dong.dat_phong.phong.so_phong }}</dd>
+</div>
+<div>
+<dt>Người thuê</dt>
+<dd>{{ yeu_cau.nguoi_yeu_cau.ho_ten }}</dd>
+</div>
+<div>
+<dt>CCCD</dt>
+<dd>{{ yeu_cau.cccd }}</dd>
+</div>
+<div>
+<dt>Ngày vào</dt>
+<dd>{{ yeu_cau.ngay_vao|date:'d/m/Y' }}</dd>
+</div>
+<div>
+<dt>Quan hệ</dt>
+<dd>{{ yeu_cau.quan_he|default:'—' }}</dd>
+</div>
+<div>
+<dt>Liên hệ</dt>
+<dd>{{ yeu_cau.so_dien_thoai|default:'—' }}</dd>
+</div>
+</dl>{% if yeu_cau.ly_do %}
+<div class="community-callout">
+<p>
+<strong>Lý do xử lý/bổ sung:</strong> {{ yeu_cau.ly_do }}</p>
+</div>{% endif %}
+</section>
+{% with evidence_list=yeu_cau.chung_tu_danh_tinh_gui_len.all %}<section class="ndt-f5-card"><h2>Ch?ng t? CCCD ri�ng tu</h2>{% if evidence_list %}<div class="community-action-stack">{% for evidence in evidence_list %}<p>Phi�n b?n {{ evidence.so_phien_ban }} � {{ evidence.mime_type }} � {{ evidence.kich_thuoc }} bytes � <a class="ndt-f5-button ndt-f5-button--secondary" href="{% url 'xem_chung_tu_danh_tinh_nguoi_o_cung' evidence.id %}">Xem/t?i an to�n</a></p>{% endfor %}</div>{% else %}<p class="community-muted">Chua c� ch?ng t? CCCD du?c t?i l�n.</p>{% endif %}</section>{% endwith %}
+{% if yeu_cau.trang_thai == 'da_duyet' and yeu_cau.residency %}
+<section class="ndt-f5-card">
+<h2>Kết quả duyệt</h2>
+<p>Đã tạo hồ sơ cư trú <a href="{% url 'chi_tiet_nguoi_o_cung' yeu_cau.residency.id %}">{{ yeu_cau.residency.ho_ten }}</a>. Phụ lục cư trú hiệu lực đã được ghi nhận bởi service.</p>
+</section>{% endif %}
+</main>
+<aside class="community-side">
+<section class="ndt-f5-card">
+<h2>Quyết định</h2>
+<dl class="community-facts community-facts--stack">
+<div>
+<dt>Revision</dt>
+<dd>{{ yeu_cau.revision }}</dd>
+</div>
+<div>
+<dt>Xử lý lúc</dt>
+<dd>{{ yeu_cau.ngay_xu_ly|date:'d/m/Y H:i'|default:'Chưa xử lý' }}</dd>
+</div>
+<div>
+<dt>Người xử lý</dt>
+<dd>{% if yeu_cau.nguoi_xu_ly %}{{ yeu_cau.nguoi_xu_ly.get_username }}
+{% else %}—{% endif %}
+</dd>
+</div>
+</dl>
+</section>{% if yeu_cau.trang_thai == 'cho_xac_minh' %}
+<section class="ndt-f5-card">
+<h2>Xử lý yêu cầu</h2>
+<div class="community-action-stack">
+<form method="post" action="{% url 'yeu_cau_nguoi_o_cung_bo_sung' yeu_cau.id %}">{% csrf_token %}
+<input type="hidden" name="expected_revision" value="{{ yeu_cau.revision }}">
+<div class="ndt-f5-field">
+<label class="ndt-f5-label" for="supplement-reason">Lý do cần bổ sung</label>
+<textarea class="ndt-f5-control" id="supplement-reason" name="reason" required>
+</textarea>
+</div>
+<button class="ndt-f5-button ndt-f5-button--secondary" type="submit">Yêu cầu bổ sung</button>
+</form>
+<form method="post" action="{% url 'duyet_yeu_cau_nguoi_o_cung' yeu_cau.id %}" data-community-confirm data-confirm-title="Duyệt yêu cầu" data-confirm-message="Hồ sơ cư trú và phụ lục hiệu lực sẽ được tạo atomically.">{% csrf_token %}
+<input type="hidden" name="expected_revision" value="{{ yeu_cau.revision }}">
+<button class="ndt-f5-button ndt-f5-button--primary" type="submit">Duyệt</button>
+</form>
+<form method="post" action="{% url 'tu_choi_yeu_cau_nguoi_o_cung' yeu_cau.id %}" data-community-confirm data-confirm-danger="true" data-confirm-title="Từ chối yêu cầu" data-confirm-message="Yêu cầu sẽ trở thành trạng thái cuối.">{% csrf_token %}
+<input type="hidden" name="expected_revision" value="{{ yeu_cau.revision }}">
+<div class="ndt-f5-field">
+<label class="ndt-f5-label" for="reject-reason">Lý do từ chối</label>
+<textarea class="ndt-f5-control" id="reject-reason" name="reason" required>
+</textarea>
+</div>
+<button class="ndt-f5-button ndt-f5-button--danger" type="submit" data-confirm-danger="true">Từ chối</button>
+</form>
+</div>
+</section>{% elif yeu_cau.trang_thai == 'cho_bo_sung' %}
+<section class="ndt-f5-card">
+<h2>Đang chờ người thuê</h2>
+<p class="community-muted">Tenant cần bổ sung và gửi lại trước khi Admin có thể duyệt. Bạn vẫn có thể từ chối nếu cần.</p>
+<form method="post" action="{% url 'tu_choi_yeu_cau_nguoi_o_cung' yeu_cau.id %}">{% csrf_token %}
+<input type="hidden" name="expected_revision" value="{{ yeu_cau.revision }}">
+<div class="ndt-f5-field">
+<label class="ndt-f5-label" for="reject-reason">Lý do từ chối</label>
+<textarea class="ndt-f5-control" id="reject-reason" name="reason" required>
+</textarea>
+</div>
+<button class="ndt-f5-button ndt-f5-button--danger" type="submit">Từ chối</button>
+</form>
+</section>{% else %}
+<section class="ndt-f5-card">
+<h2>Yêu cầu đã hoàn tất</h2>
+<p class="community-muted">Trạng thái cuối là chỉ đọc.</p>
+</section>{% endif %}
+</aside>
+</div>
+</div>
+</main>{% include 'core/foundation/p5_dialog_root.html' %}
+<script src="{% static 'js/foundation/p5-dialog.js' %}" defer>
+</script>
+<script src="{% static 'js/community_management_p6j.js' %}" defer>
+</script>{% endblock %}

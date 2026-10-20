@@ -69,7 +69,8 @@ class BusinessFixture(TestCase):
 
     def resident(self, hd, status='dang_o'):
         return NguoiOCungPhong.objects.create(hop_dong=hd, ho_ten='Audit Resident',
-            ngay_vao=self.today, trang_thai=status)
+            ngay_vao=self.today, trang_thai=status,
+            da_xac_minh_boi_admin=status in ('dang_o', 'da_xac_minh'))
 
     def sharing_request(self, hd):
         return YeuCauGhepNguoi.objects.create(hop_dong=hd, nguoi_dang_ky=self.other,

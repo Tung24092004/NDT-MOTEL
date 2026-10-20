@@ -1,0 +1,162 @@
+{% load static %}
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <base href="{{ live_server_url }}/">
+    <title>Kiểm chứng Design Foundation P5</title>
+    <link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+    <style>
+        body { margin: 0; background: #f6f4ef; }
+        .p5-showcase-title { margin: 0 0 12px; color: #14243b; font-size: 24px; }
+        .p5-showcase-note { margin: 0; color: #596273; }
+        .p5-showcase-swatches { display: flex; flex-wrap: wrap; gap: 12px; }
+        .p5-showcase-swatch { min-width: 132px; padding: 16px; border-radius: 12px; color: #fff; font-weight: 700; }
+        .p5-showcase-swatch--navy { background: #14243b; }
+        .p5-showcase-swatch--orange { background: #b84d16; }
+        .p5-showcase-swatch--canvas { border: 1px solid #d5d9e0; background: #fffefb; color: #182233; }
+    </style>
+</head>
+<body>
+<main class="ndt-f5 ndt-f5-page" data-p5-harness>
+    <div class="ndt-f5-container ndt-f5-stack">
+        <header class="ndt-f5-page-header">
+            <div class="ndt-f5-page-header__content">
+                <p class="ndt-f5-breadcrumb">Foundation / Màn kiểm chứng cô lập</p>
+                <p class="ndt-f5-eyebrow">NDT MOTEL · P5</p>
+                <h1 class="ndt-f5-page-header__title">Ngôn ngữ giao diện cho hành trình vận hành và lưu trú</h1>
+                <p class="ndt-f5-page-header__description">Nội dung tiếng Việt dài dùng để kiểm tra nhịp dòng, khả năng xuống hàng và độ rõ của phân cấp thị giác trên nhiều kích thước màn hình.</p>
+                <div class="ndt-f5-page-header__meta"><span>Bản foundation: P5</span><span>Phạm vi: opt-in</span></div>
+            </div>
+            <div class="ndt-f5-page-header__actions">
+                <button class="ndt-f5-button ndt-f5-button--secondary" data-p5-target type="button">Tác vụ phụ</button>
+                <button class="ndt-f5-button ndt-f5-button--primary" data-p5-target type="button">Tạo bản ghi</button>
+            </div>
+        </header>
+
+        <section class="ndt-f5-panel" aria-labelledby="tokens-title">
+            <h2 class="p5-showcase-title" id="tokens-title">Token cốt lõi</h2>
+            <div class="p5-showcase-swatches">
+                <div class="p5-showcase-swatch p5-showcase-swatch--navy">Navy #14243B</div>
+                <div class="p5-showcase-swatch p5-showcase-swatch--orange">CTA #B84D16</div>
+                <div class="p5-showcase-swatch p5-showcase-swatch--canvas">Surface #FFFEFB</div>
+            </div>
+        </section>
+
+        <section class="ndt-f5-panel ndt-f5-stack" aria-labelledby="layout-title">
+            <h2 class="p5-showcase-title" id="layout-title">Container và độ dài dòng</h2>
+            <div class="ndt-f5-container ndt-f5-container--full"><strong>Full-width:</strong> bảng, dashboard và nội dung cần tận dụng toàn bộ vùng sau sidebar.</div>
+            <div class="ndt-f5-container ndt-f5-container--readable"><strong>Readable:</strong> hướng dẫn và nội dung đọc dài.</div>
+            <div class="ndt-f5-container ndt-f5-container--form"><strong>Form:</strong> biểu mẫu dài có section và nhịp đọc ổn định.</div>
+        </section>
+
+        <section class="ndt-f5-panel ndt-f5-stack" aria-labelledby="buttons-title">
+            <div><h2 class="p5-showcase-title" id="buttons-title">Button và action group</h2><p class="p5-showcase-note">Primary dành cho hành động chính; link chữ chỉ dùng cho điều hướng.</p></div>
+            <div class="ndt-f5-actions" style="justify-content:flex-start">
+                <button class="ndt-f5-button ndt-f5-button--primary" data-p5-target type="button">Lưu thay đổi</button>
+                <button class="ndt-f5-button ndt-f5-button--secondary" data-p5-target type="button">Quay lại</button>
+                <button class="ndt-f5-button ndt-f5-button--neutral" data-p5-target type="button">Xem chi tiết</button>
+                <button class="ndt-f5-button ndt-f5-button--danger" data-p5-target type="button">Xóa bản ghi</button>
+                <button class="ndt-f5-button ndt-f5-button--ghost" data-p5-target type="button">Bỏ qua</button>
+                <button class="ndt-f5-button ndt-f5-button--icon" data-p5-target type="button" aria-label="Mở tùy chọn" title="Mở tùy chọn">•••</button>
+                <button class="ndt-f5-button ndt-f5-button--neutral" data-p5-target type="button" disabled>Đã vô hiệu</button>
+                <button class="ndt-f5-button ndt-f5-button--primary" data-p5-target type="button" aria-busy="true" aria-disabled="true">Đang lưu</button>
+                <a class="ndt-f5-link" href="#forms">Đi tới biểu mẫu</a>
+            </div>
+        </section>
+
+        <section class="ndt-f5-form-section ndt-f5-stack" id="forms" aria-labelledby="form-title">
+            <h2 class="ndt-f5-form-section__title" id="form-title">Form control và validation</h2>
+            <div class="ndt-f5-form-grid">
+                <div class="ndt-f5-field">
+                    <label class="ndt-f5-label" for="p5-name">Họ và tên <span class="ndt-f5-required" aria-hidden="true">*</span></label>
+                    <input class="ndt-f5-control" id="p5-name" value="Nguyễn Văn Minh" required aria-describedby="p5-name-help">
+                    <p class="ndt-f5-help" id="p5-name-help">Nhập đúng thông tin trên hồ sơ người thuê.</p>
+                </div>
+                <div class="ndt-f5-field">
+                    <label class="ndt-f5-label" for="p5-status">Trạng thái</label>
+                    <select class="ndt-f5-control" id="p5-status"><option>Chờ xác nhận</option><option>Đã xác nhận</option></select>
+                </div>
+                <div class="ndt-f5-field">
+                    <label class="ndt-f5-label" for="p5-error">Mã tham chiếu</label>
+                    <input class="ndt-f5-control" id="p5-error" value="Mã không hợp lệ" aria-invalid="true" aria-describedby="p5-error-message">
+                    <p class="ndt-f5-error" id="p5-error-message">Mã tham chiếu phải đúng định dạng của hệ thống.</p>
+                </div>
+                <div class="ndt-f5-field">
+                    <label class="ndt-f5-label" for="p5-disabled">Dữ liệu hệ thống</label>
+                    <input class="ndt-f5-control" id="p5-disabled" value="Không thể chỉnh sửa" disabled>
+                </div>
+                <div class="ndt-f5-field ndt-f5-field--full">
+                    <label class="ndt-f5-label" for="p5-note">Ghi chú dài</label>
+                    <textarea class="ndt-f5-control" id="p5-note">Nội dung dài dùng để kiểm tra tiếng Việt: quản trị viên cần đọc kỹ hậu quả trước khi xác nhận thao tác ảnh hưởng đến hợp đồng và quyền sử dụng phòng.</textarea>
+                </div>
+            </div>
+            <label class="ndt-f5-choice"><input type="checkbox" checked> Tôi đã kiểm tra thông tin bắt buộc</label>
+        </section>
+
+        <section class="ndt-f5-stack" aria-labelledby="filter-title">
+            <h2 class="p5-showcase-title" id="filter-title">Filter/search bar</h2>
+            <form class="ndt-f5-filter">
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="p5-search">Tìm kiếm</label><input class="ndt-f5-control" id="p5-search" placeholder="Mã, phòng hoặc người thuê"></div>
+                <div class="ndt-f5-field"><label class="ndt-f5-label" for="p5-filter-status">Trạng thái</label><select class="ndt-f5-control" id="p5-filter-status"><option>Tất cả</option><option>Chờ xác nhận</option></select></div>
+                <div class="ndt-f5-filter__actions"><button class="ndt-f5-button ndt-f5-button--primary" data-p5-target type="button">Áp dụng</button><button class="ndt-f5-button ndt-f5-button--neutral" data-p5-target type="button">Đặt lại</button></div>
+            </form>
+        </section>
+
+        <section class="ndt-f5-stack" aria-labelledby="states-title">
+            <h2 class="p5-showcase-title" id="states-title">Badge và feedback</h2>
+            <div class="ndt-f5-actions" style="justify-content:flex-start">
+                <span class="ndt-f5-badge ndt-f5-badge--success">Đã xác nhận</span>
+                <span class="ndt-f5-badge ndt-f5-badge--warning">Cần chú ý</span>
+                <span class="ndt-f5-badge ndt-f5-badge--danger">Bị từ chối</span>
+                <span class="ndt-f5-badge ndt-f5-badge--pending">Chờ xử lý</span>
+                <span class="ndt-f5-badge ndt-f5-badge--info">Thông tin mới</span>
+                <span class="ndt-f5-badge">Không hoạt động</span>
+            </div>
+            <div class="ndt-f5-grid">
+                <div class="ndt-f5-alert ndt-f5-alert--success ndt-f5-grid__half"><span class="ndt-f5-alert__mark" aria-hidden="true">✓</span><div><strong>Đã lưu</strong><p>Thay đổi đã được ghi nhận.</p></div></div>
+                <div class="ndt-f5-alert ndt-f5-alert--warning ndt-f5-grid__half"><span class="ndt-f5-alert__mark" aria-hidden="true">!</span><div><strong>Cần kiểm tra</strong><p>Thông tin vẫn đang chờ đối chiếu.</p></div></div>
+                <div class="ndt-f5-alert ndt-f5-alert--danger ndt-f5-grid__half"><span class="ndt-f5-alert__mark" aria-hidden="true">×</span><div><strong>Không thể tiếp tục</strong><p>Hãy sửa lỗi được mô tả trước khi gửi lại.</p></div></div>
+                <div class="ndt-f5-alert ndt-f5-alert--info ndt-f5-grid__half"><span class="ndt-f5-alert__mark" aria-hidden="true">i</span><div><strong>Thông tin</strong><p>Trạng thái chỉ thay đổi sau khi quản trị viên xác nhận.</p></div></div>
+            </div>
+        </section>
+
+        <section class="ndt-f5-stack" aria-labelledby="table-title">
+            <div><h2 class="p5-showcase-title" id="table-title">Table và row-card responsive</h2><p class="p5-showcase-note">Trên mobile mỗi hàng dùng nhãn dữ liệu, không ẩn cột.</p></div>
+            <div class="ndt-f5-table-wrap">
+                <table class="ndt-f5-table">
+                    <thead><tr><th>Mã</th><th>Người thuê</th><th>Phòng</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                    <tbody>
+                        <tr><td data-label="Mã">DP-P5-001</td><td data-label="Người thuê">Nguyễn Hoàng Minh Anh với tên hiển thị dài</td><td data-label="Phòng">P5-01 · Sơn Trà</td><td data-label="Trạng thái"><span class="ndt-f5-badge ndt-f5-badge--pending">Chờ xử lý</span></td><td data-label="Thao tác"><div class="ndt-f5-table__actions"><button class="ndt-f5-button ndt-f5-button--neutral ndt-f5-button--small" data-p5-target type="button">Xem</button></div></td></tr>
+                        <tr><td data-label="Mã">DP-P5-002</td><td data-label="Người thuê">Trần Thị Hà</td><td data-label="Phòng">P5-02 · Hải Châu</td><td data-label="Trạng thái"><span class="ndt-f5-badge ndt-f5-badge--success">Đã xác nhận</span></td><td data-label="Thao tác"><div class="ndt-f5-table__actions"><button class="ndt-f5-button ndt-f5-button--neutral ndt-f5-button--small" data-p5-target type="button">Xem</button></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <nav class="ndt-f5-pagination" aria-label="Phân trang"><a data-p5-target href="#table-title" aria-label="Trang trước">←</a><a data-p5-target href="#table-title">1</a><span data-p5-target aria-current="page">2</span><a data-p5-target href="#table-title">3</a><a data-p5-target href="#table-title" aria-label="Trang sau">→</a></nav>
+        </section>
+
+        <section class="ndt-f5-grid" aria-label="Card và empty state">
+            <article class="ndt-f5-card ndt-f5-grid__half"><header class="ndt-f5-card__header"><h2 class="ndt-f5-card__title">Panel thông tin</h2></header><div class="ndt-f5-card__body">Card lớn dùng để nhóm nội dung có quan hệ, không lồng nhiều lớp surface trắng.</div><footer class="ndt-f5-card__footer"><a class="ndt-f5-link" href="#tokens-title">Xem nguyên tắc</a></footer></article>
+            <div class="ndt-f5-empty ndt-f5-grid__half" role="status"><div class="ndt-f5-empty__icon" aria-hidden="true">0</div><h2 class="ndt-f5-empty__title">Chưa có dữ liệu phù hợp</h2><p class="ndt-f5-empty__description">Thay đổi điều kiện tìm kiếm hoặc tạo bản ghi khi nghiệp vụ cho phép.</p><div class="ndt-f5-empty__action"><button class="ndt-f5-button ndt-f5-button--secondary" data-p5-target type="button">Xóa bộ lọc</button></div></div>
+        </section>
+
+        <section class="ndt-f5-panel ndt-f5-stack" aria-labelledby="dialog-demo-title">
+            <div><h2 class="p5-showcase-title" id="dialog-demo-title">Dialog xác nhận</h2><p class="p5-showcase-note">Escape, backdrop, focus trap và trả focus được kiểm tra bằng browser QA.</p></div>
+            <div class="ndt-f5-actions" style="justify-content:flex-start"><button class="ndt-f5-button ndt-f5-button--danger" data-p5-target data-ndt-f5-dialog-open data-dialog-title="Xóa bản ghi này?" data-dialog-message="Bản ghi sẽ bị xóa khỏi danh sách. Thao tác có hậu quả đáng kể và cần được xác nhận rõ ràng." data-dialog-confirm-label="Xóa bản ghi" type="button">Mở dialog xóa</button></div>
+        </section>
+    </div>
+</main>
+
+<div class="ndt-f5-dialog" data-ndt-f5-dialog hidden>
+    <div class="ndt-f5-dialog__backdrop" data-ndt-f5-dialog-cancel></div>
+    <section class="ndt-f5-dialog__panel" role="dialog" aria-modal="true" aria-labelledby="p5DialogTitle" aria-describedby="p5DialogMessage">
+        <p class="ndt-f5-dialog__eyebrow">Xác nhận hậu quả</p>
+        <h2 class="ndt-f5-dialog__title" id="p5DialogTitle" data-ndt-f5-dialog-title></h2>
+        <p class="ndt-f5-dialog__message" id="p5DialogMessage" data-ndt-f5-dialog-message></p>
+        <div class="ndt-f5-dialog__actions"><button class="ndt-f5-button ndt-f5-button--neutral" data-p5-target data-ndt-f5-dialog-cancel type="button">Hủy</button><button class="ndt-f5-button ndt-f5-button--danger" data-p5-target data-ndt-f5-dialog-confirm type="button">Xác nhận</button></div>
+    </section>
+</div>
+<script src="{% static 'js/foundation/p5-dialog.js' %}"></script>
+</body>
+</html>

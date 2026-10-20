@@ -1,320 +1,47 @@
-﻿{% extends "core/base.html" %}
+{% extends "core/base.html" %}
+{% load static %}
 
-{% block title %}Thêm cơ sở - NDT MOTEL{% endblock %}
+{% block title %}Tạo cơ sở - NDT MOTEL{% endblock %}
+{% block page_title %}Tạo cơ sở{% endblock %}
 
 {% block extra_css %}
-<style>
-
-input:focus,
-select:focus,
-textarea:focus {
-    border-color:#07859a !important;
-    box-shadow:0 0 0 3px rgba(47,125,91,.08);
-}
-
-@media (max-width:600px) {
-
-    .page-header {
-        flex-direction:column;
-        align-items:flex-start;
-        gap:15px;
-    }
-
-    div[style*="justify-content:flex-end"] {
-        flex-direction:column-reverse;
-    }
-
-    div[style*="justify-content:flex-end"] a,
-    div[style*="justify-content:flex-end"] button {
-        width:100%;
-        box-sizing:border-box;
-        text-align:center;
-    }
-
-}
-
-</style>
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin_facilities_post_p6.css' %}">
 {% endblock %}
 
 {% block content %}
+<main class="ndt-f5 ndt-f5-page ndt-admin-facilities" data-facility-screen="create">
+    <div class="ndt-f5-container ndt-f5-container--form ndt-f5-stack">
+        <header class="ndt-f5-page-header"><div class="ndt-f5-page-header__content"><p class="ndt-f5-breadcrumb">Quản trị / Cơ sở / Tạo mới</p><h1 class="ndt-f5-page-header__title">Tạo cơ sở</h1><p class="ndt-f5-page-header__description">Khai báo địa điểm, đầu mối quản lý và quy mô dự kiến. Các trường có dấu * là bắt buộc.</p></div><div class="ndt-f5-page-header__actions"><a class="ndt-f5-button ndt-f5-button--secondary" href="{% url 'quan_ly_co_so' %}">Hủy và quay lại</a></div></header>
 
-<div class="page-header">
-
-    <div>
-        <h1>Thêm cơ sở</h1>
-        <p>Tạo một cơ sở mới cho hệ thống NDT MOTEL</p>
-    </div>
-
-    <a
-        href="{% url 'quan_ly_co_so' %}"
-        class="admin-secondary-btn"
-    >
-        ← Danh sách cơ sở
-    </a>
-
-</div>
-
-
-<div style="
-    max-width:850px;
-    margin:0 auto;
-">
-
-    <div class="booking-table-card">
-
-        <div class="booking-table-header">
-
-            <div>
-                <h2>Thông tin cơ sở</h2>
-
-                <span>
-                    Nhập đầy đủ thông tin cơ sở mới
-                </span>
-            </div>
-
-        </div>
-
-
-        <form
-            method="post"
-            action="{% url 'tao_co_so' %}"
-        >
-
+        <form class="facility-form ndt-f5-stack" method="post" action="{% url 'tao_co_so' %}" data-facility-create-form>
             {% csrf_token %}
-
-
-            <div style="padding:26px;">
-
-
-                <!-- TÊN CƠ SỞ -->
-
-                <div style="margin-bottom:20px;">
-
-                    <label
-                        for="ten_co_so"
-                        style="
-                            display:block;
-                            margin-bottom:8px;
-                            font-size:13px;
-                            font-weight:700;
-                            color:#26322c;
-                        "
-                    >
-                        Tên cơ sở <span style="color:#b84b4b;">*</span>
-                    </label>
-
-                    <input
-                        type="text"
-                        id="ten_co_so"
-                        name="ten_co_so"
-                        required
-                        placeholder="Ví dụ: NDT Motel Cẩm Lệ"
-                        style="
-                            width:100%;
-                            box-sizing:border-box;
-                            min-height:45px;
-                            padding:0 14px;
-                            border:1px solid #dce3df;
-                            border-radius:10px;
-                            font-size:14px;
-                            outline:none;
-                        "
-                    >
-
+            <section class="ndt-f5-form-section" aria-labelledby="facility-create-primary-title">
+                <h2 class="ndt-f5-form-section__title" id="facility-create-primary-title">Thông tin nhận diện</h2>
+                <div class="ndt-f5-form-grid">
+                    <div class="ndt-f5-field ndt-f5-field--full"><label class="ndt-f5-label" for="ten_co_so">Tên cơ sở <span class="ndt-f5-required">*</span></label><input class="ndt-f5-control" id="ten_co_so" name="ten_co_so" value="{{ request.POST.ten_co_so }}" required autocomplete="organization" placeholder="Ví dụ: NDT Motel Sơn Trà"></div>
+                    <div class="ndt-f5-field ndt-f5-field--full"><label class="ndt-f5-label" for="dia_chi">Địa chỉ <span class="ndt-f5-required">*</span></label><input class="ndt-f5-control" id="dia_chi" name="dia_chi" value="{{ request.POST.dia_chi }}" required autocomplete="street-address" placeholder="Số nhà, đường, phường/xã"></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="quan">Quận / khu vực <span class="ndt-f5-required">*</span></label><input class="ndt-f5-control" id="quan" name="quan" value="{{ request.POST.quan }}" required placeholder="Ví dụ: Cẩm Lệ"></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="trang_thai">Trạng thái</label><select class="ndt-f5-control" id="trang_thai" name="trang_thai"><option value="hoat_dong"{% if request.POST.trang_thai != 'tam_ngung' and request.POST.trang_thai != 'dong_cua' %} selected{% endif %}>Đang hoạt động</option><option value="tam_ngung"{% if request.POST.trang_thai == 'tam_ngung' %} selected{% endif %}>Tạm ngưng</option><option value="dong_cua"{% if request.POST.trang_thai == 'dong_cua' %} selected{% endif %}>Đóng cửa</option></select></div>
                 </div>
+            </section>
 
-
-                <!-- ĐỊA CHỈ -->
-
-                <div style="margin-bottom:20px;">
-
-                    <label
-                        for="dia_chi"
-                        style="
-                            display:block;
-                            margin-bottom:8px;
-                            font-size:13px;
-                            font-weight:700;
-                            color:#26322c;
-                        "
-                    >
-                        Địa chỉ <span style="color:#b84b4b;">*</span>
-                    </label>
-
-                    <input
-                        type="text"
-                        id="dia_chi"
-                        name="dia_chi"
-                        required
-                        placeholder="Ví dụ: 123 Nguyễn Văn Linh"
-                        style="
-                            width:100%;
-                            box-sizing:border-box;
-                            min-height:45px;
-                            padding:0 14px;
-                            border:1px solid #dce3df;
-                            border-radius:10px;
-                            font-size:14px;
-                            outline:none;
-                        "
-                    >
-
+            <section class="ndt-f5-form-section" aria-labelledby="facility-create-operation-title">
+                <h2 class="ndt-f5-form-section__title" id="facility-create-operation-title">Quy mô và liên hệ</h2>
+                <div class="ndt-f5-form-grid">
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="so_tang">Số tầng</label><input class="ndt-f5-control" id="so_tang" name="so_tang" type="number" min="1" step="1" value="{{ request.POST.so_tang|default:'1' }}" aria-describedby="facility-floor-help"><p class="ndt-f5-help" id="facility-floor-help">Tối thiểu 1 tầng.</p></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="so_phong">Số phòng khai báo</label><input class="ndt-f5-control" id="so_phong" name="so_phong" type="number" min="0" step="1" value="{{ request.POST.so_phong|default:'0' }}" aria-describedby="facility-room-help"><p class="ndt-f5-help" id="facility-room-help">Có thể cập nhật sau; chưa tạo bản ghi phòng.</p></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="so_dien_thoai">Số điện thoại cơ sở</label><input class="ndt-f5-control" id="so_dien_thoai" name="so_dien_thoai" value="{{ request.POST.so_dien_thoai }}" autocomplete="tel"></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="email">Email</label><input class="ndt-f5-control" id="email" name="email" type="email" value="{{ request.POST.email }}" autocomplete="email"></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="nguoi_quan_ly">Người quản lý</label><input class="ndt-f5-control" id="nguoi_quan_ly" name="nguoi_quan_ly" value="{{ request.POST.nguoi_quan_ly }}" autocomplete="name"></div>
+                    <div class="ndt-f5-field"><label class="ndt-f5-label" for="sdt_quan_ly">SĐT quản lý</label><input class="ndt-f5-control" id="sdt_quan_ly" name="sdt_quan_ly" value="{{ request.POST.sdt_quan_ly }}" autocomplete="tel"></div>
+                    <div class="ndt-f5-field ndt-f5-field--full"><label class="ndt-f5-label" for="tien_ich_chung">Tiện ích chung</label><textarea class="ndt-f5-control" id="tien_ich_chung" name="tien_ich_chung" aria-describedby="facility-amenity-help">{{ request.POST.tien_ich_chung }}</textarea><p class="ndt-f5-help" id="facility-amenity-help">Ví dụ: bãi xe, Wi-Fi, khu giặt sấy.</p></div>
+                    <div class="ndt-f5-field ndt-f5-field--full"><label class="ndt-f5-label" for="mo_ta">Mô tả</label><textarea class="ndt-f5-control" id="mo_ta" name="mo_ta">{{ request.POST.mo_ta }}</textarea></div>
                 </div>
+            </section>
 
-
-                <!-- QUẬN -->
-
-                <div style="margin-bottom:20px;">
-
-                    <label
-                        for="quan"
-                        style="
-                            display:block;
-                            margin-bottom:8px;
-                            font-size:13px;
-                            font-weight:700;
-                            color:#26322c;
-                        "
-                    >
-                        Quận / khu vực <span style="color:#b84b4b;">*</span>
-                    </label>
-
-                    <input
-                        type="text"
-                        id="quan"
-                        name="quan"
-                        required
-                        placeholder="Ví dụ: Cẩm Lệ"
-                        style="
-                            width:100%;
-                            box-sizing:border-box;
-                            min-height:45px;
-                            padding:0 14px;
-                            border:1px solid #dce3df;
-                            border-radius:10px;
-                            font-size:14px;
-                            outline:none;
-                        "
-                    >
-
-                </div>
-
-
-                <!-- TRẠNG THÁI -->
-
-                <div style="margin-bottom:24px;">
-
-                    <label
-                        for="trang_thai"
-                        style="
-                            display:block;
-                            margin-bottom:8px;
-                            font-size:13px;
-                            font-weight:700;
-                            color:#26322c;
-                        "
-                    >
-                        Trạng thái
-                    </label>
-
-                    <select
-                        id="trang_thai"
-                        name="trang_thai"
-                        style="
-                            width:100%;
-                            box-sizing:border-box;
-                            min-height:45px;
-                            padding:0 14px;
-                            border:1px solid #dce3df;
-                            border-radius:10px;
-                            font-size:14px;
-                            background:#fff;
-                            outline:none;
-                        "
-                    >
-
-                        <option value="hoat_dong">
-                            Đang hoạt động
-                        </option>
-
-                        <option value="tam_ngung">
-                            Tạm ngưng
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <!-- GHI CHÚ -->
-
-                <div style="
-                    padding:16px;
-                    background:#f8faf9;
-                    border:1px solid #edf0ee;
-                    border-radius:12px;
-                    margin-bottom:24px;
-                ">
-
-                    <strong
-                        style="
-                            display:block;
-                            margin-bottom:6px;
-                            color:#26322c;
-                        "
-                    >
-                        Lưu ý
-                    </strong>
-
-                    <span
-                        style="
-                            color:#66736c;
-                            font-size:13px;
-                            line-height:1.6;
-                        "
-                    >
-                        Sau khi tạo cơ sở, bạn có thể thêm và quản lý
-                        các phòng thuộc cơ sở này trong phần quản lý phòng.
-                    </span>
-
-                </div>
-
-
-                <!-- BUTTON -->
-
-                <div style="
-                    display:flex;
-                    justify-content:flex-end;
-                    gap:10px;
-                    padding-top:20px;
-                    border-top:1px solid #edf0ee;
-                ">
-
-                    <a
-                        href="{% url 'quan_ly_co_so' %}"
-                        class="admin-secondary-btn"
-                    >
-                        Hủy
-                    </a>
-
-                    <button
-                        type="submit"
-                        class="admin-primary-btn"
-                    >
-                        + Tạo cơ sở
-                    </button>
-
-                </div>
-
-            </div>
-
+            <div class="facility-form-actions"><a class="ndt-f5-button ndt-f5-button--secondary" href="{% url 'quan_ly_co_so' %}">Hủy</a><button class="ndt-f5-button ndt-f5-button--primary" type="submit">Tạo cơ sở</button></div>
         </form>
-
     </div>
-
-</div>
-
-
-
-
+</main>
 {% endblock %}

@@ -1,10 +1,12 @@
 """Business regression tests. ORM mutations run only in Django's test database."""
 from datetime import timedelta
 from decimal import Decimal
-from io import StringIO
+from io import BytesIO, StringIO
 from unittest.mock import patch
 
+from PIL import Image
 from django.contrib.auth.models import AnonymousUser, User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core.management import call_command
@@ -22,12 +24,19 @@ from core.models import (
 
 
 from core.du_lieu_test.du_lieu_test_nghiep_vu import BusinessFixture
+from core.private_storage import private_payment_evidence_storage
+
+
+def evidence_upload():
+    payload = BytesIO()
+    Image.new('RGB', (8, 8), 'white').save(payload, format='PNG')
+    return SimpleUploadedFile('receipt.png', payload.getvalue(), content_type='image/png')
 
 class InvoiceTests(BusinessFixture):
-    def invoice(self):
+    def invoice(self, due_date=None):
         return HoaDon.objects.create(hop_dong=self.contract(),thang=9,nam=2026,
             tien_phong=Decimal('2500000'),tien_dien=Decimal('100000'),tien_nuoc=Decimal('50000'),
-            tien_dich_vu=Decimal('25000'),phi_khac=Decimal('10000'),han_thanh_toan=self.today)
+            tien_dich_vu=Decimal('25000'),phi_khac=Decimal('10000'),han_thanh_toan=due_date or self.today)
 
     def invoice_for_contract(self, hop_dong, month, status='chua_thanh_toan', due_date=None):
         return HoaDon.objects.create(
@@ -43,7 +52,7 @@ class InvoiceTests(BusinessFixture):
 
     def test_payment_double_submit(self):
         invoice=self.invoice();invoice.trang_thai='cho_xac_nhan';invoice.save(update_fields=['trang_thai'])
-        data={'hanh_dong':'xac_nhan_thanh_toan','phuong_thuc':'chuyen_khoan'}
+        data={'hanh_dong':'xac_nhan_thanh_toan','phuong_thuc':'tien_mat'}
         self.post(views.xu_ly_hoa_don,invoice,data,self.admin)
         invoice.refresh_from_db();self.assertEqual(invoice.trang_thai,'da_thanh_toan')
         self.assertIsNotNone(invoice.ngay_thanh_toan);self.assertTrue(invoice.ma_giao_dich)
@@ -53,8 +62,10 @@ class InvoiceTests(BusinessFixture):
 
     def test_tenant_payment_double_submit(self):
         invoice=self.invoice()
-        data={'buoc':'xac_thuc','phuong_thuc':'chuyen_khoan','xac_nhan':'dong_y'}
-        self.post(views.thanh_toan_hoa_don_cua_toi,invoice,data)
+        data={'buoc':'xac_thuc','phuong_thuc':'chuyen_khoan','xac_nhan':'dong_y',
+              'anh_chung_tu': evidence_upload()}
+        with patch.object(private_payment_evidence_storage, 'save', side_effect=lambda name, content, max_length=None: name):
+            self.post(views.thanh_toan_hoa_don_cua_toi,invoice,data)
         invoice.refresh_from_db();self.assertEqual(invoice.trang_thai,'cho_xac_nhan')
         self.assertIsNone(invoice.ngay_thanh_toan)
         self.assertIsNone(invoice.nguoi_xac_nhan)
@@ -99,7 +110,8 @@ class InvoiceTests(BusinessFixture):
     def test_create_invoice_double_submit(self):
         hd=self.contract()
         data={'hop_dong':str(hd.pk),'thang':'9','nam':'2026','han_thanh_toan':str(self.today),
-            'tien_phong':'2500000','tien_dien':'100000','tien_nuoc':'0','tien_dich_vu':'0','phi_khac':'0'}
+            'tien_phong':'2500000','chi_so_dien_cu':'100','chi_so_dien_moi':'120',
+            'don_gia_dien':'3500','tien_dien':'100000','tien_nuoc':'0','tien_dich_vu':'0','phi_khac':'0'}
         views.tao_hoa_don(self.request(self.admin,data))
         self.assertEqual(HoaDon.objects.count(),1)
         effects=self.effects();views.tao_hoa_don(self.request(self.admin,data))
@@ -181,9 +193,7 @@ class InvoiceTests(BusinessFixture):
         self.assertIn('0', output.getvalue())
 
     def test_admin_invoice_list_get_does_not_mutate_overdue_status(self):
-        invoice = self.invoice()
-        invoice.han_thanh_toan = self.today - timedelta(days=1)
-        invoice.save(update_fields=['han_thanh_toan'])
+        invoice = self.invoice(self.today - timedelta(days=1))
         self.client.force_login(self.admin)
 
         response = self.client.get(reverse('quan_ly_hoa_don'))
@@ -193,9 +203,7 @@ class InvoiceTests(BusinessFixture):
         self.assertEqual(invoice.trang_thai, 'chua_thanh_toan')
 
     def test_admin_invoice_detail_get_does_not_mutate_overdue_status(self):
-        invoice = self.invoice()
-        invoice.han_thanh_toan = self.today - timedelta(days=1)
-        invoice.save(update_fields=['han_thanh_toan'])
+        invoice = self.invoice(self.today - timedelta(days=1))
         self.client.force_login(self.admin)
 
         response = self.client.get(reverse('chi_tiet_hoa_don', args=[invoice.pk]))
@@ -205,9 +213,7 @@ class InvoiceTests(BusinessFixture):
         self.assertEqual(invoice.trang_thai, 'chua_thanh_toan')
 
     def test_tenant_invoice_list_get_does_not_mutate_overdue_status(self):
-        invoice = self.invoice()
-        invoice.han_thanh_toan = self.today - timedelta(days=1)
-        invoice.save(update_fields=['han_thanh_toan'])
+        invoice = self.invoice(self.today - timedelta(days=1))
         self.client.force_login(self.user)
 
         response = self.client.get(reverse('hoa_don_cua_toi'))
@@ -217,9 +223,7 @@ class InvoiceTests(BusinessFixture):
         self.assertEqual(invoice.trang_thai, 'chua_thanh_toan')
 
     def test_tenant_invoice_detail_get_does_not_mutate_overdue_status(self):
-        invoice = self.invoice()
-        invoice.han_thanh_toan = self.today - timedelta(days=1)
-        invoice.save(update_fields=['han_thanh_toan'])
+        invoice = self.invoice(self.today - timedelta(days=1))
         self.client.force_login(self.user)
 
         response = self.client.get(reverse('chi_tiet_hoa_don_cua_toi', args=[invoice.pk]))
@@ -229,9 +233,7 @@ class InvoiceTests(BusinessFixture):
         self.assertEqual(invoice.trang_thai, 'chua_thanh_toan')
 
     def test_tenant_payment_get_does_not_mutate_overdue_status(self):
-        invoice = self.invoice()
-        invoice.han_thanh_toan = self.today - timedelta(days=1)
-        invoice.save(update_fields=['han_thanh_toan'])
+        invoice = self.invoice(self.today - timedelta(days=1))
         self.client.force_login(self.user)
 
         response = self.client.get(reverse('thanh_toan_hoa_don_cua_toi', args=[invoice.pk]))

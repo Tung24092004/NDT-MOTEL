@@ -10,17 +10,12 @@ from core.models import DatPhong
 
 
 class TenantBookingFoundationUITests(Phase5BookingFixture):
-    foundation_assets = (
-        "css/foundation/tokens.css",
-        "css/foundation/typography.css",
-        "css/foundation/components.css",
-        "css/foundation/utilities.css",
-    )
+    foundation_assets = ("css/foundation/p5.css", "css/booking_management_p6b.css")
 
     def assert_foundation(self, response):
         for asset in self.foundation_assets:
             self.assertContains(response, asset)
-        self.assertContains(response, 'data-tenant-booking-ui="v1"')
+        self.assertContains(response, 'data-tenant-booking-ui="p6b"')
 
     def test_booking_create_renders_six_real_steps_and_display_cover(self):
         response = self.client.get(reverse("dat_phong", args=[self.room.pk]))
@@ -37,13 +32,13 @@ class TenantBookingFoundationUITests(Phase5BookingFixture):
     def test_my_bookings_and_empty_state_use_foundation(self):
         response = self.client.get(reverse("dat_phong_cua_toi"))
         self.assert_foundation(response)
-        self.assertContains(response, "ndt-empty-state")
+        self.assertContains(response, "ndt-f5-empty")
         self.assertContains(response, "Bạn chưa có yêu cầu đặt phòng")
         booking, _ = self.new_booking()
         response = self.client.get(reverse("dat_phong_cua_toi"))
         self.assertContains(response, booking.ma_yeu_cau)
-        self.assertContains(response, "Bước tiếp theo")
         self.assertContains(response, "Chuyển khoản tiền cọc")
+        self.assertContains(response, 'data-label="Hành động"')
 
     def test_detail_uses_labels_and_cancel_dialog_without_changing_condition(self):
         booking, _ = self.new_booking()
@@ -52,7 +47,7 @@ class TenantBookingFoundationUITests(Phase5BookingFixture):
         self.assertContains(response, "Chờ thanh toán")
         self.assertNotContains(response, ">chua_thanh_toan<")
         self.assertContains(response, "data-cancel-booking-form")
-        self.assertContains(response, "ndt-button--danger")
+        self.assertContains(response, "ndt-f5-button--danger")
         DatPhong.objects.filter(pk=booking.pk).update(trang_thai="da_duyet")
         response = self.client.get(reverse("chi_tiet_dat_phong_cua_toi", args=[booking.pk]))
         self.assertNotContains(response, "data-cancel-booking-form")
@@ -68,9 +63,9 @@ class TenantBookingFoundationUITests(Phase5BookingFixture):
         self.assertNotContains(response, "Thanh toán thành công")
 
     def test_booking_css_has_no_important_and_js_wires_foundation_dialog(self):
-        css = Path(settings.BASE_DIR, "static/css/tenant/booking.css").read_text(encoding="utf-8")
+        css = Path(settings.BASE_DIR, "static/css/booking_management_p6b.css").read_text(encoding="utf-8")
         js = Path(settings.BASE_DIR, "static/js/tenant/booking.js").read_text(encoding="utf-8")
         self.assertNotIn("!important", css)
         self.assertIn("navigator.clipboard.writeText", js)
-        self.assertIn("window.NDTDialog.confirm", js)
+        self.assertIn("window.NDTFoundationDialog.confirm", js)
         self.assertIn("requestSubmit", js)

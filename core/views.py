@@ -30,15 +30,15 @@ from core.views_quan_tri import (
     xu_ly_co_so,
 )
 from core.views_phong import (
-    danh_sach_phong,
-    chi_tiet_phong,
     quan_ly_phong,
     xoa_phong,
     tao_phong,
     sua_phong,
 )
+from core.views_danh_sach_phong import danh_sach_phong
+from core.views_chi_tiet_phong import chi_tiet_phong
+from core.views_dang_ky import dang_ky
 from core.views_dang_nhap import (
-    dang_ky,
     dang_nhap,
     dang_xuat,
 )

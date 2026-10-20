@@ -138,7 +138,13 @@ class Phase8B2RouteRegressionTests(BusinessFixture):
             with self.subTest(route=name, actor="resolve"):
                 self.assert_resolves_to(name, view, args)
             with self.subTest(route=name, actor="guest"):
-                self.assert_redirects_guest_to_login(name, args)
+                self.client.logout()
+                response = self.client.get(reverse(name, args=args))
+                if name == "chi_tiet_face_profile":
+                    self.assertEqual(response.status_code, 404)
+                else:
+                    self.assertEqual(response.status_code, 302)
+                    self.assertIn(reverse("dang_nhap"), response.url)
             with self.subTest(route=name, actor="admin"):
                 self.assert_admin_page_ok(name, args)
 

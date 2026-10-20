@@ -5,33 +5,38 @@
 {% block page_title %}Hóa đơn &amp; thanh toán{% endblock %}
 
 {% block tenant_styles %}
+    <link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
     <link rel="stylesheet" href="{% static 'css/tenant/hoa_don_cua_toi.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bill_smart_full_refresh.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+    <link rel="stylesheet" href="{% static 'css/invoice_management_p6d.css' %}">
 {% endblock %}
 
 {% block tenant_content %}
-<main class="billing-page">
+<main class="ndt-foundation ndt-f5 ndt-invoice-management ndt-f5-page billing-page" data-invoice-screen="tenant-list">
+  <div class="ndt-f5-container ndt-f5-container--full invoice-p6d-stack">
     <nav class="billing-breadcrumb" aria-label="Điều hướng">
         <a href="{% url 'tai_khoan' %}">Tài khoản</a>
         <span>/</span>
         <span>Hóa đơn &amp; thanh toán</span>
     </nav>
 
-    <header class="billing-heading">
-        <div>
+    <header class="ndt-page-header ndt-f5-page-header billing-heading">
+        <div class="ndt-page-header__content">
             <p class="billing-kicker">Hồ sơ thanh toán</p>
-            <h1>Hóa đơn của tôi</h1>
-            <p>Theo dõi kỳ thu, hạn thanh toán và kết quả đối soát.</p>
+            <h1 class="ndt-page-header__title">Hóa đơn của tôi</h1>
+            <p class="ndt-page-header__subtitle">Theo dõi kỳ thu, hạn thanh toán và kết quả đối soát từ quản trị viên.</p>
         </div>
-        <a class="ndt-button ndt-button--secondary" href="{% url 'tai_khoan' %}">Quay lại tài khoản</a>
+        <a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'tai_khoan' %}">Tài khoản</a>
     </header>
 
     {% if hoa_don %}
         <section class="billing-overview" aria-label="Tổng quan hóa đơn">
             <div class="overview-primary">
-                <span>Cần thanh toán</span>
+                <span>Cần xử lý</span>
                 <strong>{{ chua_thanh_toan|add:qua_han }}</strong>
-                <small>hóa đơn cần bạn xử lý</small>
+                <small>hóa đơn chưa thanh toán hoặc quá hạn</small>
             </div>
             <dl class="overview-stats">
                 <div><dt>Tổng hóa đơn</dt><dd>{{ tong_hoa_don }}</dd></div>
@@ -53,27 +58,27 @@
         </div>
 
         {% for hd in hoa_don %}
-            <article class="invoice-row invoice-row--{{ hd.trang_thai }}">
+            <article class="ndt-f5-card invoice-row invoice-row--{{ hd.trang_thai }}">
                 <div class="invoice-identity">
                     <span class="invoice-code">HĐ-{{ hd.id }}</span>
-                    <div><p>Kỳ thu</p><h3>Tháng {{ hd.thang }}/{{ hd.nam }}</h3></div>
+                    <div><p>Kỳ hóa đơn</p><h3>Tháng {{ hd.thang }}/{{ hd.nam }}</h3></div>
                 </div>
 
                 <div class="invoice-priority">
                     <div class="invoice-amount"><span>Tổng tiền</span><strong>{{ hd.tong_tien|vnd }} VNĐ</strong></div>
                     <div class="invoice-due"><span>Hạn thanh toán</span><strong>{{ hd.han_thanh_toan|date:"d/m/Y"|default:"Chưa xác định" }}</strong></div>
                     {% if hd.trang_thai == "da_thanh_toan" %}
-                        <span class="status status--paid">Đã thanh toán</span>
+                        <span class="ndt-badge ndt-badge--success ndt-f5-badge ndt-f5-badge--success status status--paid">Đã thanh toán</span>
                     {% elif hd.trang_thai == "cho_xac_nhan" %}
-                        <span class="status status--pending">Chờ xác nhận</span>
+                        <span class="ndt-f5-badge ndt-f5-badge--pending status status--pending">Chờ xác nhận</span>
                     {% elif hd.trang_thai == "qua_han" %}
-                        <span class="status status--overdue">Quá hạn</span>
+                        <span class="ndt-f5-badge ndt-f5-badge--danger status status--overdue">Quá hạn</span>
                     {% elif hd.trang_thai == "chua_thanh_toan" %}
-                        <span class="status status--unpaid">Chưa thanh toán</span>
+                        <span class="ndt-f5-badge ndt-f5-badge--warning status status--unpaid">Chưa thanh toán</span>
                     {% elif hd.trang_thai == "huy" %}
-                        <span class="status status--cancelled">Đã hủy</span>
+                        <span class="ndt-f5-badge status status--cancelled">Đã hủy</span>
                     {% else %}
-                        <span class="status">{{ hd.get_trang_thai_display }}</span>
+                        <span class="ndt-f5-badge status">{{ hd.get_trang_thai_display }}</span>
                     {% endif %}
                 </div>
 
@@ -92,7 +97,7 @@
                     {% elif hd.trang_thai == "qua_han" %}
                         <p>Hóa đơn đã quá hạn. Vui lòng thanh toán sớm.</p>
                     {% elif hd.trang_thai == "cho_xac_nhan" %}
-                        <p>Đã báo chuyển khoản. Chờ Admin đối soát và xác nhận.</p>
+                        <p>Đã báo thanh toán. Chờ Admin đối soát và xác nhận.</p>
                     {% elif hd.trang_thai == "da_thanh_toan" %}
                         <p>Admin đã xác nhận thanh toán. Không cần thao tác thêm.</p>
                     {% elif hd.trang_thai == "huy" %}
@@ -103,20 +108,21 @@
                 </div>
 
                 <div class="invoice-actions">
-                    <a class="ndt-button ndt-button--secondary" href="{% url 'chi_tiet_hoa_don_cua_toi' hd.id %}">Xem chi tiết</a>
+                    <a class="ndt-f5-button ndt-f5-button--secondary" href="{% url 'chi_tiet_hoa_don_cua_toi' hd.id %}">Xem chi tiết</a>
                     {% if hd.trang_thai == "chua_thanh_toan" or hd.trang_thai == "qua_han" %}
-                        <a class="ndt-button ndt-button--primary" href="{% url 'thanh_toan_hoa_don_cua_toi' hd.id %}">Thanh toán / Xem QR</a>
+                        <a class="ndt-f5-button ndt-f5-button--primary" href="{% url 'thanh_toan_hoa_don_cua_toi' hd.id %}">Thanh toán / QR</a>
                     {% endif %}
                 </div>
             </article>
         {% empty %}
-            <div class="billing-empty">
+            <div class="ndt-empty-state ndt-f5-empty billing-empty">
                 <p class="billing-empty__eyebrow">Hóa đơn</p>
                 <h2>Chưa có hóa đơn</h2>
                 <p>Hóa đơn sẽ xuất hiện khi hợp đồng của bạn phát sinh kỳ thu.</p>
-                <a class="ndt-button ndt-button--secondary" href="{% url 'tai_khoan' %}">Quay lại tài khoản</a>
+                <a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'tai_khoan' %}">Tài khoản</a>
             </div>
         {% endfor %}
     </section>
+  </div>
 </main>
 {% endblock %}

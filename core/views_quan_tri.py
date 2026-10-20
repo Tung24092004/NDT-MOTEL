@@ -33,11 +33,17 @@ from core.models import (
 from core.views_hop_dong import cap_nhat_trang_thai_hop_dong, cap_nhat_trang_thai_phong_theo_hop_dong
 from core.dich_vu.phan_quyen import la_admin
 from core.dich_vu.gallery_phong import chuan_bi_gallery_hien_thi
+from core.dich_vu.phong_cong_khai import (
+    co_the_dat_phong_cong_khai,
+    queryset_phong_cong_khai,
+)
+from core.dich_vu.home_panel import lay_home_panel_context
+from core.dich_vu.luu_tru import lay_hop_dong_luu_tru_hien_tai
 
 
 def home(request):
     """
-    Trang chủ PUBLIC hiển thị toàn bộ phòng.
+    Trang chủ PUBLIC giới thiệu một số phòng phù hợp để khám phá.
 
     Khách chưa đăng nhập vẫn có thể:
     - Xem phòng
@@ -53,15 +59,7 @@ def home(request):
     - so_nguoi_toi_da <= 0: chưa cấu hình
     """
 
-    phong = (
-        Phong.objects
-        .select_related("co_so")
-        .prefetch_related("hinh_anh")
-        .order_by(
-            "co_so__ten_co_so",
-            "so_phong",
-        )
-    )
+    phong = queryset_phong_cong_khai()
     phong = chuan_bi_gallery_hien_thi(phong)
 
     for item in phong:
@@ -69,22 +67,7 @@ def home(request):
         # -------------------------------------------------
         # HỢP ĐỒNG HIỆN TẠI
         # -------------------------------------------------
-        hop_dong_hien_tai = (
-            HopDong.objects
-            .filter(
-                dat_phong__phong=item,
-                trang_thai__in=[
-                    "dang_hieu_luc",
-                    "sap_het_han",
-                ],
-            )
-            .select_related(
-                "dat_phong",
-                "dat_phong__nguoi_thue",
-            )
-            .order_by("-id")
-            .first()
-        )
+        hop_dong_hien_tai = lay_hop_dong_luu_tru_hien_tai(phong=item)
 
         # -------------------------------------------------
         # SỨC CHỨA
@@ -191,12 +174,25 @@ def home(request):
             item.get_trang_thai_display()
         )
 
+        item.co_the_dat_phong_cong_khai = co_the_dat_phong_cong_khai(item)
+
+    phong = list(phong)
+    # Giữ thứ tự công khai ổn định, chỉ đưa phòng có thể đặt và có ảnh lên trước.
+    # Các phòng công khai khác sẽ bù vào khi chưa đủ sáu gợi ý.
+    phong_goi_y = sorted(
+        phong,
+        key=lambda item: (
+            not item.co_the_dat_phong_cong_khai,
+            not bool(item.anh_dai_dien_hien_thi),
+        ),
+    )[:6]
+
     return render(
         request,
         "core/home.html",
         {
-            "phong": phong,
-            "tong_so_phong": len(phong),
+            "phong_goi_y": phong_goi_y,
+            "home_panel": lay_home_panel_context(request),
         },
     )
 
@@ -232,9 +228,7 @@ def dashboard_admin(request):
 
     for hop_dong in cac_hop_dong:
 
-        cap_nhat_trang_thai_hop_dong(
-            hop_dong
-        )
+        pass
 
     # -----------------------------------------------------
     # ĐỒNG BỘ PHÒNG
@@ -242,9 +236,7 @@ def dashboard_admin(request):
 
     for hop_dong in cac_hop_dong:
 
-        cap_nhat_trang_thai_phong_theo_hop_dong(
-            hop_dong
-        )
+        pass
 
     # -----------------------------------------------------
     # THỐNG KÊ PHÒNG

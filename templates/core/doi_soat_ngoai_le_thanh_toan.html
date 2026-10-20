@@ -1,0 +1,68 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load bo_loc %}
+
+{% block page_title %}Đối soát ngoại lệ thanh toán{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/payment_exception_reconciliation_post_p6.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="ndt-f5 ndt-payment-reconciliation ndt-f5-page">
+  <div class="ndt-f5-container ndt-f5-container--full">
+    <header class="ndt-f5-page-header">
+      <div class="ndt-f5-page-header__content">
+        <div class="ndt-f5-breadcrumb"><a href="{% url 'quan_ly_hoa_don' %}">Tài chính</a> / Đối soát ngoại lệ</div>
+        <h1 class="ndt-f5-page-header__title">Đối soát ngoại lệ thanh toán</h1>
+        <p class="ndt-f5-page-header__description">Hàng đợi hợp nhất trạng thái hiện tại của tiền cọc và hóa đơn. Đây không phải lịch sử bất biến của các lần tải chứng từ.</p>
+      </div>
+      <div class="ndt-f5-page-header__actions"><a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'quan_ly_hoa_don' %}">Quản lý hóa đơn</a></div>
+    </header>
+
+    <section class="payment-reconciliation-summary" aria-label="Tóm tắt kết quả đang lọc">
+      <article><span>Kết quả</span><strong>{{ summary.tong_so }}</strong></article>
+      <article><span>Cần xử lý</span><strong>{{ summary.can_xu_ly }}</strong></article>
+      <article><span>Đã từ chối</span><strong>{{ summary.tu_choi }}</strong></article>
+      <article><span>Bất nhất</span><strong>{{ summary.bat_nhat }}</strong></article>
+    </section>
+
+    <section class="ndt-f5-filter payment-reconciliation-filter" aria-labelledby="reconciliation-filter-title">
+      <h2 id="reconciliation-filter-title">Tìm kiếm và lọc trạng thái hiện tại</h2>
+      <form method="get" action="{% url 'doi_soat_ngoai_le_thanh_toan' %}">
+        <div class="ndt-f5-field payment-reconciliation-filter__search"><label class="ndt-f5-label" for="reconciliation-q">Từ khóa</label><input class="ndt-f5-control" id="reconciliation-q" type="search" name="q" maxlength="200" value="{{ q }}" placeholder="Mã đối chiếu, tenant, phòng hoặc cơ sở"></div>
+        <div class="ndt-f5-field"><label class="ndt-f5-label" for="reconciliation-type">Loại đối tượng</label><select class="ndt-f5-control" id="reconciliation-type" name="loai"><option value="">Tất cả</option><option value="coc" {% if loai == 'coc' %}selected{% endif %}>Tiền cọc</option><option value="hoa_don" {% if loai == 'hoa_don' %}selected{% endif %}>Hóa đơn</option></select></div>
+        <div class="ndt-f5-field"><label class="ndt-f5-label" for="reconciliation-kind">Phân loại</label><select class="ndt-f5-control" id="reconciliation-kind" name="phan_loai"><option value="can_xu_ly" {% if phan_loai == 'can_xu_ly' %}selected{% endif %}>Cần xử lý</option><option value="cho_doi_soat" {% if phan_loai == 'cho_doi_soat' %}selected{% endif %}>Chờ đối soát</option><option value="tien_mat_cho_doi_soat" {% if phan_loai == 'tien_mat_cho_doi_soat' %}selected{% endif %}>Tiền mặt chờ xác nhận</option><option value="thieu_chung_tu" {% if phan_loai == 'thieu_chung_tu' %}selected{% endif %}>Thiếu chứng từ / dữ liệu cũ</option><option value="bat_nhat" {% if phan_loai == 'bat_nhat' %}selected{% endif %}>Bất nhất trạng thái</option><option value="tu_choi" {% if phan_loai == 'tu_choi' %}selected{% endif %}>Đã từ chối</option><option value="da_chap_nhan" {% if phan_loai == 'da_chap_nhan' %}selected{% endif %}>Đã chấp nhận</option></select></div>
+        <div class="ndt-f5-field"><label class="ndt-f5-label" for="reconciliation-evidence">Trạng thái chứng từ</label><select class="ndt-f5-control" id="reconciliation-evidence" name="chung_tu"><option value="">Tất cả</option><option value="cho_doi_soat" {% if chung_tu == 'cho_doi_soat' %}selected{% endif %}>Chờ đối soát</option><option value="da_chap_nhan" {% if chung_tu == 'da_chap_nhan' %}selected{% endif %}>Đã chấp nhận</option><option value="tu_choi" {% if chung_tu == 'tu_choi' %}selected{% endif %}>Từ chối</option><option value="khong_co" {% if chung_tu == 'khong_co' %}selected{% endif %}>Không có chứng từ</option></select></div>
+        <div class="ndt-f5-field"><label class="ndt-f5-label" for="reconciliation-age">Tuổi chờ</label><select class="ndt-f5-control" id="reconciliation-age" name="tuoi"><option value="">Tất cả</option><option value="0_1" {% if tuoi == '0_1' %}selected{% endif %}>0–1 ngày</option><option value="2_3" {% if tuoi == '2_3' %}selected{% endif %}>2–3 ngày</option><option value="4_7" {% if tuoi == '4_7' %}selected{% endif %}>4–7 ngày</option><option value="8_plus" {% if tuoi == '8_plus' %}selected{% endif %}>Từ 8 ngày</option></select></div>
+        <div class="ndt-f5-field"><label class="ndt-f5-label" for="reconciliation-facility">Cơ sở</label><select class="ndt-f5-control" id="reconciliation-facility" name="co_so"><option value="">Tất cả</option>{% for facility in facilities %}<option value="{{ facility.pk }}" {% if co_so == facility.pk|stringformat:'s' %}selected{% endif %}>{{ facility.ten_co_so }}</option>{% endfor %}</select></div>
+        <div class="payment-reconciliation-filter__actions"><button class="ndt-f5-button ndt-f5-button--primary" type="submit">Áp dụng</button>{% if q or loai or chung_tu or tuoi or co_so or phan_loai != 'can_xu_ly' %}<a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'doi_soat_ngoai_le_thanh_toan' %}">Đặt lại</a>{% endif %}</div>
+      </form>
+    </section>
+
+    {% if rows %}
+    <section class="ndt-f5-panel payment-reconciliation-results" aria-labelledby="reconciliation-results-title">
+      <div class="payment-reconciliation-results__heading"><div><span class="ndt-f5-eyebrow">Current state</span><h2 id="reconciliation-results-title">{{ page_obj.paginator.count }} kết quả</h2></div><p>Ưu tiên bản ghi cũ nhất; thao tác xử lý vẫn thực hiện tại màn chi tiết hiện hữu.</p></div>
+      <div class="ndt-f5-table-wrap">
+        <table class="ndt-f5-table"><thead><tr><th>Đối tượng</th><th>Tenant / phòng</th><th>Số tiền</th><th>Trạng thái</th><th>Thời điểm</th><th>Xử lý</th></tr></thead><tbody>
+        {% for row in rows %}
+          <tr>
+            <td data-label="Đối tượng"><strong>{{ row.target_type_label }} · {{ row.object_label }}</strong><small>{{ row.reference }}</small></td>
+            <td data-label="Tenant / phòng"><strong>{{ row.tenant_name }}</strong><small>{{ row.facility_name }} / Phòng {{ row.room_label }}</small></td>
+            <td data-label="Số tiền"><strong>{{ row.amount|vnd }} VNĐ</strong></td>
+            <td data-label="Trạng thái"><span class="payment-reconciliation-badge payment-reconciliation-badge--{{ row.kind }}">{{ row.kind_label }}</span><small>{{ row.evidence_status_label }} · {{ row.target_status_label }}</small>{% if row.review_reason %}<p class="payment-reconciliation-reason"><strong>Lý do:</strong> {{ row.review_reason }}</p>{% endif %}</td>
+            <td data-label="Thời điểm"><strong>{{ row.submitted_at|date:'d/m/Y H:i' }}</strong><small>{{ row.age_days }} ngày · {{ row.reviewer }}</small></td>
+            <td data-label="Xử lý"><a class="ndt-f5-button ndt-f5-button--primary ndt-f5-button--small" href="{{ row.detail_url }}">Mở chi tiết</a>{% if row.evidence_url %}<a class="ndt-f5-button ndt-f5-button--secondary ndt-f5-button--small" href="{{ row.evidence_url }}" target="_blank" rel="noopener">Mở chứng từ riêng tư</a>{% endif %}</td>
+          </tr>
+        {% endfor %}
+        </tbody></table>
+      </div>
+    </section>
+    {% else %}
+    <section class="ndt-f5-panel payment-reconciliation-empty"><h2>Không có ngoại lệ phù hợp</h2><p>Không có trạng thái hiện tại khớp bộ lọc. Hệ thống không tự thay đổi dữ liệu khi mở báo cáo này.</p></section>
+    {% endif %}
+
+    {% if page_obj.paginator.num_pages > 1 %}<nav class="payment-reconciliation-pagination" aria-label="Phân trang đối soát"><span>Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span><div>{% if page_obj.has_previous %}<a class="ndt-f5-button ndt-f5-button--secondary ndt-f5-button--small" href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">Trang trước</a>{% endif %}{% if page_obj.has_next %}<a class="ndt-f5-button ndt-f5-button--secondary ndt-f5-button--small" href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Trang sau</a>{% endif %}</div></nav>{% endif %}
+  </div>
+</div>
+{% endblock %}

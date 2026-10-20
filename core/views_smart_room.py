@@ -1,14 +1,18 @@
 """Nghiep vu smart room."""
+from datetime import datetime, time, timedelta
+
 import cv2
 import numpy as np
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.db.models import Q, Count, Exists, OuterRef
 from django.db import transaction
 from django.db import models
 from django.utils import timezone
 from django.utils.dateparse import parse_date
+from django.views.decorators.http import require_GET
 from django.core.exceptions import ValidationError
 from core.quy_tac_nghiep_vu import (
     contract_is_current, permission_binding_is_valid, eligible_permissions,
@@ -43,6 +47,9 @@ from core.models import (
 import base64
 import json
 import os
+import mimetypes
+import re
+from uuid import uuid4
 from django.conf import settings
 FACE_YUNET_MODEL = os.path.join(
     settings.BASE_DIR,
@@ -55,6 +62,24 @@ FACE_SFACE_MODEL = os.path.join(
     "face_recognition_sface_2021dec.onnx"
 )
 from core.dich_vu.phan_quyen import la_admin
+from core.dich_vu.luu_tru import (
+    danh_gia_xac_minh_nguoi_o_cung,
+    danh_gia_quyen_ra_vao,
+    danh_gia_hop_dong,
+    du_dieu_kien_dang_ky_face_id,
+    ly_do_nguoi_o_cung_chua_du_dieu_kien,
+    nguoi_o_cung_du_dieu_kien,
+    nguoi_thue_duoc_xac_thuc_cua,
+    quyen_ra_vao_con_hieu_luc,
+    thu_hoi_quyen_nguoi_o_cung,
+    trang_thai_xac_minh_nguoi_o_cung,
+)
+from core.dich_vu.phu_luc_hop_dong import ghi_nhan_thay_doi_cu_tru
+from core.dich_vu.yeu_cau_nguoi_o_cung import (
+    direct_admit, leave_residency, return_as_new_residency,
+)
+from core.dich_vu.quyen_ra_vao import grant_access, revoke_access
+from core.dich_vu.dong_y_sinh_trac_hoc import has_effective_consent
 
 
 def smart_room_dashboard(request):
@@ -286,7 +311,7 @@ def smart_room_dashboard(request):
         LichSuRaVao.objects
         .filter(
             nguon="camera",
-            ghi_chu__startswith="[CHO PHÉP]",
+            ket_qua="cho_phep",
         )
         .count()
     )
@@ -295,7 +320,7 @@ def smart_room_dashboard(request):
         LichSuRaVao.objects
         .filter(
             nguon="camera",
-            ghi_chu__startswith="[TỪ CHỐI]",
+            ket_qua="tu_choi",
         )
         .count()
     )
@@ -701,6 +726,7 @@ def smart_access_control(request):
                     ten_nguoi=nguoi.ho_ten,
                     loai_su_kien="vao",
                     nguon="camera",
+                    ket_qua=("cho_phep" if duoc_phep else "tu_choi"),
                     thoi_diem=timezone.now(),
                     ghi_chu=ghi_chu,
                 )
@@ -783,7 +809,7 @@ def quan_ly_nguoi_o_cung(request):
         )
 
     # Lọc theo trạng thái
-    if trang_thai_filter in ["dang_o", "da_roi"]:
+    if trang_thai_filter in dict(NguoiOCungPhong.TRANG_THAI):
         ds = ds.filter(
             trang_thai=trang_thai_filter
         )
@@ -891,6 +917,14 @@ def chi_tiet_nguoi_o_cung(request, id):
         .order_by("ho_ten")
     )
 
+    face_profile = FaceProfile.objects.filter(nguoi_o_cung=nguoi).first()
+    quyen_ra_vao = (
+        QuyenRaVao.objects.filter(nguoi_o_cung=nguoi)
+        .order_by("-id")
+        .first()
+    )
+    dieu_kien_xac_minh = danh_gia_xac_minh_nguoi_o_cung(nguoi)
+
     return render(
         request,
         "core/chi_tiet_nguoi_o_cung.html",
@@ -899,16 +933,26 @@ def chi_tiet_nguoi_o_cung(request, id):
             "phong": phong,
             "hop_dong": nguoi.hop_dong,
             "danh_sach_nguoi_o": danh_sach_nguoi_o,
+            "trang_thai_xac_minh": trang_thai_xac_minh_nguoi_o_cung(nguoi),
+            "dang_luu_tru": nguoi_o_cung_du_dieu_kien(nguoi),
+            "ly_do_chua_du_dieu_kien": ly_do_nguoi_o_cung_chua_du_dieu_kien(nguoi),
+            "face_profile": face_profile,
+            "quyen_ra_vao": quyen_ra_vao,
+            "quyen_con_hieu_luc": bool(quyen_ra_vao and quyen_ra_vao_con_hieu_luc(quyen_ra_vao)),
+            "co_the_xac_minh": dieu_kien_xac_minh.du_dieu_kien,
+            "ly_do_khong_the_xac_minh": dieu_kien_xac_minh.ly_do,
 
             # Thông tin sức chứa phòng
             "suc_chua": phong.so_nguoi_toi_da,
             "so_nguoi_dang_o": phong.so_nguoi_dang_o,
             "so_cho_con_lai": phong.so_cho_con_lai,
+            "leave_idempotency_key": uuid4().hex,
+            "return_idempotency_key": uuid4().hex,
         }
     )
 
 
-def tao_nguoi_o_cung(request):
+def _tao_nguoi_o_cung_retired(request):
     if not request.user.is_authenticated:
         return redirect("dang_nhap")
 
@@ -1148,6 +1192,19 @@ def tao_nguoi_o_cung(request):
         # KIỂM TRA CCCD
         # -------------------------------------------------
 
+        if cccd and not re.fullmatch(r"(?:\d{9}|\d{12})", cccd):
+            messages.error(request, "CCCD phải gồm 9 hoặc 12 chữ số.")
+            return render(
+                request,
+                "core/tao_nguoi_o_cung.html",
+                {
+                    "cac_hop_dong": cac_hop_dong,
+                    "phong": phong,
+                    "so_nguoi_dang_o": so_nguoi_dang_o,
+                    "so_cho_con_lai": so_cho_con_lai,
+                },
+            )
+
         if cccd:
 
             if NguoiThue.objects.filter(
@@ -1228,7 +1285,9 @@ def tao_nguoi_o_cung(request):
             cccd=cccd,
             so_dien_thoai=so_dien_thoai,
             quan_he=quan_he,
-            trang_thai="dang_o",
+            # Có CCCD hợp lệ mới chỉ là đủ hồ sơ để Admin đối chiếu thủ công;
+            # tuyệt đối không coi đó là xác minh chính thức hay đang lưu trú.
+            trang_thai="cho_xac_minh" if cccd else "cho_bo_sung",
             ngay_vao=ngay_vao,
             ghi_chu=ghi_chu,
         )
@@ -1255,7 +1314,7 @@ def tao_nguoi_o_cung(request):
         messages.success(
             request,
             (
-                f"Đã thêm {ho_ten} vào phòng {phong.so_phong}. "
+                f"Đã tạo hồ sơ {ho_ten} cho phòng {phong.so_phong}. "
                 f"Hiện có {phong.so_nguoi_dang_o}/{phong.so_nguoi_toi_da} người. "
                 f"Còn {phong.so_cho_con_lai} chỗ."
             )
@@ -1275,6 +1334,58 @@ def tao_nguoi_o_cung(request):
     )
 
 
+def tao_nguoi_o_cung(request):
+    """Admin direct-admit form; residency writes live only in the domain service."""
+    if not request.user.is_authenticated:
+        return redirect("dang_nhap")
+    if not la_admin(request):
+        return redirect("tai_khoan")
+
+    cac_hop_dong = (
+        HopDong.objects.select_related(
+            "dat_phong", "dat_phong__phong", "dat_phong__phong__co_so",
+            "dat_phong__nguoi_thue",
+        ).filter(
+            trang_thai__in=["dang_hieu_luc", "sap_het_han"],
+            dat_phong__trang_thai="da_duyet",
+        ).order_by("dat_phong__phong__so_phong")
+    )
+    if request.method == "POST":
+        try:
+            contract_id = int(request.POST.get("hop_dong", ""))
+            ngay_vao = parse_date(request.POST.get("ngay_vao", "").strip())
+            ngay_sinh_raw = request.POST.get("ngay_sinh", "").strip()
+            ngay_sinh = parse_date(ngay_sinh_raw) if ngay_sinh_raw else None
+            if ngay_sinh_raw and not ngay_sinh:
+                raise ValidationError("Ngay sinh khong hop le.")
+            resident, created = direct_admit(
+                contract_id=contract_id, actor=request.user,
+                idempotency_key=request.POST.get("idempotency_key", "").strip(),
+                ho_ten=request.POST.get("ho_ten", ""),
+                cccd=request.POST.get("cccd", ""), ngay_vao=ngay_vao,
+                ngay_sinh=ngay_sinh,
+                gioi_tinh=request.POST.get("gioi_tinh", "").strip(),
+                so_dien_thoai=request.POST.get("so_dien_thoai", "").strip(),
+                quan_he=request.POST.get("quan_he", "").strip(),
+            )
+        except (TypeError, ValueError, ValidationError) as exc:
+            messages.error(request, str(exc) or "Du lieu direct-admit khong hop le.")
+        except Exception:
+            messages.error(request, "Khong the ghi nhan nguoi o cung luc nay.")
+        else:
+            if created:
+                messages.success(request, "Da ghi nhan nguoi o cung da xac minh.")
+            else:
+                messages.info(request, "Yeu cau direct-admit nay da duoc ghi nhan truoc do.")
+            return redirect("chi_tiet_nguoi_o_cung", id=resident.pk)
+
+    return render(
+        request, "core/tao_nguoi_o_cung.html",
+        {"cac_hop_dong": cac_hop_dong, "idempotency_key": request.POST.get("idempotency_key") or uuid4().hex},
+    )
+
+
+@transaction.atomic
 def xu_ly_nguoi_o_cung(request, id):
     if not request.user.is_authenticated:
         return redirect("dang_nhap")
@@ -1302,6 +1413,137 @@ def xu_ly_nguoi_o_cung(request, id):
         "cap_nhat"
     ).strip()
 
+    # Residency lifecycle is canonicalized in the co-tenant domain service.
+    # Legacy verification actions cannot activate or otherwise mutate a
+    # residency now that direct-admit/request approval own that responsibility.
+    if hanh_dong in ("xac_minh", "cho_bo_sung", "tu_choi"):
+        messages.warning(request, "Thao tac legacy da duoc dong; hay dung quy trinh nguoi o cung moi.")
+        return redirect("chi_tiet_nguoi_o_cung", id=nguoi.id)
+
+    if hanh_dong == "roi_phong":
+        try:
+            resident, changed = leave_residency(
+                residency_id=nguoi.pk, actor=request.user,
+                idempotency_key=request.POST.get("idempotency_key") or f"leave:{nguoi.pk}",
+            )
+        except ValidationError as exc:
+            messages.error(request, str(exc) or "Khong the ghi nhan roi phong.")
+        except Exception:
+            messages.error(request, "Khong the ghi nhan roi phong luc nay.")
+        else:
+            messages.success(request, "Da ghi nhan roi phong." if changed else "Residency nay da duoc ghi nhan roi phong.")
+        return redirect("chi_tiet_nguoi_o_cung", id=resident.pk if 'resident' in locals() else nguoi.pk)
+
+    if hanh_dong == "quay_lai":
+        try:
+            resident, changed = return_as_new_residency(
+                residency_id=nguoi.pk, actor=request.user,
+                idempotency_key=request.POST.get("idempotency_key") or f"return:{nguoi.pk}",
+            )
+        except ValidationError as exc:
+            messages.error(request, str(exc) or "Khong the ghi nhan quay lai.")
+        except Exception:
+            messages.error(request, "Khong the ghi nhan quay lai luc nay.")
+        else:
+            messages.success(request, "Da tao dot luu tru moi." if changed else "Yeu cau quay lai nay da duoc ghi nhan truoc do.")
+        return redirect("chi_tiet_nguoi_o_cung", id=resident.pk if 'resident' in locals() else nguoi.pk)
+
+    if hanh_dong == "cap_nhat":
+        submitted_cccd = request.POST.get("cccd", nguoi.cccd).strip()
+        submitted_status = request.POST.get("trang_thai", nguoi.trang_thai).strip()
+        submitted_leave = request.POST.get("ngay_ra", "").strip()
+        existing_leave = nguoi.ngay_ra.isoformat() if nguoi.ngay_ra else ""
+        if submitted_cccd != nguoi.cccd or submitted_status != nguoi.trang_thai or submitted_leave != existing_leave:
+            messages.error(request, "CCCD va trang thai cu tru chi duoc thay doi qua quy trinh canonical.")
+            return redirect("chi_tiet_nguoi_o_cung", id=nguoi.pk)
+        ho_ten = request.POST.get("ho_ten", nguoi.ho_ten).strip()
+        if not ho_ten:
+            messages.error(request, "Ho ten khong duoc de trong.")
+            return redirect("chi_tiet_nguoi_o_cung", id=nguoi.pk)
+        ngay_sinh_raw = request.POST.get("ngay_sinh", "").strip()
+        ngay_sinh = parse_date(ngay_sinh_raw) if ngay_sinh_raw else None
+        if ngay_sinh_raw and not ngay_sinh:
+            messages.error(request, "Ngay sinh khong hop le.")
+            return redirect("chi_tiet_nguoi_o_cung", id=nguoi.pk)
+        nguoi.ho_ten = ho_ten
+        nguoi.ngay_sinh = ngay_sinh
+        nguoi.gioi_tinh = request.POST.get("gioi_tinh", nguoi.gioi_tinh).strip()
+        nguoi.so_dien_thoai = request.POST.get("so_dien_thoai", nguoi.so_dien_thoai).strip()
+        nguoi.quan_he = request.POST.get("quan_he", nguoi.quan_he).strip()
+        nguoi.ghi_chu = request.POST.get("ghi_chu", nguoi.ghi_chu).strip()
+        nguoi.save(update_fields=["ho_ten", "ngay_sinh", "gioi_tinh", "so_dien_thoai", "quan_he", "ghi_chu", "ngay_cap_nhat"])
+        messages.success(request, "Da cap nhat thong tin ho so.")
+        return redirect("chi_tiet_nguoi_o_cung", id=nguoi.pk)
+
+    if hanh_dong in ("xac_minh", "cho_bo_sung", "tu_choi"):
+        trang_thai_cu = nguoi.trang_thai
+        xac_minh_cu = nguoi.da_xac_minh_boi_admin
+        so_quyen_thu_hoi = 0
+        if hanh_dong == "xac_minh":
+            dieu_kien = danh_gia_xac_minh_nguoi_o_cung(nguoi)
+            if not dieu_kien.du_dieu_kien:
+                messages.error(request, dieu_kien.ly_do)
+                return redirect("chi_tiet_nguoi_o_cung", id=nguoi.id)
+            nguoi.da_xac_minh_boi_admin = True
+            if nguoi.trang_thai != "da_roi":
+                nguoi.trang_thai = (
+                    "dang_o" if nguoi.ngay_vao <= timezone.localdate() else "da_xac_minh"
+                )
+                nguoi.ngay_ra = None
+            messages.success(request, "Đã xác minh thủ công hồ sơ người ở cùng.")
+        elif hanh_dong == "cho_bo_sung":
+            nguoi.da_xac_minh_boi_admin = False
+            nguoi.trang_thai = "cho_bo_sung"
+            so_quyen_thu_hoi = thu_hoi_quyen_nguoi_o_cung(
+                nguoi, nguon="Admin", trang_thai="bi_thu_hoi"
+            )
+            messages.success(request, "Đã chuyển hồ sơ sang chờ bổ sung.")
+        else:
+            nguoi.da_xac_minh_boi_admin = False
+            nguoi.trang_thai = "tu_choi"
+            so_quyen_thu_hoi = thu_hoi_quyen_nguoi_o_cung(
+                nguoi, nguon="Admin", trang_thai="bi_thu_hoi"
+            )
+            messages.success(request, "Đã từ chối hồ sơ người ở cùng.")
+        nguoi.save(update_fields=[
+            "trang_thai", "ngay_ra", "da_xac_minh_boi_admin", "ngay_cap_nhat"
+        ])
+        ghi_nhan_thay_doi_cu_tru(
+            resident=nguoi,
+            event={
+                "xac_minh": "them_sau_ky",
+                "cho_bo_sung": "yeu_cau_bo_sung",
+                "tu_choi": "tu_choi",
+            }[hanh_dong],
+            actor=request.user,
+            reason=f"Admin xu ly ho so: {hanh_dong}.",
+        )
+        ghi_nhat_ky(
+            request=request,
+            hanh_dong={
+                "xac_minh": "duyet",
+                "cho_bo_sung": "cap_nhat",
+                "tu_choi": "tu_choi",
+            }[hanh_dong],
+            module="Smart Room",
+            doi_tuong="NguoiOCungPhong",
+            doi_tuong_id=nguoi.id,
+            tieu_de=f"Xử lý hồ sơ người ở cùng #{nguoi.id}",
+            noi_dung=(
+                f"Admin xử lý '{hanh_dong}' hồ sơ #{nguoi.id}; "
+                f"thu hồi {so_quyen_thu_hoi} quyền ra vào."
+            ),
+            du_lieu_cu={
+                "trang_thai": trang_thai_cu,
+                "da_xac_minh_boi_admin": xac_minh_cu,
+            },
+            du_lieu_moi={
+                "trang_thai": nguoi.trang_thai,
+                "da_xac_minh_boi_admin": nguoi.da_xac_minh_boi_admin,
+            },
+        )
+        return redirect("chi_tiet_nguoi_o_cung", id=nguoi.id)
+
     # =====================================================
     # 1. ĐÁNH DẤU RỜI PHÒNG
     # =====================================================
@@ -1312,6 +1554,10 @@ def xu_ly_nguoi_o_cung(request, id):
             and request.POST.get("trang_thai", "").strip() == "dang_o")
     ) and not contract_is_current(nguoi.hop_dong):
         messages.error(request, "Hợp đồng này hiện không còn hiệu lực.")
+        return redirect("chi_tiet_nguoi_o_cung", id=nguoi.id)
+
+    if hanh_dong == "quay_lai" and not nguoi.da_xac_minh_boi_admin:
+        messages.error(request, "Cần Admin xác minh hồ sơ trước khi ghi nhận đang ở lại.")
         return redirect("chi_tiet_nguoi_o_cung", id=nguoi.id)
 
     if hanh_dong == "roi_phong":
@@ -1326,15 +1572,15 @@ def xu_ly_nguoi_o_cung(request, id):
                 "ngay_cap_nhat",
             ]
         )
+        ghi_nhan_thay_doi_cu_tru(
+            resident=nguoi,
+            event="roi_sau_ky",
+            actor=request.user,
+            reason="Admin ghi nhan nguoi o cung roi phong.",
+        )
 
         # Thu hồi toàn bộ quyền ra vào đang hoạt động
-        QuyenRaVao.objects.filter(hop_dong=nguoi.hop_dong, nguon_cap__in=KNOWN_PERMISSION_SOURCES,
-            nguoi_o_cung=nguoi,
-            trang_thai="hoat_dong"
-        ).update(
-            trang_thai="het_han",
-            ngay_ket_thuc=timezone.localdate()
-        )
+        thu_hoi_quyen_nguoi_o_cung(nguoi, nguon="Admin")
 
         messages.success(
             request,
@@ -1384,6 +1630,12 @@ def xu_ly_nguoi_o_cung(request, id):
                 "ngay_cap_nhat",
             ]
         )
+        ghi_nhan_thay_doi_cu_tru(
+            resident=nguoi,
+            event="them_sau_ky",
+            actor=request.user,
+            reason="Admin ghi nhan nguoi o cung quay lai.",
+        )
 
         messages.success(
             request,
@@ -1400,6 +1652,12 @@ def xu_ly_nguoi_o_cung(request, id):
     # =====================================================
 
     if hanh_dong == "xoa":
+        messages.error(
+            request,
+            "Hồ sơ residency được lưu lịch sử; hãy ghi nhận rời phòng thay vì xóa.",
+        )
+        return redirect("chi_tiet_nguoi_o_cung", id=nguoi.pk)
+
         if QuyenRaVao.objects.filter(nguoi_o_cung=nguoi).filter(
             Q(hop_dong__isnull=True) | Q(nguon_cap="legacy_unknown")
         ).exists():
@@ -1493,10 +1751,7 @@ def xu_ly_nguoi_o_cung(request, id):
     # 4.2. KIỂM TRA TRẠNG THÁI
     # =====================================================
 
-    if trang_thai not in [
-        "dang_o",
-        "da_roi",
-    ]:
+    if trang_thai not in dict(NguoiOCungPhong.TRANG_THAI):
         messages.error(
             request,
             "Trạng thái không hợp lệ."
@@ -1510,6 +1765,10 @@ def xu_ly_nguoi_o_cung(request, id):
     # =====================================================
     # 4.3. KIỂM TRA CCCD
     # =====================================================
+
+    if cccd and not re.fullmatch(r"(?:\d{9}|\d{12})", cccd):
+        messages.error(request, "CCCD phải gồm 9 hoặc 12 chữ số.")
+        return redirect("chi_tiet_nguoi_o_cung", id=nguoi.id)
 
     if cccd:
 
@@ -1660,11 +1919,14 @@ def xu_ly_nguoi_o_cung(request, id):
 
         nguoi.ngay_ra = None
 
-    else:
+    elif trang_thai == "da_roi":
 
         # Nếu chuyển sang đã rời mà chưa nhập ngày
         # thì tự lấy ngày hiện tại
         nguoi.ngay_ra = ngay_ra or timezone.localdate()
+
+    else:
+        nguoi.ngay_ra = None
 
     nguoi.save()
 
@@ -1675,12 +1937,10 @@ def xu_ly_nguoi_o_cung(request, id):
 
     if trang_thai == "da_roi":
 
-        QuyenRaVao.objects.filter(hop_dong=nguoi.hop_dong, nguon_cap__in=KNOWN_PERMISSION_SOURCES,
-            nguoi_o_cung=nguoi,
-            trang_thai="hoat_dong"
-        ).update(
-            trang_thai="het_han",
-            ngay_ket_thuc=nguoi.ngay_ra
+        thu_hoi_quyen_nguoi_o_cung(
+            nguoi,
+            ngay_thu_hoi=nguoi.ngay_ra,
+            nguon="Admin",
         )
 
     # =====================================================
@@ -1852,27 +2112,46 @@ def _face_compare(
 
 def _smart_room_hop_dong_hop_le_cua_face_profile(fp):
     # Read-only, unique resolution. Never synchronize unrelated historical stays.
-    if bool(fp.nguoi_thue_id) == bool(fp.nguoi_o_cung_id):
+    if bool(fp.nguoi_thue_id) == bool(fp.danh_tinh_nguoi_o_cung_id):
         return None
-    if fp.nguoi_o_cung_id:
-        resident = fp.nguoi_o_cung
+    if fp.danh_tinh_nguoi_o_cung_id:
+        resident = (
+            fp.danh_tinh_nguoi_o_cung.lich_su_luu_tru
+            .select_related("hop_dong__dat_phong__phong")
+            .filter(trang_thai="dang_o")
+            .order_by("-ngay_vao", "-pk")
+            .first()
+        )
+        if not resident:
+            return None
         hd = resident.hop_dong
-        return hd if resident.trang_thai == "dang_o" and contract_is_current(hd) else None
+        return hd if nguoi_o_cung_du_dieu_kien(resident) else None
     today = timezone.localdate()
     candidates = list(HopDong.objects.select_related("dat_phong__phong").filter(
         dat_phong__nguoi_thue_id=fp.nguoi_thue_id, dat_phong__trang_thai="da_duyet",
         trang_thai__in=("dang_hieu_luc", "sap_het_han"),
         ngay_bat_dau__lte=today, ngay_ket_thuc__gte=today,
     )[:2])
-    return candidates[0] if len(candidates) == 1 else None
+    if len(candidates) != 1:
+        return None
+
+    hop_dong = candidates[0]
+    nguoi_thue = hop_dong.dat_phong.nguoi_thue
+
+    if not nguoi_thue_duoc_xac_thuc_cua(
+        nguoi_thue,
+        hop_dong=hop_dong,
+        today=today,
+    ):
+        return None
+
+    return hop_dong
 
 
 def _smart_room_hop_dong_cua_quyen(quyen):
     if not permission_binding_is_valid(quyen):
         return None
-    if quyen.nguoi_o_cung_id and quyen.nguoi_o_cung.trang_thai != "dang_o":
-        return None
-    return quyen.hop_dong if contract_is_current(quyen.hop_dong) else None
+    return quyen.hop_dong if quyen_ra_vao_con_hieu_luc(quyen) else None
 
 
 def _smart_room_user_co_quyen_voi_face_profile(request, fp):
@@ -1886,6 +2165,71 @@ def _smart_room_user_co_quyen_voi_face_profile(request, fp):
     )
 
 
+def _face_profile_consent_from_post(request):
+    return request.POST.get("dong_y_du_lieu_khuon_mat") in {
+        "1",
+        "true",
+        "on",
+        "yes",
+    }
+
+
+def _face_profile_apply_consent(fp):
+    if not fp.dong_y_du_lieu_khuon_mat:
+        fp.dong_y_du_lieu_khuon_mat = True
+        fp.thoi_diem_dong_y_du_lieu_khuon_mat = timezone.now()
+
+
+def _face_profile_has_consent(fp, request):
+    if fp.dong_y_du_lieu_khuon_mat:
+        return True
+
+    if _face_profile_consent_from_post(request):
+        _face_profile_apply_consent(fp)
+        return True
+
+    return False
+
+
+def face_profile_image(request, id):
+    if not request.user.is_authenticated:
+        raise Http404("Không tìm thấy ảnh Face ID.")
+
+    fp = get_object_or_404(
+        FaceProfile.objects.select_related(
+            "nguoi_thue",
+            "nguoi_thue__tai_khoan",
+            "nguoi_o_cung",
+        ),
+        id=id,
+    )
+
+    if not _smart_room_user_co_quyen_voi_face_profile(request, fp):
+        raise Http404("Không tìm thấy ảnh Face ID.")
+
+    if not fp.anh_dai_dien:
+        raise Http404("Không tìm thấy ảnh Face ID.")
+
+    content_type = (
+        mimetypes.guess_type(fp.anh_dai_dien.name)[0]
+        or "application/octet-stream"
+    )
+
+    try:
+        image_file = fp.anh_dai_dien.open("rb")
+    except (FileNotFoundError, OSError):
+        raise Http404("Không tìm thấy ảnh Face ID.")
+
+    response = FileResponse(image_file, content_type=content_type)
+    response["Cache-Control"] = "private, no-store"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
+def face_profile_media(request, path):
+    raise Http404("Không tìm thấy ảnh Face ID.")
+
+
 def _smart_room_dong_bo_quyen_sau_dang_ky(fp, hop_dong, request):
     """Enrollment may reuse only permissions from this exact stay and auto source."""
     with transaction.atomic():
@@ -1894,7 +2238,15 @@ def _smart_room_dong_bo_quyen_sau_dang_ky(fp, hop_dong, request):
         resolved = _smart_room_hop_dong_hop_le_cua_face_profile(fp)
         if not resolved or resolved.pk != hop_dong.pk or not contract_is_current(hop_dong):
             raise ValidationError("Không xác định duy nhất hợp đồng hợp lệ để cấp quyền.")
-        subject = dict(nguoi_thue_id=fp.nguoi_thue_id, nguoi_o_cung_id=fp.nguoi_o_cung_id)
+        resident = None
+        if fp.danh_tinh_nguoi_o_cung_id:
+            resident = (
+                fp.danh_tinh_nguoi_o_cung.lich_su_luu_tru.select_for_update()
+                .filter(hop_dong=hop_dong, trang_thai="dang_o").first()
+            )
+            if not resident:
+                raise ValidationError("Danh tinh khong con cu tru hop le tai hop dong nay.")
+        subject = dict(nguoi_thue_id=fp.nguoi_thue_id, nguoi_o_cung_id=resident.pk if resident else None)
         kind = "chu_phong" if fp.nguoi_thue_id else "nguoi_o_cung"
         existing = (QuyenRaVao.objects.select_for_update().filter(
             hop_dong=hop_dong, phong_id=hop_dong.dat_phong.phong_id,
@@ -1906,13 +2258,18 @@ def _smart_room_dong_bo_quyen_sau_dang_ky(fp, hop_dong, request):
                 existing.ngay_ket_thuc = hop_dong.ngay_ket_thuc
                 existing.save(update_fields=["ngay_ket_thuc", "ngay_cap_nhat"])
             return existing, False
-        right = QuyenRaVao.objects.create(
-            hop_dong=hop_dong, nguon_cap="face_id", phong_id=hop_dong.dat_phong.phong_id,
-            loai_quyen=kind, trang_thai="hoat_dong", **subject,
-            ngay_bat_dau=timezone.localdate(), ngay_ket_thuc=hop_dong.ngay_ket_thuc,
-            nguoi_tao=request.user,
+        if resident:
+            # Co-tenant biometrics identify a person; they never create room access.
+            raise ValidationError("Nguoi o cung chua co quyen ra vao hop le de dong bo Face ID.")
+        return grant_access(
+            contract_id=hop_dong.pk,
+            tenant_id=fp.nguoi_thue_id,
+            resident_id=None,
+            source="face_id",
+            actor=request.user,
+            start_date=timezone.localdate(),
+            end_date=hop_dong.ngay_ket_thuc,
         )
-        return right, True
 
 
 def nhan_dien_su_dung_phong(request):
@@ -1934,10 +2291,19 @@ def nhan_dien_su_dung_phong(request):
     )
 
     if not hop_dong:
+        hop_dong_gan_nhat = (
+            HopDong.objects.select_related("dat_phong")
+            .filter(dat_phong__nguoi_thue=nguoi_thue)
+            .order_by("-ngay_ket_thuc", "-id")
+            .first()
+        )
+        ly_do = danh_gia_hop_dong(hop_dong_gan_nhat).ly_do
+        if nguoi_thue.trang_thai_luu_tru == "da_tra_phong":
+            ly_do = "Người thuê đã trả phòng, không còn đủ điều kiện Face ID."
         return render(
             request,
             "core/face_id_unavailable.html",
-            {"nguoi_thue": nguoi_thue},
+            {"nguoi_thue": nguoi_thue, "ly_do_khong_du_dieu_kien": ly_do},
         )
 
     with transaction.atomic():
@@ -1970,6 +2336,7 @@ def quan_ly_face_profile(request):
 
     ds = FaceProfile.objects.select_related(
         "nguoi_thue",
+        "danh_tinh_nguoi_o_cung",
         "nguoi_o_cung__hop_dong__dat_phong__phong",
     ).order_by("-ngay_tao")
 
@@ -1985,12 +2352,13 @@ def quan_ly_face_profile(request):
 
 def chi_tiet_face_profile(request, id):
     if not request.user.is_authenticated:
-        return redirect("dang_nhap")
+        raise Http404("Không tìm thấy hồ sơ Face ID.")
 
     fp = get_object_or_404(
         FaceProfile.objects.select_related(
             "nguoi_thue",
             "nguoi_thue__tai_khoan",
+            "danh_tinh_nguoi_o_cung",
             "nguoi_o_cung",
             "nguoi_o_cung__hop_dong",
             "nguoi_o_cung__hop_dong__dat_phong",
@@ -2004,11 +2372,7 @@ def chi_tiet_face_profile(request, id):
         request,
         fp
     ):
-        messages.error(
-            request,
-            "Bạn không có quyền truy cập hồ sơ nhận diện này."
-        )
-        return redirect("tai_khoan")
+        raise Http404("Không tìm thấy hồ sơ Face ID.")
 
     hop_dong = _smart_room_hop_dong_hop_le_cua_face_profile(fp)
 
@@ -2031,10 +2395,18 @@ def chi_tiet_face_profile(request, id):
             quyen_ra_vao = quyen_qs.filter(
                 nguoi_thue_id=fp.nguoi_thue_id
             ).first()
-        elif fp.nguoi_o_cung_id:
+        elif fp.danh_tinh_nguoi_o_cung_id:
             quyen_ra_vao = quyen_qs.filter(
-                nguoi_o_cung_id=fp.nguoi_o_cung_id
+                nguoi_o_cung__identity_id=fp.danh_tinh_nguoi_o_cung_id,
+                nguoi_o_cung__trang_thai="dang_o",
             ).first()
+
+    dieu_kien_face = du_dieu_kien_dang_ky_face_id(fp, hop_dong)
+    chi_thieu_consent = bool(
+        fp.nguoi_thue_id
+        and hop_dong
+        and dieu_kien_face.ly_do == "Chưa ghi nhận consent dữ liệu khuôn mặt."
+    )
 
     context = {
         "fp": fp,
@@ -2047,10 +2419,8 @@ def chi_tiet_face_profile(request, id):
             and fp.nguoi_thue
             and fp.nguoi_thue.tai_khoan_id == request.user.id
         ),
-        "co_the_dang_ky_face": bool(
-            hop_dong
-            and fp.trang_thai != "bi_vo_hieu"
-        ),
+        "co_the_dang_ky_face": bool(dieu_kien_face.du_dieu_kien or chi_thieu_consent),
+        "ly_do_khong_du_dieu_kien_face": dieu_kien_face.ly_do,
     }
 
     return render(
@@ -2072,6 +2442,7 @@ def tao_face_profile(request):
         nguoi_o_cung_id = request.POST.get("nguoi_o_cung", "").strip()
         loai_chu_the = request.POST.get("loai_chu_the", "").strip()
         ghi_chu = request.POST.get("ghi_chu", "").strip()
+        dong_y_du_lieu_khuon_mat = _face_profile_consent_from_post(request)
 
         co_nguoi_thue = bool(nguoi_thue_id)
         co_nguoi_o_cung = bool(nguoi_o_cung_id)
@@ -2155,13 +2526,19 @@ def tao_face_profile(request):
             elif (
                 nguoi_o_cung
                 and FaceProfile.objects.filter(
-                    nguoi_o_cung=nguoi_o_cung
+                    danh_tinh_nguoi_o_cung=nguoi_o_cung.identity
                 ).exists()
             ):
                 messages.error(
                     request,
                     "Người ở cùng này đã có FaceProfile."
                 )
+
+            elif nguoi_o_cung:
+                # A residency selector cannot supply another adult's personal
+                # consent.  The later consent UI will create an identity-bound
+                # profile; this legacy form must fail closed meanwhile.
+                messages.error(request, "Nguoi o cung can dong y sinh trac hoc ca nhan do Admin ghi nhan.")
 
             else:
                 # =================================================
@@ -2171,12 +2548,22 @@ def tao_face_profile(request):
                 # từ webcam ở bước đăng ký Face ID.
                 # =================================================
 
+                if not dong_y_du_lieu_khuon_mat:
+                    messages.error(
+                        request,
+                        "Cần ghi nhận đồng ý sử dụng dữ liệu khuôn mặt trước khi tạo FaceProfile."
+                    )
+                    return redirect("tao_face_profile")
+
                 fp = FaceProfile.objects.create(
                     nguoi_thue=nguoi_thue,
-                    nguoi_o_cung=nguoi_o_cung,
+                    danh_tinh_nguoi_o_cung=None,
+                    nguoi_o_cung=None,
                     loai_chu_the=loai_chu_the,
                     anh_dai_dien=None,
                     face_encoding=None,
+                    dong_y_du_lieu_khuon_mat=True,
+                    thoi_diem_dong_y_du_lieu_khuon_mat=timezone.now(),
                     trang_thai="chua_co_anh",
                     ghi_chu=ghi_chu,
                 )
@@ -2310,6 +2697,28 @@ def face_id_dang_ky(request, id):
                         )
                     },
                     status=403
+                )
+
+            if not _face_profile_has_consent(fp, request):
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": (
+                            "Cần xác nhận đồng ý sử dụng dữ liệu khuôn mặt "
+                            "trước khi đăng ký Face ID."
+                        )
+                    },
+                    status=400
+                )
+
+            dieu_kien_face = du_dieu_kien_dang_ky_face_id(fp, hop_dong)
+            if not dieu_kien_face.du_dieu_kien:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": dieu_kien_face.ly_do,
+                    },
+                    status=403,
                 )
 
             phong = hop_dong.dat_phong.phong
@@ -2659,6 +3068,15 @@ def face_id_dang_ky(request, id):
                 }
             )
 
+    except Http404:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Không tìm thấy hồ sơ Face ID."
+            },
+            status=404
+        )
+
     except ValueError as e:
         return JsonResponse(
             {
@@ -2757,11 +3175,8 @@ def face_id_xac_thuc(request):
         """
         Ghi lịch sử cho cả lượt được phép và bị từ chối.
 
-        Model LichSuRaVao hiện chưa có field ket_qua riêng,
-        nên kết quả được chuẩn hóa ở đầu ghi_chu:
-        [CHO PHÉP] / [TỪ CHỐI].
-
-        Không dùng hard-delete lịch sử.
+        Kết quả được lưu bằng field cấu trúc; nhãn trong ghi_chu chỉ còn
+        phục vụ khả năng đọc và tương thích lịch sử. Không hard-delete log.
         """
 
         if ket_qua == "cho_phep":
@@ -2782,6 +3197,7 @@ def face_id_xac_thuc(request):
             ten_nguoi=ten_nguoi or "",
             loai_su_kien=loai_su_kien,
             nguon="camera",
+            ket_qua=ket_qua,
             thoi_diem=timezone.now(),
             ghi_chu=chi_tiet,
         )
@@ -2940,6 +3356,10 @@ def face_id_xac_thuc(request):
                 flat=True
             )
         )
+        danh_tinh_nguoi_o_cung_ids = list(
+            NguoiOCungPhong.objects.filter(pk__in=nguoi_o_cung_ids)
+            .values_list("identity_id", flat=True)
+        )
 
         # =====================================================
         # PHÒNG KHÔNG CÓ QUYỀN FACE ID ĐANG HOẠT ĐỘNG
@@ -2980,14 +3400,16 @@ def face_id_xac_thuc(request):
         face_profiles = (
             FaceProfile.objects
             .filter(trang_thai="da_xac_thuc")
+            .filter(dong_y_du_lieu_khuon_mat=True)
             .filter(
                 Q(nguoi_thue_id__in=nguoi_thue_ids)
                 | Q(
-                    nguoi_o_cung_id__in=nguoi_o_cung_ids
+                    danh_tinh_nguoi_o_cung_id__in=danh_tinh_nguoi_o_cung_ids
                 )
             )
             .select_related(
                 "nguoi_thue",
+                "danh_tinh_nguoi_o_cung",
                 "nguoi_o_cung",
             )
         )
@@ -3020,6 +3442,10 @@ def face_id_xac_thuc(request):
         best_score = -1.0
 
         for fp in face_profiles:
+            if fp.danh_tinh_nguoi_o_cung_id and not has_effective_consent(
+                fp.danh_tinh_nguoi_o_cung
+            ):
+                continue
             saved_feature = _face_feature_from_text(
                 fp.face_encoding
             )
@@ -3103,12 +3529,15 @@ def face_id_xac_thuc(request):
         else:
             quyen = (
                 quyen_hop_le
-                .filter(nguoi_o_cung=nguoi_o_cung)
+                .filter(
+                    nguoi_o_cung__identity_id=best_profile.danh_tinh_nguoi_o_cung_id,
+                    nguoi_o_cung__trang_thai="dang_o",
+                )
                 .order_by("-id")
                 .first()
             )
-
-            ten_nguoi = nguoi_o_cung.ho_ten
+            nguoi_o_cung = quyen.nguoi_o_cung if quyen else None
+            ten_nguoi = nguoi_o_cung.ho_ten if nguoi_o_cung else "Nguoi o cung"
 
         # =====================================================
         # TRƯỜNG HỢP QUYỀN BIẾN ĐỘNG TRONG LÚC XÁC THỰC
@@ -3195,6 +3624,16 @@ def face_id_xac_thuc(request):
             }
         )
 
+    except Http404:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Không tìm thấy phòng cần xác thực.",
+                "access": "error",
+            },
+            status=404
+        )
+
     except ValueError as e:
         return JsonResponse(
             {
@@ -3254,6 +3693,16 @@ def xu_ly_face_profile(request, id):
             anh = request.FILES.get(
                 "anh_dai_dien"
             )
+
+            if not _face_profile_has_consent(fp, request):
+                messages.error(
+                    request,
+                    "Cần ghi nhận đồng ý sử dụng dữ liệu khuôn mặt trước khi cập nhật ảnh FaceProfile."
+                )
+                return redirect(
+                    "chi_tiet_face_profile",
+                    id=fp.id
+                )
 
             if not anh:
                 messages.error(
@@ -3330,15 +3779,28 @@ def xu_ly_face_profile(request, id):
                     )
                 )
 
+            elif (
+                trang_thai_moi == "da_xac_thuc"
+                and not _face_profile_has_consent(fp, request)
+            ):
+                messages.error(
+                    request,
+                    "Cần ghi nhận đồng ý sử dụng dữ liệu khuôn mặt trước khi xác thực FaceProfile."
+                )
+
             else:
                 fp.trang_thai = trang_thai_moi
                 fp.ghi_chu = ghi_chu_moi
-                fp.save(
-                    update_fields=[
-                        "trang_thai",
-                        "ghi_chu",
-                    ]
-                )
+                update_fields = [
+                    "trang_thai",
+                    "ghi_chu",
+                ]
+                if fp.dong_y_du_lieu_khuon_mat:
+                    update_fields.extend([
+                        "dong_y_du_lieu_khuon_mat",
+                        "thoi_diem_dong_y_du_lieu_khuon_mat",
+                    ])
+                fp.save(update_fields=update_fields)
 
                 so_quyen_thu_hoi = 0
 
@@ -3479,6 +3941,112 @@ def xu_ly_face_profile(request, id):
         "chi_tiet_face_profile",
         id=fp.id
     )
+
+
+@require_GET
+def quyen_va_lich_su_ra_vao_cua_toi(request):
+    """Read-only, owner-scoped access status and history for a principal tenant."""
+    if not request.user.is_authenticated:
+        return redirect("dang_nhap")
+    if la_admin(request):
+        return redirect("dashboard_admin")
+
+    nguoi_thue = get_object_or_404(NguoiThue, tai_khoan=request.user)
+
+    quyen_goc = (
+        QuyenRaVao.objects
+        .filter(nguoi_thue=nguoi_thue)
+        .select_related(
+            "phong__co_so",
+            "hop_dong__dat_phong__phong",
+            "nguoi_thue",
+        )
+        .order_by("-ngay_tao", "-id")
+    )
+    lich_su_goc = (
+        LichSuRaVao.objects
+        .filter(nguoi_thue=nguoi_thue)
+        .select_related("phong__co_so", "quyen_ra_vao")
+        .order_by("-thoi_diem", "-id")
+    )
+
+    trang_thai = request.GET.get("trang_thai", "").strip()
+    phong_id = request.GET.get("phong", "").strip()
+    loai = request.GET.get("loai", "").strip()
+    nguon = request.GET.get("nguon", "").strip()
+    ket_qua = request.GET.get("ket_qua", "").strip()
+    tu_ngay_raw = request.GET.get("tu_ngay", "").strip()
+    den_ngay_raw = request.GET.get("den_ngay", "").strip()
+
+    trang_thai_hop_le = {value for value, _label in QuyenRaVao.TRANG_THAI}
+    loai_hop_le = {value for value, _label in LichSuRaVao.LOAI_SU_KIEN}
+    nguon_hop_le = {value for value, _label in LichSuRaVao.NGUON_DU_LIEU}
+    ket_qua_hop_le = {value for value, _label in LichSuRaVao.KET_QUA}
+
+    quyen = quyen_goc
+    lich_su = lich_su_goc
+    if trang_thai in trang_thai_hop_le:
+        quyen = quyen.filter(trang_thai=trang_thai)
+    if phong_id.isdigit():
+        quyen = quyen.filter(phong_id=phong_id)
+        lich_su = lich_su.filter(phong_id=phong_id)
+    if loai in loai_hop_le:
+        lich_su = lich_su.filter(loai_su_kien=loai)
+    if nguon in nguon_hop_le:
+        lich_su = lich_su.filter(nguon=nguon)
+    if ket_qua in ket_qua_hop_le:
+        lich_su = lich_su.filter(ket_qua=ket_qua)
+
+    tu_ngay = parse_date(tu_ngay_raw)
+    den_ngay = parse_date(den_ngay_raw)
+    mui_gio = timezone.get_current_timezone()
+    if tu_ngay:
+        bat_dau = timezone.make_aware(datetime.combine(tu_ngay, time.min), mui_gio)
+        lich_su = lich_su.filter(thoi_diem__gte=bat_dau)
+    if den_ngay:
+        sau_ket_thuc = timezone.make_aware(
+            datetime.combine(den_ngay + timedelta(days=1), time.min),
+            mui_gio,
+        )
+        lich_su = lich_su.filter(thoi_diem__lt=sau_ket_thuc)
+
+    danh_sach_quyen = list(quyen)
+    for item in danh_sach_quyen:
+        item.danh_gia_hieu_luc = danh_gia_quyen_ra_vao(item)
+
+    page_obj = Paginator(lich_su, 20).get_page(request.GET.get("page"))
+    query_string = request.GET.copy()
+    query_string.pop("page", None)
+
+    phong_ds = (
+        Phong.objects
+        .filter(
+            Q(quyen_ra_vao__nguoi_thue=nguoi_thue)
+            | Q(lich_su_ra_vao__nguoi_thue=nguoi_thue)
+        )
+        .select_related("co_so")
+        .distinct()
+        .order_by("co_so__ten_co_so", "so_phong")
+    )
+
+    return render(request, "core/quyen_va_lich_su_ra_vao_cua_toi.html", {
+        "nguoi_thue": nguoi_thue,
+        "danh_sach_quyen": danh_sach_quyen,
+        "lich_su": page_obj.object_list,
+        "page_obj": page_obj,
+        "phong_ds": phong_ds,
+        "tong_quyen": quyen_goc.count(),
+        "quyen_hieu_luc": eligible_permissions(quyen_goc).count(),
+        "tong_lich_su": lich_su_goc.count(),
+        "trang_thai_filter": trang_thai if trang_thai in trang_thai_hop_le else "",
+        "phong_filter": phong_id if phong_id.isdigit() else "",
+        "loai_filter": loai if loai in loai_hop_le else "",
+        "nguon_filter": nguon if nguon in nguon_hop_le else "",
+        "ket_qua_filter": ket_qua if ket_qua in ket_qua_hop_le else "",
+        "tu_ngay_filter": tu_ngay.isoformat() if tu_ngay else "",
+        "den_ngay_filter": den_ngay.isoformat() if den_ngay else "",
+        "query_string": query_string.urlencode(),
+    })
 
 
 def quan_ly_quyen_ra_vao(request):
@@ -3793,18 +4361,12 @@ def tao_quyen_ra_vao(request):
 
                                 else:
 
-                                    QuyenRaVao.objects.create(
-                                        hop_dong=hop_dong, nguon_cap="thu_cong",
-                                        phong=phong,
-                                        nguoi_thue=nguoi_thue,
-                                        nguoi_o_cung=None,
-                                        loai_quyen=loai_quyen,
-                                        trang_thai="hoat_dong",
-                                        ngay_bat_dau=ngay_bat_dau,
-                                        ngay_ket_thuc=ngay_ket_thuc or hop_dong.ngay_ket_thuc,
-                                        ma_the=ma_the,
-                                        ghi_chu=ghi_chu,
-                                        nguoi_tao=request.user,
+                                    grant_access(
+                                        contract_id=hop_dong.pk, tenant_id=nguoi_thue.pk,
+                                        source="thu_cong", actor=request.user,
+                                        start_date=ngay_bat_dau,
+                                        end_date=ngay_ket_thuc or hop_dong.ngay_ket_thuc,
+                                        card_code=ma_the, note=ghi_chu,
                                     )
 
                                     messages.success(
@@ -3821,8 +4383,11 @@ def tao_quyen_ra_vao(request):
                 # 4. NGƯỜI Ở CÙNG
                 # =================================================
 
-                elif nguoi_o_cung and nguoi_o_cung.trang_thai != "dang_o":
-                    messages.error(request, "Người ở cùng đã rời phòng, không thể cấp quyền.")
+                elif nguoi_o_cung and not nguoi_o_cung_du_dieu_kien(nguoi_o_cung):
+                    messages.error(
+                        request,
+                        ly_do_nguoi_o_cung_chua_du_dieu_kien(nguoi_o_cung),
+                    )
 
                 elif nguoi_o_cung:
 
@@ -3969,18 +4534,12 @@ def tao_quyen_ra_vao(request):
 
                                 else:
 
-                                    QuyenRaVao.objects.create(
-                                        hop_dong=hop_dong, nguon_cap="thu_cong",
-                                        phong=phong,
-                                        nguoi_thue=None,
-                                        nguoi_o_cung=nguoi_o_cung,
-                                        loai_quyen=loai_quyen,
-                                        trang_thai="hoat_dong",
-                                        ngay_bat_dau=ngay_bat_dau,
-                                        ngay_ket_thuc=ngay_ket_thuc or hop_dong.ngay_ket_thuc,
-                                        ma_the=ma_the,
-                                        ghi_chu=ghi_chu,
-                                        nguoi_tao=request.user,
+                                    grant_access(
+                                        contract_id=hop_dong.pk, resident_id=nguoi_o_cung.pk,
+                                        source="thu_cong", actor=request.user,
+                                        start_date=ngay_bat_dau,
+                                        end_date=ngay_ket_thuc or hop_dong.ngay_ket_thuc,
+                                        card_code=ma_the, note=ghi_chu,
                                     )
 
                                     messages.success(
@@ -4081,6 +4640,14 @@ def xu_ly_quyen_ra_vao(request, id):
             "het_han",
             "bi_thu_hoi",
         ]:
+            if hanh_dong == "hoat_dong" and quyen.trang_thai != "hoat_dong":
+                messages.error(
+                    request,
+                    "Khong kich hoat lai ban ghi cu. Hay cap quyen moi qua luong canonical.",
+                )
+                return redirect("chi_tiet_quyen_ra_vao", id=quyen.id)
+            if hanh_dong in ("het_han", "bi_thu_hoi"):
+                revoke_access(permission_id=quyen.pk, status=hanh_dong)
             if hanh_dong == "hoat_dong":
                 if not hop_dong:
                     messages.error(
@@ -4118,6 +4685,7 @@ def xu_ly_quyen_ra_vao(request, id):
                 "het_han",
                 "bi_thu_hoi",
             ]:
+                quyen.active_access_key = None
                 if (
                     not quyen.ngay_ket_thuc
                     or quyen.ngay_ket_thuc
@@ -4271,7 +4839,9 @@ def xu_ly_quyen_ra_vao(request, id):
 
         elif hanh_dong == "xoa":
             # Thay hard-delete bằng thu hồi để giữ lịch sử.
+            revoke_access(permission_id=quyen.pk, status="bi_thu_hoi")
             quyen.trang_thai = "bi_thu_hoi"
+            quyen.active_access_key = None
 
             if (
                 not quyen.ngay_ket_thuc
@@ -4364,10 +4934,13 @@ def quan_ly_lich_su_ra_vao(request):
 
     phong_id = request.GET.get("phong", "")
     loai = request.GET.get("loai", "")
+    ket_qua = request.GET.get("ket_qua", "")
     if phong_id:
         ds = ds.filter(phong_id=phong_id)
     if loai:
         ds = ds.filter(loai_su_kien=loai)
+    if ket_qua in {value for value, _label in LichSuRaVao.KET_QUA}:
+        ds = ds.filter(ket_qua=ket_qua)
 
     phong_ds = Phong.objects.select_related("co_so").order_by("co_so", "so_phong")
 
@@ -4376,6 +4949,7 @@ def quan_ly_lich_su_ra_vao(request):
         "phong_ds": phong_ds,
         "phong_filter": phong_id,
         "loai_filter": loai,
+        "ket_qua_filter": ket_qua,
     })
 
 
@@ -4704,6 +5278,7 @@ def tao_lich_su_ra_vao(request):
                         ten_nguoi=ten_nguoi,
                         loai_su_kien=loai_su_kien,
                         nguon="thu_cong",
+                        ket_qua="cho_phep",
                         thoi_diem=thoi_diem,
                         ghi_chu=ghi_chu,
                     )

@@ -3,82 +3,104 @@
 {% block title %}Quản lý phòng - NDT MOTEL{% endblock %}
 {% block page_title %}Quản lý phòng{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
-<link rel="stylesheet" href="{% static 'css/room_management.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/room_management_p6a.css' %}">
 {% endblock %}
 {% block content %}
-<main class="room-management ndt-foundation" data-room-management-page="list">
-    {% url 'tao_phong' as create_room_url %}
-    {% include "core/foundation/page_header.html" with breadcrumb="Quản trị / Phòng" title="Quản lý phòng" subtitle="Theo dõi phòng, trạng thái và thông tin vận hành." action_url=create_room_url action_label="+ Thêm phòng" %}
-    <section class="ndt-filter-bar" aria-labelledby="room-filter-title">
-        <h2 class="ndt-filter-bar__title" id="room-filter-title">Tìm kiếm và lọc phòng</h2>
-        <form method="get" class="ndt-filter-bar__form">
-            <div class="ndt-field room-search-field">
-                <label class="ndt-label" for="q">Từ khóa</label>
-                <input class="ndt-control" id="q" name="q" type="search" value="{{ tu_khoa }}" placeholder="Số phòng, cơ sở hoặc quận...">
+<main class="ndt-f5 ndt-f5-page ndt-room-management" data-room-management-page="list">
+    <div class="ndt-f5-container ndt-f5-container--full">
+        <header class="ndt-f5-page-header">
+            <div class="ndt-f5-page-header__content">
+                <h1 class="ndt-f5-page-header__title">Quản lý phòng</h1>
+                <p class="ndt-f5-page-header__description">Theo dõi phòng, trạng thái và thông tin vận hành tại các cơ sở.</p>
+                <div class="ndt-f5-page-header__meta"><span>{{ tong_phong }} phòng</span><span>{{ phong_trong }} phòng trống</span><span>{{ phong_bao_tri }} phòng bảo trì</span></div>
             </div>
-            <div class="ndt-field room-status-field">
-                <label class="ndt-label" for="trang_thai">Trạng thái</label>
-                <select class="ndt-control" id="trang_thai" name="trang_thai">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="trong" {% if trang_thai == "trong" %}selected{% endif %}>Trống</option>
-                    <option value="da_dat" {% if trang_thai == "da_dat" %}selected{% endif %}>Đã đặt</option>
-                    <option value="dang_thue" {% if trang_thai == "dang_thue" %}selected{% endif %}>Đang thuê</option>
-                    <option value="bao_tri" {% if trang_thai == "bao_tri" %}selected{% endif %}>Bảo trì</option>
-                </select>
+            <div class="ndt-f5-page-header__actions">
+                <a class="ndt-f5-button ndt-f5-button--primary" href="{% url 'tao_phong' %}">+ Thêm phòng</a>
             </div>
-            <div class="room-filter-actions">
-                <button class="ndt-button ndt-button--primary" type="submit">Lọc phòng</button>
-                {% if tu_khoa or trang_thai %}<a class="ndt-button ndt-button--secondary" href="{% url 'quan_ly_phong' %}">Đặt lại</a>{% endif %}
+        </header>
+
+        <section class="ndt-f5-stack" aria-labelledby="room-filter-title">
+            <h2 class="ndt-room-section-title" id="room-filter-title">Tìm kiếm và lọc phòng</h2>
+            <form method="get" class="ndt-f5-filter">
+                <div class="ndt-f5-field ndt-room-search-field">
+                    <label class="ndt-f5-label" for="q">Từ khóa</label>
+                    <input class="ndt-f5-control" id="q" name="q" type="search" value="{{ tu_khoa }}" placeholder="Số phòng, cơ sở hoặc quận...">
+                </div>
+                <div class="ndt-f5-field ndt-room-status-field">
+                    <label class="ndt-f5-label" for="trang_thai">Trạng thái</label>
+                    <select class="ndt-f5-control" id="trang_thai" name="trang_thai">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="trong" {% if trang_thai == "trong" %}selected{% endif %}>Trống</option>
+                        <option value="da_dat" {% if trang_thai == "da_dat" %}selected{% endif %}>Đã đặt</option>
+                        <option value="dang_thue" {% if trang_thai == "dang_thue" %}selected{% endif %}>Đang thuê</option>
+                        <option value="bao_tri" {% if trang_thai == "bao_tri" %}selected{% endif %}>Bảo trì</option>
+                    </select>
+                </div>
+                <div class="ndt-f5-filter__actions">
+                    <button class="ndt-f5-button ndt-f5-button--primary" type="submit">Lọc phòng</button>
+                    {% if tu_khoa or trang_thai %}<a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'quan_ly_phong' %}">Đặt lại</a>{% endif %}
+                </div>
+            </form>
+        </section>
+
+        <section class="ndt-room-list-section" aria-labelledby="room-list-title">
+            <div class="ndt-room-list-heading">
+                <div><h2 id="room-list-title">Danh sách phòng</h2><p>{{ phong|length }} kết quả theo điều kiện hiện tại.</p></div>
+                {% if tu_khoa or trang_thai %}<span class="ndt-f5-badge ndt-f5-badge--info">Đang áp dụng bộ lọc</span>{% endif %}
             </div>
-        </form>
-    </section>
-    <section aria-labelledby="room-list-title">
-        <div class="room-list-heading">
-            <h2 id="room-list-title">Danh sách phòng</h2>
-            <p>{{ phong|length }} kết quả theo điều kiện hiện tại.</p>
-        </div>
-        {% if phong %}
-        <div class="ndt-table-wrap">
-            <table class="ndt-table room-table">
-                <thead><tr><th scope="col">Phòng</th><th scope="col">Cơ sở</th><th scope="col">Loại</th><th scope="col">Tầng</th><th scope="col">Giá thuê</th><th scope="col">Trạng thái</th><th scope="col">Thao tác</th></tr></thead>
-                <tbody>
-                    {% for p in phong %}
-                    <tr>
-                        <td data-label="Phòng"><span class="room-code">P{{ p.so_phong }}</span></td>
-                        <td data-label="Cơ sở"><strong>{{ p.co_so.ten_co_so }}</strong>{% if p.co_so.quan %}<div class="room-muted">{{ p.co_so.quan }}</div>{% endif %}</td>
-                        <td data-label="Loại">{{ p.get_loai_phong_display }}</td>
-                        <td data-label="Tầng">{{ p.tang }}</td>
-                        <td data-label="Giá thuê"><span class="room-price">{{ p.gia_thue|vnd }} đ</span></td>
-                        <td data-label="Trạng thái">
-                            {% if p.trang_thai == "trong" %}<span class="ndt-badge ndt-badge--success">Trống</span>
-                            {% elif p.trang_thai == "da_dat" %}<span class="ndt-badge ndt-badge--warning">Đã đặt</span>
-                            {% elif p.trang_thai == "dang_thue" %}<span class="ndt-badge ndt-badge--info">Đang thuê</span>
-                            {% elif p.trang_thai == "bao_tri" %}<span class="ndt-badge ndt-badge--danger">Bảo trì</span>
-                            {% else %}<span class="ndt-badge">{{ p.get_trang_thai_display }}</span>{% endif %}
-                        </td>
-                        <td data-label="Thao tác"><div class="ndt-table__actions">
-                            <a class="ndt-button ndt-button--secondary ndt-button--compact room-action" href="{% url 'chi_tiet_phong' p.id %}">Xem</a>
-                            <a class="ndt-button ndt-button--secondary ndt-button--compact room-action" href="{% url 'sua_phong' p.id %}">Sửa</a>
-                            <form class="room-delete-form" method="post" action="{% url 'xoa_phong' p.id %}" data-ndt-confirm-form data-confirm-title="Xóa phòng P{{ p.so_phong }}" data-confirm-message="Bạn có chắc chắn muốn xóa phòng P{{ p.so_phong }} không?" data-confirm-label="Xóa phòng">{% csrf_token %}<button class="ndt-button ndt-button--danger ndt-button--compact room-action" type="submit" aria-label="Xóa phòng P{{ p.so_phong }}" title="Xóa phòng P{{ p.so_phong }}">Xóa</button></form>
-                        </div></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="ndt-empty-state" role="status">
-            <h2 class="ndt-empty-state__title">Không tìm thấy phòng</h2>
-            <p class="ndt-empty-state__description">{% if tu_khoa or trang_thai %}Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.{% else %}Chưa có phòng nào trong hệ thống.{% endif %}</p>
-            <div class="room-empty-action">{% if tu_khoa or trang_thai %}<a class="ndt-button ndt-button--secondary" href="{% url 'quan_ly_phong' %}">Đặt lại bộ lọc</a>{% else %}<a class="ndt-button ndt-button--primary" href="{% url 'tao_phong' %}">+ Thêm phòng</a>{% endif %}</div>
-        </div>
-        {% endif %}
-    </section>
+            {% if phong %}
+            <div class="ndt-f5-table-wrap">
+                <table class="ndt-f5-table ndt-room-table">
+                    <thead><tr><th scope="col">Phòng</th><th scope="col">Cơ sở</th><th scope="col">Loại</th><th scope="col">Tầng</th><th scope="col">Giá thuê</th><th scope="col">Trạng thái</th><th scope="col">Thao tác</th></tr></thead>
+                    <tbody>
+                        {% for p in phong %}
+                        <tr>
+                            <td data-label="Phòng"><strong class="ndt-room-code">P{{ p.so_phong }}</strong></td>
+                            <td data-label="Cơ sở"><strong>{{ p.co_so.ten_co_so }}</strong>{% if p.co_so.quan %}<span class="ndt-room-muted">{{ p.co_so.quan }}</span>{% endif %}</td>
+                            <td data-label="Loại">{{ p.get_loai_phong_display }}</td>
+                            <td data-label="Tầng">{{ p.tang }}</td>
+                            <td data-label="Giá thuê"><strong class="ndt-room-price">{{ p.gia_thue|vnd }} đ</strong></td>
+                            <td data-label="Trạng thái">
+                                {% if p.trang_thai == "trong" %}<span class="ndt-f5-badge ndt-f5-badge--success">Trống</span>
+                                {% elif p.trang_thai == "da_dat" %}<span class="ndt-f5-badge ndt-f5-badge--warning">Đã đặt</span>
+                                {% elif p.trang_thai == "dang_thue" %}<span class="ndt-f5-badge ndt-f5-badge--info">Đang thuê</span>
+                                {% elif p.trang_thai == "bao_tri" %}<span class="ndt-f5-badge ndt-f5-badge--danger">Bảo trì</span>
+                                {% else %}<span class="ndt-f5-badge">{{ p.get_trang_thai_display }}</span>{% endif %}
+                            </td>
+                            <td data-label="Thao tác">
+                                <div class="ndt-f5-table__actions">
+                                    <a class="ndt-f5-button ndt-f5-button--neutral ndt-f5-button--small ndt-room-action" href="{% url 'chi_tiet_phong' p.id %}">Xem</a>
+                                    <a class="ndt-f5-button ndt-f5-button--secondary ndt-f5-button--small ndt-room-action" href="{% url 'sua_phong' p.id %}">Sửa</a>
+                                    <form class="ndt-room-delete-form" method="post" action="{% url 'xoa_phong' p.id %}" data-room-delete-form data-confirm-title="Xóa phòng P{{ p.so_phong }}?" data-confirm-message="Phòng P{{ p.so_phong }} sẽ bị xóa khỏi danh sách nếu không có dữ liệu nghiệp vụ liên quan. Thao tác này không thể hoàn tác." data-confirm-label="Xóa phòng">{% csrf_token %}<button class="ndt-f5-button ndt-f5-button--danger ndt-f5-button--small ndt-room-action" data-room-delete-trigger type="submit" aria-label="Xóa phòng P{{ p.so_phong }}" title="Xóa phòng P{{ p.so_phong }}">Xóa</button></form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="ndt-f5-empty" role="status">
+                <div class="ndt-f5-empty__icon" aria-hidden="true">0</div>
+                <h2 class="ndt-f5-empty__title">Không tìm thấy phòng</h2>
+                <p class="ndt-f5-empty__description">{% if tu_khoa or trang_thai %}Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.{% else %}Chưa có phòng nào trong hệ thống.{% endif %}</p>
+                <div class="ndt-f5-empty__action">{% if tu_khoa or trang_thai %}<a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'quan_ly_phong' %}">Đặt lại bộ lọc</a>{% else %}<a class="ndt-f5-button ndt-f5-button--primary" href="{% url 'tao_phong' %}">+ Thêm phòng</a>{% endif %}</div>
+            </div>
+            {% endif %}
+        </section>
+    </div>
 </main>
-{% include 'core/foundation/dialog_root.html' %}
-<script src="{% static 'js/foundation/dialog.js' %}" defer></script>
+
+<div class="ndt-f5-dialog" data-ndt-f5-dialog hidden>
+    <div class="ndt-f5-dialog__backdrop" data-ndt-f5-dialog-cancel></div>
+    <section class="ndt-f5-dialog__panel" role="dialog" aria-modal="true" aria-labelledby="roomDialogTitle" aria-describedby="roomDialogMessage">
+        <p class="ndt-f5-dialog__eyebrow">Xác nhận hậu quả</p>
+        <h2 class="ndt-f5-dialog__title" id="roomDialogTitle" data-ndt-f5-dialog-title></h2>
+        <p class="ndt-f5-dialog__message" id="roomDialogMessage" data-ndt-f5-dialog-message></p>
+        <div class="ndt-f5-dialog__actions"><button class="ndt-f5-button ndt-f5-button--neutral" data-ndt-f5-dialog-cancel type="button">Hủy</button><button class="ndt-f5-button ndt-f5-button--danger" data-ndt-f5-dialog-confirm type="button">Xóa phòng</button></div>
+    </section>
+</div>
+<script src="{% static 'js/foundation/p5-dialog.js' %}" defer></script>
+<script src="{% static 'js/room_management_p6a.js' %}" defer></script>
 {% endblock %}

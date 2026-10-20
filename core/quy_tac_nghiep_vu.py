@@ -2,6 +2,10 @@
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import F, Q
+from core.dich_vu.luu_tru import (
+    TRANG_THAI_DA_TRA_PHONG,
+    hop_dong_dang_hieu_luc,
+)
 
 
 KNOWN_PERMISSION_SOURCES = ("thu_cong", "face_id", "duyet_ghep")
@@ -30,12 +34,7 @@ def dong_bo_hoa_don_qua_han(queryset=None, today=None):
 
 
 def contract_is_current(contract):
-    today = timezone.localdate()
-    return (
-        contract.trang_thai in ("dang_hieu_luc", "sap_het_han")
-        and contract.dat_phong.trang_thai == "da_duyet"
-        and contract.ngay_bat_dau <= today <= contract.ngay_ket_thuc
-    )
+    return hop_dong_dang_hieu_luc(contract)
 
 
 def permission_binding_is_valid(permission):
@@ -65,8 +64,22 @@ def eligible_permissions(queryset):
         hop_dong__trang_thai__in=("dang_hieu_luc", "sap_het_han"),
         hop_dong__ngay_bat_dau__lte=today, hop_dong__ngay_ket_thuc__gte=today,
     ).filter(Q(ngay_ket_thuc__isnull=True) | Q(ngay_ket_thuc__gte=today)).filter(
-        Q(loai_quyen="chu_phong", nguoi_o_cung__isnull=True,
-          nguoi_thue_id=F("hop_dong__dat_phong__nguoi_thue_id"))
-        | Q(loai_quyen="nguoi_o_cung", nguoi_thue__isnull=True,
-            nguoi_o_cung__hop_dong_id=F("hop_dong_id"), nguoi_o_cung__trang_thai="dang_o")
+        Q(
+            loai_quyen="chu_phong",
+            nguoi_o_cung__isnull=True,
+            nguoi_thue_id=F("hop_dong__dat_phong__nguoi_thue_id"),
+            nguoi_thue__dang_hoat_dong=True,
+            nguoi_thue__trang_thai_luu_tru__in=("dang_o", "tam_vang"),
+        )
+        | Q(
+            loai_quyen="nguoi_o_cung",
+            nguoi_thue__isnull=True,
+            nguoi_o_cung__hop_dong_id=F("hop_dong_id"),
+            nguoi_o_cung__trang_thai="dang_o",
+            nguoi_o_cung__da_xac_minh_boi_admin=True,
+            nguoi_o_cung__ngay_vao__lte=today,
+        ) & (
+            Q(nguoi_o_cung__ngay_ra__isnull=True)
+            | Q(nguoi_o_cung__ngay_ra__gte=today)
+        )
     )

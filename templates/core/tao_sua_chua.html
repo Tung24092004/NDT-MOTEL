@@ -5,153 +5,120 @@
 {% block page_title %}Tạo yêu cầu sửa chữa{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/v2.css' %}">
-<link rel="stylesheet" href="{% static 'css/repair.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/repair_management_p6e.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="repair repair-admin-v2 ndt-foundation ndt-v2" data-repair-screen="admin-create">
-    {% url 'quan_ly_sua_chua' as list_url %}
-    {% include 'core/foundation/page_header.html' with breadcrumb='Quản trị / Sửa chữa' title='Tạo yêu cầu sửa chữa' subtitle='Ghi nhận sự cố cho người thuê có phòng thuộc hợp đồng đang hiệu lực.' action_url=list_url action_label='Về danh sách' %}
+<main class="ndt-f5 ndt-f5-page ndt-repair-management" data-repair-screen="admin-create">
+    <div class="ndt-f5-container ndt-f5-container--full">
+        <header class="ndt-f5-page-header">
+            <div class="ndt-f5-page-header__content">
+                <p class="ndt-f5-breadcrumb">Quản trị / Sửa chữa / Tạo mới</p>
+                <h1 class="ndt-f5-page-header__title">Tạo yêu cầu sửa chữa</h1>
+                <p class="ndt-f5-page-header__description">Ghi nhận sự cố cho người thuê có phòng thuộc hợp đồng đang hiệu lực.</p>
+            </div>
+            <div class="ndt-f5-page-header__actions"><a class="ndt-f5-button ndt-f5-button--secondary" href="{% url 'quan_ly_sua_chua' %}">Về danh sách</a></div>
+        </header>
 
-    <form class="repair-form-layout repair-form-layout--v2" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <main class="repair-form">
-            <section class="ndt-surface repair-create-intake">
-                <div>
-                    <span class="repair-eyebrow">Hồ sơ tiếp nhận</span>
-                    <h2>Phòng, vấn đề và mức độ cần rõ ngay từ đầu</h2>
-                    <p>Yêu cầu sẽ được tạo ở trạng thái Mới để quản lý phân công hoặc cập nhật chi phí sau khi kiểm tra.</p>
-                </div>
-                <div class="repair-create-intake__badges">
-                    <span class="ndt-badge ndt-badge--warning">Mới</span>
-                    <span class="ndt-badge">Nội bộ Admin</span>
-                </div>
-            </section>
+        <form class="repair-form-layout" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="repair-form-main">
+                <section class="ndt-f5-form-section">
+                    <h2 class="ndt-f5-form-section__title">1. Người thuê và phòng</h2>
+                    <div class="ndt-f5-form-grid">
+                        <div class="ndt-f5-field">
+                            <label class="ndt-f5-label" for="nguoi_thue">Người thuê <span class="ndt-f5-required">*</span></label>
+                            <select class="ndt-f5-control" id="nguoi_thue" name="nguoi_thue" required {% if repair_errors.nguoi_thue %}aria-invalid="true"{% endif %}>
+                                <option value="">Chọn người thuê</option>
+                                {% for item in nguoi_thues %}<option value="{{ item.id }}" {% if submitted.nguoi_thue == item.id|stringformat:'s' %}selected{% endif %}>{{ item.ho_ten }}{% if item.so_dien_thoai %} · {{ item.so_dien_thoai }}{% endif %}</option>{% endfor %}
+                            </select>
+                            {% if repair_errors.nguoi_thue %}<p class="ndt-f5-error">{{ repair_errors.nguoi_thue }}</p>{% endif %}
+                        </div>
+                        <div class="ndt-f5-field">
+                            <label class="ndt-f5-label" for="phong">Phòng <span class="ndt-f5-required">*</span></label>
+                            <select class="ndt-f5-control" id="phong" name="phong" required aria-describedby="admin-room-help" {% if repair_errors.phong %}aria-invalid="true"{% endif %}>
+                                <option value="">Chọn phòng</option>
+                                {% for item in phongs %}<option value="{{ item.id }}" {% if submitted.phong == item.id|stringformat:'s' %}selected{% endif %}>{{ item.so_phong }}{% if item.co_so %} · {{ item.co_so.ten_co_so }}{% endif %}</option>{% endfor %}
+                            </select>
+                            <p class="ndt-f5-help" id="admin-room-help">Hệ thống xác minh phòng thuộc hợp đồng đang hiệu lực của người thuê.</p>
+                            {% if repair_errors.phong %}<p class="ndt-f5-error">{{ repair_errors.phong }}</p>{% endif %}
+                        </div>
+                    </div>
+                </section>
 
-            <section class="ndt-surface">
-                <div class="repair-panel-head">
-                    <div>
-                        <span class="repair-eyebrow">Bước 1</span>
-                        <h2>Người thuê và phòng</h2>
+                <section class="ndt-f5-form-section">
+                    <h2 class="ndt-f5-form-section__title">2. Thông tin sự cố</h2>
+                    <div class="ndt-f5-form-grid">
+                        <div class="ndt-f5-field ndt-f5-field--full">
+                            <label class="ndt-f5-label" for="tieu_de">Tiêu đề <span class="ndt-f5-required">*</span></label>
+                            <input class="ndt-f5-control" id="tieu_de" name="tieu_de" maxlength="200" value="{{ submitted.tieu_de }}" required {% if repair_errors.tieu_de %}aria-invalid="true"{% endif %}>
+                            {% if repair_errors.tieu_de %}<p class="ndt-f5-error">{{ repair_errors.tieu_de }}</p>{% endif %}
+                        </div>
+                        <div class="ndt-f5-field">
+                            <label class="ndt-f5-label" for="loai_su_co">Loại sự cố <span class="ndt-f5-required">*</span></label>
+                            <select class="ndt-f5-control" id="loai_su_co" name="loai_su_co" required {% if repair_errors.loai_su_co %}aria-invalid="true"{% endif %}>
+                                {% for value,label in loai_su_co %}<option value="{{ value }}" {% if submitted.loai_su_co == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                            </select>
+                            {% if repair_errors.loai_su_co %}<p class="ndt-f5-error">{{ repair_errors.loai_su_co }}</p>{% endif %}
+                        </div>
+                        <div class="ndt-f5-field">
+                            <label class="ndt-f5-label" for="muc_do">Mức độ <span class="ndt-f5-required">*</span></label>
+                            <select class="ndt-f5-control" id="muc_do" name="muc_do" required {% if repair_errors.muc_do %}aria-invalid="true"{% endif %}>
+                                {% for value,label in muc_do %}<option value="{{ value }}" {% if submitted.muc_do == value or not submitted.muc_do and value == 'trung_binh' %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                            </select>
+                            {% if repair_errors.muc_do %}<p class="ndt-f5-error">{{ repair_errors.muc_do }}</p>{% endif %}
+                        </div>
+                        <div class="ndt-f5-field ndt-f5-field--full">
+                            <label class="ndt-f5-label" for="noi_dung">Mô tả chi tiết <span class="ndt-f5-required">*</span></label>
+                            <textarea class="ndt-f5-control" id="noi_dung" name="noi_dung" rows="6" required {% if repair_errors.noi_dung %}aria-invalid="true"{% endif %}>{{ submitted.noi_dung }}</textarea>
+                            {% if repair_errors.noi_dung %}<p class="ndt-f5-error">{{ repair_errors.noi_dung }}</p>{% endif %}
+                        </div>
+                        <div class="ndt-f5-field ndt-f5-field--full">
+                            <label class="ndt-f5-label" for="hinh_anh">Hình ảnh sự cố</label>
+                            <input class="ndt-f5-control" id="hinh_anh" name="hinh_anh" type="file" accept="image/*">
+                        </div>
                     </div>
-                </div>
-                <div class="repair-form-grid">
-                    <div class="ndt-field{% if repair_errors.nguoi_thue %} ndt-field--error{% endif %}">
-                        <label class="ndt-label" for="nguoi_thue">Người thuê <span class="ndt-required">*</span></label>
-                        <select class="ndt-control" id="nguoi_thue" name="nguoi_thue" required {% if repair_errors.nguoi_thue %}aria-invalid="true"{% endif %}>
-                            <option value="">Chọn người thuê</option>
-                            {% for item in nguoi_thues %}
-                                <option value="{{ item.id }}" {% if submitted.nguoi_thue == item.id|stringformat:'s' %}selected{% endif %}>
-                                    {{ item.ho_ten }}{% if item.so_dien_thoai %} · {{ item.so_dien_thoai }}{% endif %}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        {% if repair_errors.nguoi_thue %}<p class="ndt-error">{{ repair_errors.nguoi_thue }}</p>{% endif %}
-                    </div>
-                    <div class="ndt-field{% if repair_errors.phong %} ndt-field--error{% endif %}">
-                        <label class="ndt-label" for="phong">Phòng <span class="ndt-required">*</span></label>
-                        <select class="ndt-control" id="phong" name="phong" required {% if repair_errors.phong %}aria-invalid="true"{% endif %}>
-                            <option value="">Chọn phòng</option>
-                            {% for item in phongs %}
-                                <option value="{{ item.id }}" {% if submitted.phong == item.id|stringformat:'s' %}selected{% endif %}>
-                                    {{ item.so_phong }}{% if item.co_so %} · {{ item.co_so.ten_co_so }}{% endif %}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <p class="ndt-helper">Backend sẽ xác minh phòng thuộc hợp đồng đang hiệu lực của người thuê.</p>
-                        {% if repair_errors.phong %}<p class="ndt-error">{{ repair_errors.phong }}</p>{% endif %}
-                    </div>
-                </div>
-            </section>
+                </section>
 
-            <section class="ndt-surface">
-                <div class="repair-panel-head">
-                    <div>
-                        <span class="repair-eyebrow">Bước 2</span>
-                        <h2>Thông tin sự cố</h2>
+                <section class="ndt-f5-form-section">
+                    <h2 class="ndt-f5-form-section__title">3. Chi phí và ghi chú</h2>
+                    <div class="ndt-f5-form-grid">
+                        <div class="ndt-f5-field">
+                            <label class="ndt-f5-label" for="chi_phi">Chi phí dự kiến</label>
+                            <input class="ndt-f5-control" id="chi_phi" name="chi_phi" type="number" min="0" step="1000" value="{{ submitted.chi_phi|default:'0' }}" {% if repair_errors.chi_phi %}aria-invalid="true"{% endif %}>
+                            {% if repair_errors.chi_phi %}<p class="ndt-f5-error">{{ repair_errors.chi_phi }}</p>{% endif %}
+                        </div>
+                        <div class="ndt-f5-field">
+                            <label class="ndt-f5-label" for="chi_tiet_chi_phi">Chi tiết chi phí</label>
+                            <textarea class="ndt-f5-control" id="chi_tiet_chi_phi" name="chi_tiet_chi_phi" rows="3">{{ submitted.chi_tiet_chi_phi }}</textarea>
+                        </div>
+                        <div class="ndt-f5-field ndt-f5-field--full">
+                            <label class="ndt-f5-label" for="ghi_chu_admin">Ghi chú quản lý</label>
+                            <textarea class="ndt-f5-control" id="ghi_chu_admin" name="ghi_chu_admin" rows="3">{{ submitted.ghi_chu_admin }}</textarea>
+                        </div>
                     </div>
-                </div>
-                <div class="repair-form-grid">
-                    <div class="ndt-field repair-form-full{% if repair_errors.tieu_de %} ndt-field--error{% endif %}">
-                        <label class="ndt-label" for="tieu_de">Tiêu đề <span class="ndt-required">*</span></label>
-                        <input class="ndt-control" id="tieu_de" name="tieu_de" maxlength="200" value="{{ submitted.tieu_de }}" required {% if repair_errors.tieu_de %}aria-invalid="true"{% endif %}>
-                        {% if repair_errors.tieu_de %}<p class="ndt-error">{{ repair_errors.tieu_de }}</p>{% endif %}
-                    </div>
-                    <div class="ndt-field{% if repair_errors.loai_su_co %} ndt-field--error{% endif %}">
-                        <label class="ndt-label" for="loai_su_co">Loại sự cố <span class="ndt-required">*</span></label>
-                        <select class="ndt-control" id="loai_su_co" name="loai_su_co" required {% if repair_errors.loai_su_co %}aria-invalid="true"{% endif %}>
-                            {% for value,label in loai_su_co %}
-                                <option value="{{ value }}" {% if submitted.loai_su_co == value %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                        {% if repair_errors.loai_su_co %}<p class="ndt-error">{{ repair_errors.loai_su_co }}</p>{% endif %}
-                    </div>
-                    <div class="ndt-field{% if repair_errors.muc_do %} ndt-field--error{% endif %}">
-                        <label class="ndt-label" for="muc_do">Mức độ <span class="ndt-required">*</span></label>
-                        <select class="ndt-control" id="muc_do" name="muc_do" required {% if repair_errors.muc_do %}aria-invalid="true"{% endif %}>
-                            {% for value,label in muc_do %}
-                                <option value="{{ value }}" {% if submitted.muc_do == value or not submitted.muc_do and value == 'trung_binh' %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                        {% if repair_errors.muc_do %}<p class="ndt-error">{{ repair_errors.muc_do }}</p>{% endif %}
-                    </div>
-                    <div class="ndt-field repair-form-full{% if repair_errors.noi_dung %} ndt-field--error{% endif %}">
-                        <label class="ndt-label" for="noi_dung">Mô tả chi tiết <span class="ndt-required">*</span></label>
-                        <textarea class="ndt-control" id="noi_dung" name="noi_dung" rows="6" required {% if repair_errors.noi_dung %}aria-invalid="true"{% endif %}>{{ submitted.noi_dung }}</textarea>
-                        {% if repair_errors.noi_dung %}<p class="ndt-error">{{ repair_errors.noi_dung }}</p>{% endif %}
-                    </div>
-                    <div class="ndt-field repair-form-full">
-                        <label class="ndt-label" for="hinh_anh">Hình ảnh</label>
-                        <input class="ndt-control ndt-file" id="hinh_anh" name="hinh_anh" type="file" accept="image/*">
-                    </div>
-                </div>
-            </section>
+                </section>
+            </div>
 
-            <section class="ndt-surface">
-                <div class="repair-panel-head">
-                    <div>
-                        <span class="repair-eyebrow">Bước 3</span>
-                        <h2>Chi phí và ghi chú</h2>
+            <aside class="repair-form-side">
+                <section class="ndt-f5-panel">
+                    <p class="ndt-f5-eyebrow">Phiếu nội bộ Admin</p>
+                    <h2 class="repair-section-heading">Kiểm tra trước khi tạo</h2>
+                    <ul class="repair-checklist">
+                        <li>Người thuê đang hoạt động.</li>
+                        <li>Phòng thuộc hợp đồng đang hiệu lực.</li>
+                        <li>Mô tả đủ vị trí và hiện tượng.</li>
+                        <li>Chi phí có thể để 0 nếu chưa xác định.</li>
+                    </ul>
+                    <div class="repair-form-actions">
+                        <button class="ndt-f5-button ndt-f5-button--primary" type="submit">Tạo yêu cầu</button>
+                        <a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'quan_ly_sua_chua' %}">Hủy</a>
                     </div>
-                </div>
-                <div class="repair-form-grid">
-                    <div class="ndt-field{% if repair_errors.chi_phi %} ndt-field--error{% endif %}">
-                        <label class="ndt-label" for="chi_phi">Chi phí dự kiến</label>
-                        <input class="ndt-control" id="chi_phi" name="chi_phi" type="number" min="0" step="1000" value="{{ submitted.chi_phi|default:'0' }}" {% if repair_errors.chi_phi %}aria-invalid="true"{% endif %}>
-                        {% if repair_errors.chi_phi %}<p class="ndt-error">{{ repair_errors.chi_phi }}</p>{% endif %}
-                    </div>
-                    <div class="ndt-field">
-                        <label class="ndt-label" for="chi_tiet_chi_phi">Chi tiết chi phí</label>
-                        <textarea class="ndt-control" id="chi_tiet_chi_phi" name="chi_tiet_chi_phi" rows="3">{{ submitted.chi_tiet_chi_phi }}</textarea>
-                    </div>
-                    <div class="ndt-field repair-form-full">
-                        <label class="ndt-label" for="ghi_chu_admin">Ghi chú quản lý</label>
-                        <textarea class="ndt-control" id="ghi_chu_admin" name="ghi_chu_admin" rows="3">{{ submitted.ghi_chu_admin }}</textarea>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <aside class="repair-form-side">
-            <section class="ndt-surface repair-submit-panel repair-submit-panel--v2">
-                <h2>Kiểm tra trước khi tạo</h2>
-                <ul class="repair-checklist">
-                    <li>Người thuê đang hoạt động.</li>
-                    <li>Phòng thuộc hợp đồng đang hiệu lực.</li>
-                    <li>Mô tả đủ vị trí và hiện tượng.</li>
-                    <li>Chi phí có thể để 0 nếu chưa xác định.</li>
-                </ul>
-                <div class="repair-form-actions">
-                    <button class="ndt-button ndt-button--primary" type="submit">Tạo yêu cầu</button>
-                    <a class="ndt-button ndt-button--secondary" href="{% url 'quan_ly_sua_chua' %}">Hủy</a>
-                </div>
-            </section>
-        </aside>
-    </form>
-</div>
+                </section>
+            </aside>
+        </form>
+    </div>
+</main>
+<script src="{% static 'js/repair_management_p6e.js' %}" defer></script>
 {% endblock %}

@@ -4,6 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from core.tien_ich import ghi_nhat_ky
 from core.dich_vu.thong_bao_quan_tri import notify_admin_event
 from core.models import (
@@ -21,6 +22,7 @@ from core.models import (
     ThongBao,
     YeuCauGhepNguoi,
     LichSuThanhToan,
+    ChungTuThanhToan,
 
     # Smart Room — Phase 1
     NguoiOCungPhong,
@@ -32,6 +34,7 @@ from core.models import (
     NhatKyThaoTac,
 )
 from core.dich_vu.phan_quyen import la_admin
+from core.dich_vu import chung_tu_thanh_toan
 
 
 def thanh_toan_hoa_don_cua_toi(request, id):
@@ -60,7 +63,7 @@ def thanh_toan_hoa_don_cua_toi(request, id):
         return redirect("tai_khoan")
 
     hoa_don = get_object_or_404(
-        HoaDon.objects.select_related(
+        HoaDon.objects.exclude(trang_thai="draft").select_related(
             "hop_dong",
             "hop_dong__dat_phong",
             "hop_dong__dat_phong__nguoi_thue",
@@ -275,10 +278,11 @@ def thanh_toan_hoa_don_cua_toi(request, id):
     # LOCK HÓA ĐƠN — CHỐNG GỬI TRÙNG
     # =====================================================
 
-    with transaction.atomic():
+    with chung_tu_thanh_toan.atomic_invoice_attempt_submission() as created_attempts:
 
         hoa_don_khoa = get_object_or_404(
             HoaDon.objects
+            .exclude(trang_thai="draft")
             .select_for_update()
             .select_related(
                 "hop_dong",
@@ -336,6 +340,20 @@ def thanh_toan_hoa_don_cua_toi(request, id):
 
         trang_thai_cu = hoa_don_khoa.trang_thai
         phuong_thuc_cu = hoa_don_khoa.phuong_thuc
+
+        if phuong_thuc == "chuyen_khoan":
+            try:
+                evidence = chung_tu_thanh_toan.create_for_invoice(
+                    actor=request.user,
+                    invoice=hoa_don_khoa,
+                    uploaded=request.FILES.get("anh_chung_tu"),
+                )
+                if evidence._created_payment_attempt:
+                    created_attempts.append(evidence)
+            except ValidationError as exc:
+                messages.error(request, " ".join(exc.messages))
+                context_chung.update({"phuong_thuc": phuong_thuc, "buoc_thanh_toan": "xac_thuc"})
+                return render(request, "core/thanh_toan_hoa_don_cua_toi.html", context_chung)
 
         # QUAN TRỌNG:
         # Khách chỉ gửi yêu cầu.
@@ -476,6 +494,7 @@ def xu_ly_hoa_don(request, id):
 
     if hanh_dong not in [
         "xac_nhan_thanh_toan",
+        "tu_choi_thanh_toan",
         "huy_thanh_toan",
     ]:
         messages.error(
@@ -584,6 +603,22 @@ def xu_ly_hoa_don(request, id):
                 hoa_don.trang_thai
             )
 
+            # The invoice row is locked before this lookup.  A transfer can
+            # only settle its one active evidence attempt; old/rejected rows
+            # must remain immutable audit evidence.
+            try:
+                evidence = chung_tu_thanh_toan.active_invoice_attempt(hoa_don, for_update=True)
+            except ValidationError as exc:
+                messages.error(request, " ".join(exc.messages))
+                return redirect("chi_tiet_hoa_don", id=hoa_don.id)
+            requested_attempt_id = request.POST.get("attempt_id", "").strip()
+            if requested_attempt_id and (not evidence or str(evidence.pk) != requested_attempt_id):
+                messages.error(request, "Chứng từ được chọn không còn là attempt đang chờ đối soát.")
+                return redirect("chi_tiet_hoa_don", id=hoa_don.id)
+            if phuong_thuc == "chuyen_khoan" and not evidence:
+                messages.warning(request, "Không tìm thấy chứng từ đang chờ đối soát cho hóa đơn này.")
+                return redirect("chi_tiet_hoa_don", id=hoa_don.id)
+
             # ---------------------------------------------
             # TỰ SINH MÃ GIAO DỊCH
             # ---------------------------------------------
@@ -627,6 +662,9 @@ def xu_ly_hoa_don(request, id):
                     "ngay_cap_nhat",
                 ]
             )
+
+            if evidence:
+                chung_tu_thanh_toan.mark_reviewed(evidence, accepted=True, reviewer=request.user)
 
             # ---------------------------------------------
             # LỊCH SỬ THANH TOÁN
@@ -766,6 +804,80 @@ def xu_ly_hoa_don(request, id):
         # =================================================
         # HỦY / HOÀN TRẠNG THÁI THANH TOÁN
         # =================================================
+
+        elif hanh_dong == "tu_choi_thanh_toan":
+            if hoa_don.trang_thai != "cho_xac_nhan":
+                messages.warning(request, "Chỉ có thể từ chối hóa đơn đang chờ đối soát.")
+                return redirect("chi_tiet_hoa_don", id=hoa_don.id)
+            reason = request.POST.get("ly_do_tu_choi", "").strip()
+            if not reason:
+                messages.error(request, "Vui lòng nhập lý do từ chối chứng từ.")
+                return redirect("chi_tiet_hoa_don", id=hoa_don.id)
+            trang_thai_cu = hoa_don.trang_thai
+            phuong_thuc_cu = hoa_don.phuong_thuc
+            try:
+                evidence = chung_tu_thanh_toan.active_invoice_attempt(hoa_don, for_update=True)
+            except ValidationError as exc:
+                messages.error(request, " ".join(exc.messages))
+                return redirect("chi_tiet_hoa_don", id=hoa_don.id)
+            requested_attempt_id = request.POST.get("attempt_id", "").strip()
+            if requested_attempt_id and (not evidence or str(evidence.pk) != requested_attempt_id):
+                messages.error(request, "Chứng từ được chọn không còn là attempt đang chờ đối soát.")
+                return redirect("chi_tiet_hoa_don", id=hoa_don.id)
+            if hoa_don.phuong_thuc == "chuyen_khoan" and not evidence:
+                messages.warning(request, "Không tìm thấy chứng từ đang chờ đối soát cho hóa đơn này.")
+                return redirect("chi_tiet_hoa_don", id=hoa_don.id)
+            evidence_state_old = evidence.trang_thai if evidence else "khong_co"
+            submission_revision = (evidence.ngay_cap_nhat if evidence else hoa_don.ngay_cap_nhat)
+            hoa_don.trang_thai = "qua_han" if hoa_don.han_thanh_toan and hoa_don.han_thanh_toan < timezone.localdate() else "chua_thanh_toan"
+            hoa_don.phuong_thuc = ""
+            hoa_don.save(update_fields=["trang_thai", "phuong_thuc", "ngay_cap_nhat"])
+            if evidence:
+                chung_tu_thanh_toan.mark_reviewed(evidence, accepted=False, reviewer=request.user, note=reason)
+            rejection_marker = (
+                f"INVOICE:{hoa_don.pk}:PAYMENT_REJECTED:"
+                f"{submission_revision.strftime('%Y%m%d%H%M%S%f')}"
+            )
+            tenant_notice, _created = ThongBao.objects.get_or_create(
+                nguoi_thue=nguoi_thue,
+                ma_tham_chieu=rejection_marker,
+                defaults={
+                    "tieu_de": "Chứng từ thanh toán hóa đơn cần gửi lại",
+                    "noi_dung": (
+                        f"Chứng từ thanh toán hóa đơn {hoa_don.thang}/{hoa_don.nam} "
+                        f"phòng {phong.so_phong} chưa được chấp nhận. Lý do: {reason}. "
+                        "Vui lòng kiểm tra và gửi lại chứng từ hợp lệ."
+                    ),
+                    "loai": "thanh_toan",
+                    "muc_do": "quan_trong",
+                    "url_lien_ket": f"/hoa-don-cua-toi/{hoa_don.pk}/",
+                },
+            )
+            ghi_nhat_ky(
+                request=request,
+                hanh_dong="tu_choi",
+                module="Hóa đơn",
+                doi_tuong="HoaDon",
+                doi_tuong_id=hoa_don.pk,
+                tieu_de=f"Từ chối chứng từ hóa đơn {hoa_don.thang}/{hoa_don.nam}",
+                noi_dung=(
+                    f"Admin {request.user.username} từ chối chứng từ thanh toán "
+                    f"hóa đơn {hoa_don.thang}/{hoa_don.nam}."
+                ),
+                du_lieu_cu={
+                    "trang_thai": trang_thai_cu,
+                    "phuong_thuc": phuong_thuc_cu,
+                    "trang_thai_chung_tu": evidence_state_old,
+                },
+                du_lieu_moi={
+                    "trang_thai": hoa_don.trang_thai,
+                    "phuong_thuc": hoa_don.phuong_thuc,
+                    "trang_thai_chung_tu": evidence.trang_thai if evidence else "khong_co",
+                    "ly_do_tu_choi": reason,
+                    "thong_bao_id": tenant_notice.pk,
+                },
+            )
+            messages.warning(request, "Đã từ chối chứng từ; hóa đơn chưa được ghi nhận thanh toán.")
 
         elif hanh_dong == "huy_thanh_toan":
 

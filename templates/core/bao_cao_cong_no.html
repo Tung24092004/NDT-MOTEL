@@ -1,0 +1,140 @@
+{% extends "core/base.html" %}
+{% load static bo_loc %}
+
+{% block title %}Báo cáo công nợ - NDT MOTEL{% endblock %}
+{% block page_title %}Báo cáo công nợ{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+    <link rel="stylesheet" href="{% static 'css/invoice_management_p6d.css' %}">
+    <link rel="stylesheet" href="{% static 'css/receivables_report_post_p6.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="ndt-f5 ndt-invoice-management ndt-receivables-report ndt-f5-page" data-receivables-screen="aging-report">
+  <div class="ndt-f5-container ndt-f5-container--full receivables-stack">
+    <header class="ndt-f5-page-header invoice-page-header">
+      <div class="ndt-f5-page-header__content">
+        <p class="ndt-breadcrumb">Quản trị / Hóa đơn / Công nợ</p>
+        <h1 class="ndt-f5-page-header__title">Báo cáo tuổi nợ</h1>
+        <p class="ndt-f5-page-header__description">Theo dõi các hóa đơn chưa tất toán theo hạn thanh toán. Hóa đơn đã thanh toán hoặc đã hủy không được tính vào công nợ.</p>
+      </div>
+      <div class="ndt-f5-actions ndt-f5-page-header__actions">
+        <a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'quan_ly_hoa_don' %}">Danh sách hóa đơn</a>
+        <a class="ndt-f5-button ndt-f5-button--primary" href="?{{ export_query }}">Xuất CSV</a>
+      </div>
+    </header>
+
+    <section class="receivables-summary" aria-label="Tổng hợp công nợ">
+      <article class="ndt-f5-card receivables-total">
+        <span>Tổng công nợ</span>
+        <strong>{{ thong_ke.tong_tien|vnd }} VNĐ</strong>
+        <small>{{ thong_ke.tong_so }} hóa đơn chưa tất toán</small>
+      </article>
+      <article class="ndt-f5-card receivables-age receivables-age--current">
+        <span>Chưa đến hạn</span><strong>{{ thong_ke.chua_den_han.tong_tien|vnd }} VNĐ</strong><small>{{ thong_ke.chua_den_han.so_luong }} hóa đơn</small>
+      </article>
+      <article class="ndt-f5-card receivables-age receivables-age--low">
+        <span>Quá hạn 1–7 ngày</span><strong>{{ thong_ke.qua_han_1_7.tong_tien|vnd }} VNĐ</strong><small>{{ thong_ke.qua_han_1_7.so_luong }} hóa đơn</small>
+      </article>
+      <article class="ndt-f5-card receivables-age receivables-age--medium">
+        <span>Quá hạn 8–30 ngày</span><strong>{{ thong_ke.qua_han_8_30.tong_tien|vnd }} VNĐ</strong><small>{{ thong_ke.qua_han_8_30.so_luong }} hóa đơn</small>
+      </article>
+      <article class="ndt-f5-card receivables-age receivables-age--high">
+        <span>Quá hạn từ 31 ngày</span><strong>{{ thong_ke.qua_han_31_plus.tong_tien|vnd }} VNĐ</strong><small>{{ thong_ke.qua_han_31_plus.so_luong }} hóa đơn</small>
+      </article>
+    </section>
+
+    <section class="ndt-f5-filter receivables-filter" aria-labelledby="receivables-filter-title">
+      <h2 class="ndt-filter-bar__title" id="receivables-filter-title">Bộ lọc báo cáo</h2>
+      <form class="ndt-filter-bar__form receivables-filter__form" method="get" action="{% url 'bao_cao_cong_no' %}">
+        <div class="ndt-f5-field receivables-filter__query">
+          <label class="ndt-f5-label" for="receivables-query">Từ khóa</label>
+          <input class="ndt-f5-control" id="receivables-query" type="search" name="q" value="{{ tu_khoa }}" placeholder="Hợp đồng, người thuê hoặc phòng">
+        </div>
+        <div class="ndt-f5-field">
+          <label class="ndt-f5-label" for="receivables-facility">Cơ sở</label>
+          <select class="ndt-f5-control" id="receivables-facility" name="co_so">
+            <option value="">Tất cả cơ sở</option>
+            {% for item in co_so_list %}<option value="{{ item.id }}" {% if co_so == item.id|stringformat:'s' %}selected{% endif %}>{{ item.ten_co_so }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="ndt-f5-field">
+          <label class="ndt-f5-label" for="receivables-status">Trạng thái</label>
+          <select class="ndt-f5-control" id="receivables-status" name="trang_thai">
+            <option value="">Tất cả chưa tất toán</option>
+            <option value="chua_thanh_toan" {% if trang_thai == 'chua_thanh_toan' %}selected{% endif %}>Chưa thanh toán</option>
+            <option value="cho_xac_nhan" {% if trang_thai == 'cho_xac_nhan' %}selected{% endif %}>Chờ xác nhận</option>
+            <option value="qua_han" {% if trang_thai == 'qua_han' %}selected{% endif %}>Quá hạn</option>
+          </select>
+        </div>
+        <div class="ndt-f5-field">
+          <label class="ndt-f5-label" for="receivables-age">Nhóm tuổi nợ</label>
+          <select class="ndt-f5-control" id="receivables-age" name="nhom_tuoi">
+            <option value="">Tất cả nhóm</option>
+            <option value="chua_den_han" {% if nhom_tuoi == 'chua_den_han' %}selected{% endif %}>Chưa đến hạn</option>
+            <option value="qua_han_1_7" {% if nhom_tuoi == 'qua_han_1_7' %}selected{% endif %}>Quá hạn 1–7 ngày</option>
+            <option value="qua_han_8_30" {% if nhom_tuoi == 'qua_han_8_30' %}selected{% endif %}>Quá hạn 8–30 ngày</option>
+            <option value="qua_han_31_plus" {% if nhom_tuoi == 'qua_han_31_plus' %}selected{% endif %}>Quá hạn từ 31 ngày</option>
+          </select>
+        </div>
+        <div class="ndt-f5-field">
+          <label class="ndt-f5-label" for="receivables-from">Hạn từ ngày</label>
+          <input class="ndt-f5-control" id="receivables-from" type="date" name="tu_han" value="{{ tu_han }}">
+        </div>
+        <div class="ndt-f5-field">
+          <label class="ndt-f5-label" for="receivables-to">Hạn đến ngày</label>
+          <input class="ndt-f5-control" id="receivables-to" type="date" name="den_han" value="{{ den_han }}">
+        </div>
+        <div class="receivables-filter__actions">
+          <button class="ndt-f5-button ndt-f5-button--primary" type="submit">Áp dụng</button>
+          {% if tu_khoa or co_so or trang_thai or nhom_tuoi or tu_han or den_han %}<a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'bao_cao_cong_no' %}">Đặt lại</a>{% endif %}
+        </div>
+      </form>
+    </section>
+
+    <section class="receivables-result" aria-labelledby="receivables-result-title">
+      <div>
+        <h2 id="receivables-result-title">Chi tiết khoản phải thu</h2>
+        <p>{{ page_obj.paginator.count }} kết quả theo bộ lọc hiện tại</p>
+      </div>
+      <p class="receivables-note">Hệ thống chưa hỗ trợ thanh toán một phần; số dư hiển thị bằng tổng hóa đơn cho tới khi được xác nhận đã thanh toán.</p>
+    </section>
+
+    {% if hoa_don %}
+      <div class="ndt-f5-table-wrap receivables-table-wrap">
+        <table class="ndt-f5-table receivables-table">
+          <thead><tr><th>Hóa đơn</th><th>Người thuê / phòng</th><th>Hạn thanh toán</th><th>Tuổi nợ</th><th>Trạng thái</th><th>Số tiền còn nợ</th><th>Thao tác</th></tr></thead>
+          <tbody>
+          {% for item in hoa_don %}
+            <tr>
+              <td data-label="Hóa đơn"><strong>HĐ-{{ item.id }}</strong><span>{{ item.thang|stringformat:'02d' }}/{{ item.nam }} · {{ item.hop_dong.so_hop_dong }}</span></td>
+              <td data-label="Người thuê / phòng"><strong>{{ item.hop_dong.dat_phong.nguoi_thue.ho_ten }}</strong><span>{{ item.hop_dong.dat_phong.phong.co_so.ten_co_so }} · Phòng {{ item.hop_dong.dat_phong.phong.so_phong }}</span></td>
+              <td data-label="Hạn thanh toán"><strong>{{ item.han_thanh_toan|date:'d/m/Y' }}</strong></td>
+              <td data-label="Tuổi nợ">{% if item.so_ngay_qua_han %}<span class="receivables-days receivables-days--overdue">{{ item.so_ngay_qua_han }} ngày quá hạn</span>{% else %}<span class="receivables-days">Chưa quá hạn</span>{% endif %}</td>
+              <td data-label="Trạng thái">{% if item.trang_thai == 'qua_han' %}<span class="ndt-f5-badge ndt-f5-badge--danger">Quá hạn</span>{% elif item.trang_thai == 'cho_xac_nhan' %}<span class="ndt-f5-badge ndt-f5-badge--pending">Chờ xác nhận</span>{% else %}<span class="ndt-f5-badge ndt-f5-badge--warning">Chưa thanh toán</span>{% endif %}</td>
+              <td data-label="Số tiền còn nợ"><strong class="receivables-money">{{ item.so_tien_con_no|vnd }} VNĐ</strong></td>
+              <td data-label="Thao tác"><a class="ndt-f5-button ndt-f5-button--secondary" href="{% url 'chi_tiet_hoa_don' item.id %}">Xem hóa đơn</a></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="ndt-f5-pagination receivables-pagination" aria-label="Phân trang công nợ">
+          {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if query_string %}&amp;{{ query_string }}{% endif %}" rel="prev">Trước</a>{% endif %}
+          <span aria-current="page">Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+          {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if query_string %}&amp;{{ query_string }}{% endif %}" rel="next">Sau</a>{% endif %}
+        </nav>
+      {% endif %}
+    {% else %}
+      <section class="ndt-f5-empty" role="status">
+        <div class="ndt-empty-state__icon" aria-hidden="true">CN</div>
+        <h2 class="ndt-f5-empty__title">Không có khoản phải thu phù hợp</h2>
+        <p class="ndt-f5-empty__description">Thử thay đổi bộ lọc hoặc quay lại danh sách hóa đơn để kiểm tra dữ liệu.</p>
+        <a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'bao_cao_cong_no' %}">Xóa bộ lọc</a>
+      </section>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,114 @@
+/*
+ * POST-P6 Public Discovery/Support.
+ * Opt-in only: every selector is rooted in .ndt-public-discovery.
+ */
+.ndt-public-discovery {
+    --ndt-public-ink: var(--ndt-f5-navy);
+    --ndt-public-accent: var(--ndt-f5-orange);
+    --ndt-public-accent-hover: var(--ndt-f5-orange-hover);
+    --ndt-public-canvas: var(--ndt-f5-canvas);
+    --ndt-public-surface: var(--ndt-f5-surface);
+    --ndt-public-muted: var(--ndt-f5-text-muted);
+    --ndt-public-line: var(--ndt-f5-line);
+    min-width: 0;
+    color: var(--ndt-public-ink);
+    font-family: var(--ndt-f5-font);
+}
+
+.ndt-public-discovery,
+.ndt-public-discovery *,
+.ndt-public-discovery *::before,
+.ndt-public-discovery *::after {
+    box-sizing: border-box;
+}
+
+.ndt-public-discovery :is(img, svg, video) {
+    max-width: 100%;
+}
+
+.ndt-public-discovery :is(a, button, input, select, summary):focus-visible {
+    outline: 3px solid var(--ndt-public-accent);
+    outline-offset: 3px;
+    box-shadow: var(--ndt-f5-focus);
+}
+
+.ndt-public-home {
+    --home-ink: var(--ndt-public-ink);
+    --home-muted: var(--ndt-public-muted);
+    --home-brand: var(--ndt-public-accent);
+    --home-deep: var(--ndt-public-accent-hover);
+    --home-soft: #fff5ed;
+    --home-line: var(--ndt-public-line);
+    max-width: none;
+}
+
+.ndt-public-home .ndt-home-hero {
+    width: 100%;
+}
+
+.ndt-public-room-list {
+    --room-teal: var(--ndt-public-accent);
+    --room-teal-dark: var(--ndt-public-accent-hover);
+    --room-ink: var(--ndt-public-ink);
+    --room-muted: var(--ndt-public-muted);
+    --room-line: var(--ndt-public-line);
+    background: var(--ndt-public-canvas);
+}
+
+.ndt-public-room-list .ndt-room-filter,
+.ndt-public-room-list .ndt-room-card,
+.ndt-public-room-list .ndt-room-empty,
+.ndt-public-room-list .ndt-room-pagination {
+    background: var(--ndt-public-surface);
+}
+
+.ndt-public-room-detail {
+    --ndt-primary: var(--ndt-public-accent);
+    --ndt-primary-hover: var(--ndt-public-accent-hover);
+    --ndt-text: var(--ndt-public-ink);
+    --ndt-text-muted: var(--ndt-public-muted);
+    --ndt-border: var(--ndt-public-line);
+}
+
+.ndt-public-guide,
+.ndt-public-help {
+    --ndt-primary: var(--ndt-public-accent);
+    --ndt-primary-hover: var(--ndt-public-accent-hover);
+    --ndt-text: var(--ndt-public-ink);
+    --ndt-text-muted: var(--ndt-public-muted);
+    --ndt-border: var(--ndt-public-line);
+    background: var(--ndt-public-canvas);
+}
+
+.ndt-public-help .help-hero {
+    background: linear-gradient(135deg, var(--ndt-f5-navy) 0%, #263d5d 64%, var(--ndt-public-accent) 100%);
+}
+
+.ndt-public-help.ndt-public-discovery .help-hero h1 {
+    color: #fff;
+}
+
+.ndt-public-policy {
+    width: min(100%, var(--ndt-f5-readable));
+    color: var(--ndt-public-ink);
+}
+
+.ndt-public-policy .policy-eyebrow,
+.ndt-public-policy .policy-group,
+.ndt-public-policy .policy-top,
+.ndt-public-policy .policy-breadcrumb a,
+.ndt-public-policy .policy-back {
+    color: var(--ndt-public-accent);
+}
+
+@media (max-width: 767px) {
+    .ndt-public-home,
+    .ndt-public-room-list,
+    .ndt-public-room-detail,
+    .ndt-public-guide,
+    .ndt-public-help,
+    .ndt-public-policy {
+        min-width: 0;
+        max-width: 100%;
+    }
+}

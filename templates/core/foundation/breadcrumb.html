@@ -1,0 +1,9 @@
+{% if breadcrumb_root_label or breadcrumb_parent_label or breadcrumb_current %}
+<nav class="ndt-breadcrumb" aria-label="Đường dẫn">
+    <ol class="ndt-breadcrumb__list">
+        {% if breadcrumb_root_label %}<li class="ndt-breadcrumb__item"><a href="{{ breadcrumb_root_url }}">{{ breadcrumb_root_label }}</a></li>{% endif %}
+        {% if breadcrumb_parent_label %}<li class="ndt-breadcrumb__item"><a href="{{ breadcrumb_parent_url }}">{{ breadcrumb_parent_label }}</a></li>{% endif %}
+        {% if breadcrumb_current %}<li class="ndt-breadcrumb__item" aria-current="page">{{ breadcrumb_current }}</li>{% endif %}
+    </ol>
+</nav>
+{% endif %}

@@ -1,12 +1,14 @@
 {% if sharing %}
-  {% if sharing.trang_thai == "da_duyet" %}<span class="ndt-badge ndt-badge--success">{{ sharing.get_trang_thai_display }}</span>
-  {% elif sharing.trang_thai == "cho_duyet" %}<span class="ndt-badge ndt-badge--warning">{{ sharing.get_trang_thai_display }}</span>
-  {% elif sharing.trang_thai == "tu_choi" %}<span class="ndt-badge ndt-badge--danger">{{ sharing.get_trang_thai_display }}</span>
-  {% else %}<span class="ndt-badge ndt-badge--info">{{ sharing.get_trang_thai_display }}</span>{% endif %}
+  {% if sharing.trang_thai == "da_duyet" %}<span class="ndt-f5-badge ndt-f5-badge--success">{{ sharing.get_trang_thai_display }}</span>
+  {% elif sharing.trang_thai == "cho_duyet" %}<span class="ndt-f5-badge ndt-f5-badge--warning">{{ sharing.get_trang_thai_display }}</span>
+  {% elif sharing.trang_thai == "tu_choi" %}<span class="ndt-f5-badge ndt-f5-badge--danger">{{ sharing.get_trang_thai_display }}</span>
+  {% else %}<span class="ndt-f5-badge ndt-f5-badge--info">{{ sharing.get_trang_thai_display }}</span>{% endif %}
 {% elif resident %}
-  {% if resident.trang_thai == "dang_o" %}<span class="ndt-badge ndt-badge--success">{{ resident.get_trang_thai_display }}</span>
-  {% else %}<span class="ndt-badge ndt-badge--info">{{ resident.get_trang_thai_display }}</span>{% endif %}
+  {% if resident.trang_thai == "dang_o" %}<span class="ndt-f5-badge ndt-f5-badge--success">{{ resident.get_trang_thai_display }}</span>
+  {% elif resident.trang_thai == "tu_choi" %}<span class="ndt-f5-badge ndt-f5-badge--danger">{{ resident.get_trang_thai_display }}</span>
+  {% elif resident.trang_thai == "cho_bo_sung" or resident.trang_thai == "cho_xac_minh" %}<span class="ndt-f5-badge ndt-f5-badge--warning">{{ resident.get_trang_thai_display }}</span>
+  {% else %}<span class="ndt-f5-badge ndt-f5-badge--info">{{ resident.get_trang_thai_display }}</span>{% endif %}
 {% elif tenant %}
-  {% if tenant.dang_hoat_dong %}<span class="ndt-badge ndt-badge--success">Đang hoạt động</span>
-  {% else %}<span class="ndt-badge ndt-badge--info">Ngừng hoạt động</span>{% endif %}
+  {% if tenant.dang_hoat_dong %}<span class="ndt-f5-badge ndt-f5-badge--success">Đang hoạt động</span>
+  {% else %}<span class="ndt-f5-badge ndt-f5-badge--info">Ngừng hoạt động</span>{% endif %}
 {% endif %}

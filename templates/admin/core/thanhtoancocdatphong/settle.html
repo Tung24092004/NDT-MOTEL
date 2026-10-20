@@ -1,0 +1,10 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Quyết toán cọc {{ payment.ma_tham_chieu }}</h1>
+<p>Đã nhận thực tế: {{ payment.so_tien_thuc_nhan }}. Trạng thái: {{ payment.trang_thai }}.</p>
+<p>Chỉ ghi nhận quyết định hoàn/giữ tiền đã thực hiện bên ngoài; biểu mẫu này không chuyển tiền.</p>
+<form method="post">{% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" value="Xác nhận quyết toán">
+</form>
+{% endblock %}

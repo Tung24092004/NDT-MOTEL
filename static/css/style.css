@@ -3111,7 +3111,7 @@ img {
 
 }
 /* =========================================================
-   DASHBOARD - ÄÆ N Äáº¶T PHÃ’NG
+   DASHBOARD - ÄÆ N Äáº¶T PHÃ’NG
 ========================================================= */
 
 .booking-card {
@@ -3346,7 +3346,7 @@ img {
 
 
 /* =========================================================
-   TRáº NG THÃI
+   TRáº NG THÃI
 ========================================================= */
 
 .success-status {
@@ -4149,7 +4149,7 @@ img {
     transform: translateY(-1px);
 }
 /* =========================================================
-   SMART ROOM DASHBOARD - TÃŒNH TRáº NG PHÃ’NG
+   SMART ROOM DASHBOARD - TÃŒNH TRáº NG PHÃ’NG
    ========================================================= */
 
 .smart-room-section {
@@ -6619,4 +6619,535 @@ body.ndt-auth-opened{overflow:hidden}
         padding: 20px;
     }
     .ndt-flyout-links a { min-width: 0; overflow-wrap: anywhere; }
+}
+
+/* Guest discovery is scoped away from tenant and administrator navigation. */
+body.ndt-role-public { --ndt-sidebar: 256px; --ndt-active-overhang: 0px; }
+body.ndt-role-public .ndt-sidebar-nav { padding-inline: 14px; }
+body.ndt-role-public .ndt-side-link { min-height: 52px; font-size: 16px; }
+body.ndt-role-public .ndt-member-card-guest { padding: 12px; }
+body.ndt-role-public .ndt-guest-auth-actions { grid-template-columns: 1fr 1fr; }
+body.ndt-role-public .ndt-public-discovery-trigger { cursor: pointer; }
+body.ndt-role-public .ndt-public-discovery-trigger .ndt-nav-chevron {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    margin-left: auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform .18s ease;
+}
+body.ndt-role-public .ndt-public-discovery-trigger.is-open {
+    position: relative;
+    z-index: 12031;
+    width: calc(100% + 14px);
+    margin-right: -14px;
+    border-radius: 999px 0 0 999px;
+    background: var(--ndt-shell-panel);
+    color: #1c3035;
+    box-shadow: 18px 0 0 var(--ndt-shell-panel);
+}
+body.ndt-role-public .ndt-public-discovery-trigger.is-open::after {
+    content: "";
+    position: absolute;
+    top: -18px;
+    right: -18px;
+    width: 18px;
+    height: 18px;
+    border-bottom-right-radius: 18px;
+    box-shadow: 9px 9px 0 8px var(--ndt-shell-teal);
+}
+body.ndt-role-public .ndt-public-discovery-trigger.is-open .ndt-nav-chevron { transform: rotate(-90deg); }
+body.ndt-role-public .ndt-public-discovery-flyout {
+    left: var(--ndt-sidebar);
+    width: min(460px, calc(100vw - var(--ndt-sidebar) - 24px));
+    padding: 24px 26px 26px;
+    border-radius: 0 20px 20px 0;
+    background: var(--ndt-shell-panel);
+}
+body.ndt-role-public .ndt-public-flyout-title { display: flex; align-items: center; gap: 12px; }
+body.ndt-role-public .ndt-public-flyout-title .ndt-side-icon { width: 28px; height: 28px; color: #08778b; }
+body.ndt-role-public .ndt-public-flyout-title .ndt-side-icon svg { width: 100%; height: 100%; }
+body.ndt-role-public .ndt-public-flyout-title h2 { margin: 0; }
+body.ndt-role-public .ndt-public-flyout-links {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    margin-top: 12px;
+}
+
+/* Keep the VNA connector active on tablet/compact desktop widths. */
+@media (min-width: 601px) {
+    body.ndt-role-public .ndt-sidebar-nav { overflow: visible; }
+    body.ndt-role-public .ndt-public-discovery-wrap {
+        position: relative;
+        width: 100%;
+        overflow: visible;
+    }
+    body.ndt-role-public .ndt-vna-ear {
+        position: absolute;
+        right: -14px;
+        width: 28px;
+        height: 28px;
+        overflow: visible;
+        fill: var(--ndt-shell-panel);
+        pointer-events: none;
+        z-index: 12032;
+    }
+    body.ndt-role-public .ndt-public-discovery-trigger.is-open ~ .ndt-vna-ear {
+        display: block !important;
+    }
+    body.ndt-role-public .ndt-vna-ear-top { top: -28px; }
+    body.ndt-role-public .ndt-vna-ear-bottom { bottom: -28px; }
+}
+@media (max-width: 600px) {
+    body.ndt-role-public .ndt-vna-ear { display: none !important; }
+}
+
+/* =========================================================
+   NDT PUBLIC SHELL V3 — stacked brand + seamless VNA flyout
+   ========================================================= */
+body.ndt-role-public .ndt-sidebar-brand {
+    height: 132px;
+    flex-basis: 132px;
+    justify-content: center;
+    padding: 12px 18px 15px;
+}
+body.ndt-role-public .ndt-shell-brand {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    text-align: center;
+}
+body.ndt-role-public .ndt-shell-brand-mark.ndt-brand-emblem {
+    width: 100px;
+    height: 58px;
+    flex: 0 0 58px;
+}
+body.ndt-role-public .ndt-brand-emblem svg { width: 100px; height: 54px; }
+body.ndt-role-public .ndt-brand-emblem .ndt-logo-peak,
+body.ndt-role-public .ndt-brand-emblem .ndt-logo-sun { fill: #efbf28; }
+body.ndt-role-public .ndt-brand-emblem .ndt-logo-peak-right { fill: #dca91c; }
+body.ndt-role-public .ndt-brand-emblem .ndt-logo-wave {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+}
+body.ndt-role-public .ndt-shell-brand-copy { align-items: center; overflow: visible; }
+body.ndt-role-public .ndt-shell-brand-copy strong {
+    font-size: 21px;
+    font-weight: 650;
+    letter-spacing: -.25px;
+}
+body.ndt-role-public .ndt-shell-brand-copy small {
+    margin-top: 4px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.65px;
+}
+body.ndt-role-public .ndt-sidebar-collapse { top: 84px; }
+
+@media (min-width: 901px) {
+    body.ndt-role-public .ndt-sidebar-nav {
+        overflow: visible;
+    }
+    body.ndt-role-public .ndt-public-discovery-trigger.is-open {
+        width: calc(100% + 14px);
+        margin-right: -14px;
+        border-radius: 999px 0 0 999px;
+        box-shadow: 18px 0 0 var(--ndt-shell-panel);
+    }
+    body.ndt-role-public .ndt-public-discovery-trigger.is-open::before,
+    body.ndt-role-public .ndt-public-discovery-trigger.is-open::after { display: none; }
+    body.ndt-role-public .ndt-public-discovery-wrap {
+        position: relative;
+        width: 100%;
+        overflow: visible;
+    }
+    body.ndt-role-public .ndt-vna-ear {
+        position: absolute;
+        right: -14px;
+        width: 28px;
+        height: 28px;
+        display: none;
+        overflow: visible;
+        fill: var(--ndt-shell-panel);
+        pointer-events: none;
+        z-index: 12032;
+    }
+    body.ndt-role-public .ndt-public-discovery-trigger.is-open ~ .ndt-vna-ear { display: block; }
+    body.ndt-role-public .ndt-vna-ear-top { top: -28px; }
+    body.ndt-role-public .ndt-vna-ear-bottom { bottom: -28px; }
+    body.ndt-role-public .ndt-public-discovery-flyout {
+        border-radius: 0 20px 20px 0;
+        border-left: 0;
+        box-shadow: 26px 22px 50px rgba(13, 39, 44, .22);
+    }
+}
+
+@media (max-width: 900px) {
+    body.ndt-role-public .ndt-vna-ear { display: none !important; }
+    body.ndt-role-public .ndt-sidebar-brand {
+        height: 116px;
+        flex-basis: 116px;
+        padding-block: 9px 11px;
+    }
+    body.ndt-role-public .ndt-shell-brand-mark.ndt-brand-emblem {
+        width: 82px;
+        height: 46px;
+        flex-basis: 46px;
+    }
+    body.ndt-role-public .ndt-brand-emblem svg { width: 82px; height: 44px; }
+    body.ndt-role-public .ndt-shell-brand-copy strong { font-size: 18px; }
+    body.ndt-role-public .ndt-sidebar-collapse { top: 74px; }
+}
+body.ndt-role-public .ndt-public-flyout-link {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 5px;
+    width: 100%;
+    min-height: 70px;
+    padding: 13px 12px;
+    border-bottom: 1px solid rgba(68, 126, 137, .22);
+    color: #28474e;
+    text-align: left;
+    transition: background .18s ease, color .18s ease, padding-left .18s ease;
+}
+body.ndt-role-public .ndt-public-flyout-link strong {
+    display: block;
+    width: 100%;
+    color: #203b42;
+    font-size: 17px;
+    font-weight: 650;
+    line-height: 1.25;
+}
+body.ndt-role-public .ndt-public-flyout-link span {
+    display: block;
+    width: 100%;
+    margin: 0;
+    color: #657d82;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.45;
+}
+body.ndt-role-public .ndt-public-flyout-link.is-disabled {
+    cursor: default;
+    opacity: .68;
+}
+body.ndt-role-public .ndt-public-flyout-link:last-child { border-bottom: 0; }
+body.ndt-role-public .ndt-public-flyout-link:hover,
+body.ndt-role-public .ndt-public-flyout-link:focus-visible,
+body.ndt-role-public .ndt-public-flyout-link.is-active {
+    padding-left: 18px;
+    background: rgba(255, 255, 255, .48);
+    color: #006e82;
+}
+body.ndt-role-public .ndt-public-flyout-link.is-disabled:hover {
+    padding-left: 12px;
+    background: transparent;
+    color: #28474e;
+}
+body.ndt-role-public .ndt-public-flyout-link:focus-visible { outline: 3px solid rgba(0, 110, 130, .32); outline-offset: -3px; }
+body.ndt-role-public .ndt-public-flyout-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 42px;
+    margin-top: 14px;
+    padding: 0 12px;
+    border: 1px solid rgba(24, 113, 129, .28);
+    border-radius: 999px;
+    color: #086f82;
+    font-size: 14px;
+    font-weight: 700;
+}
+body.ndt-role-public .ndt-public-flyout-all:hover,
+body.ndt-role-public .ndt-public-flyout-all:focus-visible { background: #fff; }
+.ndt-public-mobile-discovery { display: none; }
+@media (prefers-reduced-motion: reduce) {
+    body.ndt-role-public .ndt-public-discovery-trigger .ndt-nav-chevron,
+    body.ndt-role-public .ndt-public-flyout-link { transition: none; }
+}
+@media (max-width: 900px) {
+    body.ndt-role-public .ndt-public-discovery-flyout {
+        display: block;
+        left: 12px !important;
+        right: 12px;
+        top: 16px;
+        width: auto;
+        max-width: none;
+        max-height: calc(100dvh - 32px);
+        padding: 24px;
+        border-radius: 18px;
+        z-index: 12050;
+    }
+    body.ndt-role-public .ndt-sidebar { overflow-y: auto; overscroll-behavior: contain; }
+    body.ndt-role-public .ndt-sidebar-nav { padding-bottom: 10px; }
+    body.ndt-role-public .ndt-public-discovery-trigger.is-open {
+        width: 100%;
+        margin-right: 0;
+        border-radius: 12px;
+        box-shadow: none;
+    }
+    body.ndt-role-public .ndt-public-discovery-trigger.is-open::after { display: none; }
+    body.ndt-role-public .ndt-public-mobile-discovery {
+        display: grid;
+        grid-template-rows: 0fr;
+        min-width: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: grid-template-rows .18s ease, opacity .18s ease;
+    }
+    body.ndt-role-public.ndt-public-mobile-discovery-open .ndt-public-mobile-discovery {
+        grid-template-rows: 1fr;
+        opacity: 1;
+    }
+    body.ndt-role-public .ndt-public-mobile-discovery-content { min-height: 0; overflow: hidden; }
+    body.ndt-role-public .ndt-public-mobile-link {
+        min-height: 46px;
+        display: flex;
+        align-items: center;
+        margin: 4px 0 0 44px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        color: rgba(255, 255, 255, .88);
+        font-size: 15px;
+        font-weight: 600;
+    }
+    body.ndt-role-public .ndt-public-mobile-link.is-active { background: rgba(255, 255, 255, .16); color: #fff; }
+}
+
+/* Final cascade: VNA ears remain visible from compact desktop upward. */
+@media (min-width: 601px) {
+    body.ndt-role-public .ndt-sidebar-nav { overflow: visible; }
+    body.ndt-role-public .ndt-public-discovery-wrap {
+        position: relative;
+        width: 100%;
+        overflow: visible;
+    }
+    body.ndt-role-public .ndt-vna-ear {
+        position: absolute;
+        right: -14px;
+        width: 28px;
+        height: 28px;
+        overflow: visible;
+        fill: var(--ndt-shell-panel);
+        pointer-events: none;
+        z-index: 12032;
+    }
+    body.ndt-role-public .ndt-public-discovery-trigger.is-open ~ .ndt-vna-ear {
+        display: block !important;
+    }
+    body.ndt-role-public .ndt-vna-ear-top { top: -28px; }
+    body.ndt-role-public .ndt-vna-ear-bottom { bottom: -28px; }
+}
+@media (max-width: 600px) {
+    body.ndt-role-public .ndt-vna-ear { display: none !important; }
+}
+
+/* V11 geometry foundation — V12 below owns the final visual tokens. */
+body.ndt-role-public {
+    --ndt-public-surface: #d4ebf0;
+    --ndt-public-surface-radius: 22px;
+}
+@media (min-width: 901px) {
+    body.ndt-role-public:has(.ndt-public-discovery-trigger.is-open)
+    .ndt-sidebar-nav > .ndt-side-link.is-active {
+        background: transparent;
+        color: rgba(255, 255, 255, .88);
+        box-shadow: none;
+    }
+    body.ndt-role-public .ndt-public-discovery-trigger.is-open {
+        width: calc(100% + 14px);
+        margin-right: -14px;
+        border: 0;
+        border-radius: 999px 0 0 999px;
+        background: var(--ndt-public-surface) !important;
+        box-shadow: none !important;
+    }
+    body.ndt-role-public .ndt-public-discovery-flyout {
+        left: var(--ndt-sidebar);
+        border: 0 !important;
+        border-left: 0 !important;
+        border-radius: 0 var(--ndt-public-surface-radius)
+            var(--ndt-public-surface-radius) 0 !important;
+        background: var(--ndt-public-surface) !important;
+        box-shadow: 24px 24px 48px rgba(13, 39, 44, .18);
+    }
+    body.ndt-role-public .ndt-public-discovery-flyout .ndt-flyout-head {
+        background: var(--ndt-public-surface) !important;
+    }
+    body.ndt-role-public .ndt-vna-ear {
+        right: -14px;
+        width: 36px;
+        height: 36px;
+        fill: var(--ndt-public-surface) !important;
+        filter: none !important;
+        opacity: 1 !important;
+    }
+    body.ndt-role-public .ndt-vna-ear-top { top: -36px; }
+    body.ndt-role-public .ndt-vna-ear-bottom { bottom: -36px; }
+}
+
+/* =========================================================
+   NDT PUBLIC SHELL V12 — measured from the supplied VNA reference
+   Reference colours: rail rgb(0 104 133), surface rgb(204 225 231).
+   Final owner of the public flyout; keep this block last.
+   ========================================================= */
+body.ndt-role-public {
+    --ndt-shell-teal: #006885;
+    --ndt-shell-teal-deep: #006885;
+    --ndt-shell-teal-dark: #005d78;
+    --ndt-shell-panel: #cce1e7;
+    --ndt-public-surface: #cce1e7;
+    --ndt-shell-panel-line: rgba(0, 104, 133, .32);
+}
+body.ndt-role-public .ndt-sidebar {
+    background: #006885 !important;
+}
+@media (min-width: 901px) {
+    body.ndt-role-public .ndt-public-discovery-trigger.is-open {
+        min-height: 52px;
+        background: #cce1e7 !important;
+        color: #1d3035;
+        border-radius: 999px 0 0 999px;
+        box-shadow: none !important;
+    }
+    body.ndt-role-public .ndt-public-discovery-flyout {
+        width: 490px;
+        padding: 26px 28px 28px;
+        background: #cce1e7 !important;
+        border: 0 !important;
+        border-radius: 0 16px 16px 0 !important;
+        box-shadow: 18px 22px 42px rgba(9, 28, 50, .16);
+    }
+    body.ndt-role-public .ndt-public-discovery-flyout .ndt-flyout-head {
+        background: #cce1e7 !important;
+        border-bottom-color: rgba(0, 104, 133, .42);
+    }
+    body.ndt-role-public .ndt-vna-ear {
+        fill: #cce1e7 !important;
+    }
+    body.ndt-role-public .ndt-public-flyout-link {
+        border-bottom-color: rgba(0, 104, 133, .20);
+    }
+    body.ndt-role-public .ndt-public-flyout-link:hover,
+    body.ndt-role-public .ndt-public-flyout-link:focus-visible {
+        background: rgba(255, 255, 255, .30);
+    }
+}
+
+/* =========================================================
+   NDT PUBLIC SHELL V13 — clean connector + readable labels
+   SVG ears are retired. A radial connector now owns both curves.
+   ========================================================= */
+body.ndt-role-public .ndt-side-link {
+    height: auto;
+    min-height: 52px;
+    padding-block: 9px;
+    overflow: visible;
+}
+body.ndt-role-public .ndt-side-label {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+}
+body.ndt-role-public .ndt-vna-ear {
+    display: none !important;
+}
+
+/* Shared sidebar finish: Guest, User and Admin use the same V13 rail language. */
+body.ndt-role-tenant,
+body.ndt-role-admin {
+    --ndt-sidebar: 256px;
+    --ndt-active-overhang: 0px;
+    --ndt-shell-teal: #006885;
+    --ndt-shell-teal-deep: #006885;
+    --ndt-shell-teal-dark: #005d78;
+    --ndt-shell-panel: #cce1e7;
+    --ndt-public-surface: #cce1e7;
+    --ndt-shell-panel-line: rgba(0, 104, 133, .32);
+}
+
+body.ndt-role-tenant .ndt-sidebar,
+body.ndt-role-admin .ndt-sidebar {
+    background: #006885;
+}
+
+body.ndt-role-tenant .ndt-sidebar-nav,
+body.ndt-role-admin .ndt-sidebar-nav {
+    padding-inline: 14px;
+    overflow-x: hidden;
+}
+
+body.ndt-role-tenant .ndt-side-link,
+body.ndt-role-admin .ndt-side-link {
+    height: auto;
+    min-height: 52px;
+    padding-block: 9px;
+    border-radius: 999px;
+    font-size: 16px;
+    overflow: visible;
+}
+
+body.ndt-role-tenant .ndt-side-label,
+body.ndt-role-admin .ndt-side-label {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+}
+
+body.ndt-role-tenant .ndt-side-link.is-active:not(.is-open),
+body.ndt-role-admin .ndt-side-link.is-active:not(.is-open) {
+    background: rgba(255, 255, 255, .16);
+    color: #fff;
+}
+
+body.ndt-role-tenant .ndt-side-link.is-open,
+body.ndt-role-admin .ndt-side-link.is-open {
+    width: calc(100% + 14px);
+    margin-right: -14px;
+    background: #cce1e7;
+    color: #1d3035;
+    box-shadow: none;
+}
+
+.ndt-flyout-links a.is-active {
+    padding-left: 14px;
+    background: rgba(255, 255, 255, .45);
+    color: #006885;
+}
+
+.ndt-flyout-links a.is-active strong {
+    color: #006885;
+}
+
+@media (max-width: 900px) {
+    body.ndt-role-public .ndt-side-link {
+        min-height: 56px;
+        padding-block: 10px;
+    }
+    body.ndt-role-public .ndt-side-label {
+        font-size: 15px;
+    }
 }

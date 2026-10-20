@@ -38,6 +38,9 @@ from core.views_hop_dong import cap_nhat_trang_thai_hop_dong, cap_nhat_trang_tha
 from core.dich_vu.phan_quyen import la_admin
 from core.views_tai_khoan import _lay_nguoi_thue_dang_dang_nhap
 from core.dich_vu.ngay_thue import tinh_ngay_ket_thuc_theo_thang
+from core.dich_vu.vong_doi_hop_dong import gan_trang_thai_hien_thi_hop_dong
+from core.dich_vu.phu_luc_hop_dong import tao_phu_luc_gia_han
+from core.dich_vu.hop_dong import room_contract_range_conflicts
 
 
 def xu_ly_yeu_cau_gia_han(request, id):
@@ -202,9 +205,35 @@ def xu_ly_yeu_cau_gia_han(request, id):
                     id=hop_dong.id,
                 )
 
+            # Reuse the contract-creation overlap rule while the room remains
+            # locked.  A future contract may have been valid when created
+            # against the old end date, but must block this later extension.
+            if room_contract_range_conflicts(
+                phong,
+                hop_dong.ngay_bat_dau,
+                ngay_ket_thuc_moi,
+                exclude_contract_id=hop_dong.id,
+            ):
+                messages.error(
+                    request,
+                    "Không thể duyệt gia hạn vì phòng đã có hợp đồng khác trùng thời gian.",
+                )
+                return redirect(
+                    "chi_tiet_hop_dong",
+                    id=hop_dong.id,
+                )
+
             # ---------------------------------------------
             # CẬP NHẬT HỢP ĐỒNG
             # ---------------------------------------------
+
+            phu_luc, phu_luc_moi = tao_phu_luc_gia_han(
+                request_obj=yeu_cau,
+                actor=request.user,
+            )
+            if not phu_luc_moi:
+                messages.warning(request, "Yêu cầu này đã có phụ lục gia hạn.")
+                return redirect("chi_tiet_hop_dong", id=hop_dong.id)
 
             hop_dong.ngay_ket_thuc = ngay_ket_thuc_moi
             hop_dong.nguoi_cap_nhat = request.user
@@ -383,6 +412,8 @@ def xu_ly_yeu_cau_gia_han(request, id):
                     "trang_thai_yeu_cau": yeu_cau.trang_thai,
                     "so_thang_gia_han": yeu_cau.so_thang_gia_han,
                     "so_quyen_ra_vao_gia_han": tong_quyen_gia_han,
+                    "phu_luc_id": phu_luc.id,
+                    "ma_phu_luc": phu_luc.ma_phu_luc,
                     "thong_bao_id": thong_bao_moi.id,
                 },
             )
@@ -535,7 +566,10 @@ def gui_yeu_cau_gia_han(request, id):
     )
 
     # Đồng bộ trạng thái trước khi kiểm tra nghiệp vụ.
-    cap_nhat_trang_thai_hop_dong(hop_dong)
+    if request.method == "POST":
+        cap_nhat_trang_thai_hop_dong(hop_dong)
+    else:
+        gan_trang_thai_hien_thi_hop_dong(hop_dong)
 
     # -----------------------------------------------------
     # KIỂM TRA TRẠNG THÁI HỢP ĐỒNG

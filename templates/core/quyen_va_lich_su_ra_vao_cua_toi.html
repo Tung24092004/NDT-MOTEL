@@ -1,0 +1,157 @@
+{% extends "core/tenant_base.html" %}
+{% load static %}
+
+{% block title %}Quyền và lịch sử ra vào của tôi - NDT MOTEL{% endblock %}
+{% block page_title %}Quyền và lịch sử ra vào{% endblock %}
+
+{% block tenant_styles %}
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/tenant_access_history_post_p6.css' %}">
+{% endblock %}
+
+{% block tenant_content %}
+<main class="ndt-foundation ndt-f5 ndt-f5-page ndt-tenant-access-read-model" data-tenant-access-screen="overview">
+    <div class="ndt-f5-container ndt-f5-container--full ndt-f5-stack">
+        <header class="ndt-page-header ndt-f5-page-header">
+            <div class="ndt-page-header__content ndt-f5-page-header__content">
+                <p class="ndt-f5-breadcrumb">Tổng quan / Ra vào &amp; Face ID</p>
+                <h1 class="ndt-page-header__title ndt-f5-page-header__title">Quyền và lịch sử ra vào</h1>
+                <p class="ndt-page-header__subtitle ndt-f5-page-header__description">Kiểm tra quyền truy cập đã cấp cho bạn và những lượt ra vào của chính bạn. Dữ liệu của người ở cùng không xuất hiện tại đây.</p>
+            </div>
+            <div class="ndt-page-header__actions ndt-f5-page-header__actions">
+                {% if hien_thi_lien_ket_face_id %}<a class="ndt-f5-button ndt-f5-button--secondary" href="{% url 'nhan_dien_su_dung_phong' %}">Face ID của tôi</a>{% endif %}
+                <a class="ndt-f5-button ndt-f5-button--primary" href="{% url 'tai_khoan' %}">Về tổng quan</a>
+            </div>
+        </header>
+
+        <section class="tenant-access-metrics" aria-label="Tổng quan quyền truy cập">
+            <article class="ndt-f5-panel tenant-access-metric"><span>Quyền đã ghi nhận</span><strong>{{ tong_quyen }}</strong><p>Bao gồm quyền hiện hành và quyền cũ.</p></article>
+            <article class="ndt-f5-panel tenant-access-metric"><span>Đang đủ điều kiện</span><strong>{{ quyen_hieu_luc }}</strong><p>Đã xét trạng thái, thời hạn và hợp đồng.</p></article>
+            <article class="ndt-f5-panel tenant-access-metric"><span>Lượt ra vào của tôi</span><strong>{{ tong_lich_su }}</strong><p>Không bao gồm lịch sử của người ở cùng.</p></article>
+        </section>
+
+        <form class="ndt-f5-filter tenant-access-filter" method="get" aria-label="Lọc quyền và lịch sử ra vào">
+            <div class="ndt-f5-field">
+                <label class="ndt-f5-label" for="access-room">Phòng</label>
+                <select class="ndt-f5-control" id="access-room" name="phong">
+                    <option value="">Tất cả phòng của tôi</option>
+                    {% for phong in phong_ds %}<option value="{{ phong.id }}" {% if phong_filter|stringformat:"s" == phong.id|stringformat:"s" %}selected{% endif %}>{{ phong.co_so.ten_co_so }} — Phòng {{ phong.so_phong }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="ndt-f5-field">
+                <label class="ndt-f5-label" for="access-status">Trạng thái quyền</label>
+                <select class="ndt-f5-control" id="access-status" name="trang_thai">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="hoat_dong" {% if trang_thai_filter == 'hoat_dong' %}selected{% endif %}>Đang hoạt động</option>
+                    <option value="tam_khoa" {% if trang_thai_filter == 'tam_khoa' %}selected{% endif %}>Tạm khóa</option>
+                    <option value="het_han" {% if trang_thai_filter == 'het_han' %}selected{% endif %}>Hết hạn</option>
+                    <option value="bi_thu_hoi" {% if trang_thai_filter == 'bi_thu_hoi' %}selected{% endif %}>Bị thu hồi</option>
+                </select>
+            </div>
+            <div class="ndt-f5-field">
+                <label class="ndt-f5-label" for="access-event">Sự kiện</label>
+                <select class="ndt-f5-control" id="access-event" name="loai">
+                    <option value="">Tất cả sự kiện</option>
+                    <option value="vao" {% if loai_filter == 'vao' %}selected{% endif %}>Vào phòng</option>
+                    <option value="ra" {% if loai_filter == 'ra' %}selected{% endif %}>Ra khỏi phòng</option>
+                </select>
+            </div>
+            <div class="ndt-f5-field">
+                <label class="ndt-f5-label" for="access-source">Nguồn ghi nhận</label>
+                <select class="ndt-f5-control" id="access-source" name="nguon">
+                    <option value="">Tất cả nguồn</option>
+                    <option value="camera" {% if nguon_filter == 'camera' %}selected{% endif %}>Nhận diện camera</option>
+                    <option value="thu_cong" {% if nguon_filter == 'thu_cong' %}selected{% endif %}>Nhập tay</option>
+                    <option value="the_tu" {% if nguon_filter == 'the_tu' %}selected{% endif %}>Thẻ từ</option>
+                    <option value="ma_pin" {% if nguon_filter == 'ma_pin' %}selected{% endif %}>Mã PIN</option>
+                </select>
+            </div>
+            <div class="ndt-f5-field">
+                <label class="ndt-f5-label" for="access-result">Kết quả</label>
+                <select class="ndt-f5-control" id="access-result" name="ket_qua">
+                    <option value="">Tất cả kết quả</option>
+                    <option value="cho_phep" {% if ket_qua_filter == 'cho_phep' %}selected{% endif %}>Cho phép</option>
+                    <option value="tu_choi" {% if ket_qua_filter == 'tu_choi' %}selected{% endif %}>Từ chối</option>
+                    <option value="khong_xac_dinh" {% if ket_qua_filter == 'khong_xac_dinh' %}selected{% endif %}>Không xác định</option>
+                </select>
+            </div>
+            <div class="ndt-f5-field">
+                <label class="ndt-f5-label" for="access-from">Từ ngày</label>
+                <input class="ndt-f5-control" id="access-from" name="tu_ngay" type="date" value="{{ tu_ngay_filter }}">
+            </div>
+            <div class="ndt-f5-field">
+                <label class="ndt-f5-label" for="access-to">Đến ngày</label>
+                <input class="ndt-f5-control" id="access-to" name="den_ngay" type="date" value="{{ den_ngay_filter }}">
+            </div>
+            <div class="ndt-f5-filter__actions">
+                <button class="ndt-f5-button ndt-f5-button--primary" type="submit">Áp dụng bộ lọc</button>
+                <a class="ndt-f5-button ndt-f5-button--ghost" href="{% url 'quyen_va_lich_su_ra_vao_cua_toi' %}">Đặt lại</a>
+            </div>
+        </form>
+
+        <section class="ndt-f5-stack" aria-labelledby="tenant-rights-title">
+            <div class="tenant-access-section-head">
+                <div><h2 id="tenant-rights-title">Quyền ra vào của tôi</h2><p>Trạng thái đủ điều kiện được đánh giá theo dữ liệu hợp đồng và lưu trú hiện tại.</p></div>
+            </div>
+            {% if danh_sach_quyen %}
+            <div class="ndt-f5-table-wrap">
+                <table class="ndt-f5-table">
+                    <thead><tr><th>Phòng</th><th>Nguồn cấp</th><th>Hiệu lực</th><th>Trạng thái ghi nhận</th><th>Đánh giá hiện tại</th></tr></thead>
+                    <tbody>
+                    {% for quyen in danh_sach_quyen %}
+                        <tr>
+                            <td data-label="Phòng"><strong>Phòng {{ quyen.phong.so_phong }}</strong><span class="tenant-access-note">{{ quyen.phong.co_so.ten_co_so }}</span></td>
+                            <td data-label="Nguồn cấp">{{ quyen.get_nguon_cap_display }}{% if quyen.hop_dong %}<span class="tenant-access-note">Hợp đồng {{ quyen.hop_dong.so_hop_dong }}</span>{% endif %}</td>
+                            <td data-label="Hiệu lực">{{ quyen.ngay_bat_dau|date:"d/m/Y" }}<span class="tenant-access-note">đến {{ quyen.ngay_ket_thuc|date:"d/m/Y"|default:"không xác định" }}</span></td>
+                            <td data-label="Trạng thái ghi nhận"><span class="ndt-f5-badge {% if quyen.trang_thai == 'hoat_dong' %}ndt-f5-badge--info{% elif quyen.trang_thai == 'bi_thu_hoi' %}ndt-f5-badge--danger{% else %}ndt-f5-badge--pending{% endif %}">{{ quyen.get_trang_thai_display }}</span></td>
+                            <td data-label="Đánh giá hiện tại">
+                                {% if quyen.danh_gia_hieu_luc.du_dieu_kien %}<span class="ndt-f5-badge ndt-f5-badge--success">Đang đủ điều kiện</span>{% else %}<span class="ndt-f5-badge ndt-f5-badge--pending">Không còn hiệu lực</span><span class="tenant-access-note">{{ quyen.danh_gia_hieu_luc.ly_do }}</span>{% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="ndt-f5-empty"><div class="ndt-f5-empty__icon" aria-hidden="true">QR</div><h3 class="ndt-f5-empty__title">Không có quyền phù hợp</h3><p class="ndt-f5-empty__description">Bạn chưa có quyền ra vào hoặc không có quyền nào khớp bộ lọc hiện tại.</p></div>
+            {% endif %}
+        </section>
+
+        <section class="ndt-f5-stack" aria-labelledby="tenant-history-title">
+            <div class="tenant-access-section-head">
+                <div><h2 id="tenant-history-title">Lịch sử ra vào của tôi</h2><p>Mỗi bản ghi cho biết thời gian, phòng, sự kiện, nguồn và kết quả đã lưu.</p></div>
+                <span class="tenant-access-count">{{ page_obj.paginator.count }} kết quả</span>
+            </div>
+            {% if lich_su %}
+            <div class="ndt-f5-table-wrap">
+                <table class="ndt-f5-table">
+                    <thead><tr><th>Thời gian</th><th>Phòng</th><th>Sự kiện</th><th>Kết quả</th><th>Nguồn</th><th>Nội dung ghi nhận</th></tr></thead>
+                    <tbody>
+                    {% for su_kien in lich_su %}
+                        <tr>
+                            <td data-label="Thời gian"><strong>{{ su_kien.thoi_diem|date:"d/m/Y" }}</strong><span class="tenant-access-note">{{ su_kien.thoi_diem|date:"H:i:s" }}</span></td>
+                            <td data-label="Phòng"><strong>Phòng {{ su_kien.phong.so_phong }}</strong><span class="tenant-access-note">{{ su_kien.phong.co_so.ten_co_so }}</span></td>
+                            <td data-label="Sự kiện">{{ su_kien.get_loai_su_kien_display }}</td>
+                            <td data-label="Kết quả">{% if su_kien.ket_qua == "cho_phep" %}<span class="ndt-f5-badge ndt-f5-badge--success">Cho phép</span>{% elif su_kien.ket_qua == "tu_choi" %}<span class="ndt-f5-badge ndt-f5-badge--danger">Từ chối</span>{% else %}<span class="ndt-f5-badge ndt-f5-badge--info">Không xác định</span>{% endif %}</td>
+                            <td data-label="Nguồn">{{ su_kien.get_nguon_display }}</td>
+                            <td data-label="Nội dung ghi nhận">{{ su_kien.ghi_chu|default:"Không có ghi chú"|linebreaksbr }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="ndt-f5-empty"><div class="ndt-f5-empty__icon" aria-hidden="true">LS</div><h3 class="ndt-f5-empty__title">Không có lịch sử phù hợp</h3><p class="ndt-f5-empty__description">Chưa có lượt ra vào của bạn hoặc không có bản ghi nào khớp bộ lọc hiện tại.</p></div>
+            {% endif %}
+
+            {% if page_obj.paginator.num_pages > 1 %}
+            <nav class="ndt-f5-pagination" aria-label="Phân trang lịch sử ra vào">
+                {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if query_string %}&amp;{{ query_string }}{% endif %}" rel="prev" aria-label="Trang lịch sử trước">Trước</a>{% endif %}
+                <span aria-current="page">Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if query_string %}&amp;{{ query_string }}{% endif %}" rel="next" aria-label="Trang lịch sử sau">Sau</a>{% endif %}
+            </nav>
+            {% endif %}
+        </section>
+    </div>
+</main>
+{% endblock %}

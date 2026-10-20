@@ -1,5 +1,5 @@
 ﻿{% extends "core/base.html" %}
-{% load bo_loc %}
+{% load static bo_loc %}
 
 {% block title %}NDT MOTEL - Tìm phòng tại Đà Nẵng{% endblock %}
 
@@ -1248,7 +1248,7 @@
 .ndt-home .ndt-home-room-body h3{font-size:24px;margin:0 0 8px}.ndt-home .ndt-home-room-type{font-size:13px}.ndt-home .ndt-home-room-location{font-size:13px;line-height:1.6}
 .ndt-home .ndt-home-room-meta{font-size:14px;flex-wrap:wrap}.ndt-home .ndt-home-room-foot{margin-top:auto;flex-wrap:wrap;gap:16px}
 .ndt-home .ndt-home-price strong{font-size:22px;color:#066b7b}.ndt-home .ndt-home-price em{display:block;font-size:12px;color:#5c737a}
-.ndt-home .ndt-home-detail{min-height:48px;display:inline-flex;align-items:center;padding:12px 16px;background:#087f91;color:#fff;border:1px solid #087f91;border-radius:8px;font-size:14px}
+.ndt-home .ndt-home-actions{display:flex;flex-wrap:wrap;gap:8px}.ndt-home .ndt-home-detail,.ndt-home .ndt-home-book{min-height:48px;display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border:1px solid #087f91;border-radius:8px;font-size:14px}.ndt-home .ndt-home-detail{background:#fff;color:#066b7b}.ndt-home .ndt-home-book{background:#087f91;color:#fff}
 .ndt-home .ndt-home-journey-grid{grid-template-columns:1fr}.ndt-home .ndt-home-journey-item{padding:24px;border:0;border-bottom:1px solid #dce7e9}.ndt-home .ndt-home-journey-item p{font-size:14px}
 .ndt-home .ndt-home-support{gap:0;border-top:1px solid #dce7e9;border-bottom:1px solid #dce7e9}.ndt-home .ndt-home-support>a{border:0;border-radius:0;box-shadow:none;padding:24px}
 .ndt-home .ndt-home-final{background:#edf7f8;border:1px solid #dce7e9;border-radius:16px;color:#16333a}.ndt-home .ndt-home-final h2,.ndt-home .ndt-home-final p{color:#16333a}
@@ -1257,7 +1257,7 @@
 @media(min-width:1600px){.ndt-home .ndt-home-hero{min-height:620px}}
 @media(max-width:1439px){.ndt-home .ndt-home-rooms{grid-template-columns:repeat(2,minmax(0,1fr))}.ndt-home .ndt-home-booktabs{grid-template-columns:repeat(3,minmax(0,1fr))}.ndt-home .ndt-home-booktabs a:nth-child(n){display:flex}}
 @media(max-width:1120px){.ndt-home-search{grid-template-columns:1fr 1fr}.ndt-home-search button{grid-column:1/-1}.ndt-home .ndt-home-copy{left:42%;width:52%}.ndt-home .ndt-home-copy h1,.ndt-home .ndt-home-copy h2{font-size:34px}}
-@media(max-width:767px){.ndt-home{padding:16px}.ndt-home .ndt-home-hero{min-height:640px}.ndt-home .ndt-home-copy{left:24px;right:24px;top:40px;width:auto;transform:none}.ndt-home .ndt-home-copy h1,.ndt-home .ndt-home-copy h2{font-size:32px}.ndt-home .ndt-home-art{opacity:.3;pointer-events:none}.ndt-home .ndt-home-bookbar{width:100%;margin-top:16px}.ndt-home-search{grid-template-columns:1fr;padding:16px}.ndt-home-search button{grid-column:auto}.ndt-home .ndt-home-rooms{grid-template-columns:1fr}.ndt-home .ndt-home-booktabs{grid-template-columns:1fr 1fr}.ndt-home .ndt-home-index{top:auto;bottom:24px;left:24px;right:24px;display:flex;flex-wrap:wrap;gap:4px;transform:none}.ndt-home .ndt-home-copy{bottom:auto}.ndt-home .ndt-home-room-body{padding:16px}.ndt-home .ndt-home-final{padding:24px}.ndt-home .ndt-home-journey-copy{padding:24px}}
+@media(max-width:767px){.ndt-home{padding:16px}.ndt-home .ndt-home-hero{min-height:640px}.ndt-home .ndt-home-copy{left:24px;right:24px;top:40px;width:auto;transform:none}.ndt-home .ndt-home-copy h1,.ndt-home .ndt-home-copy h2{font-size:32px}.ndt-home .ndt-home-art{opacity:.3;pointer-events:none}.ndt-home .ndt-home-bookbar{width:100%;margin-top:16px}.ndt-home-search{grid-template-columns:1fr;padding:16px}.ndt-home-search button{grid-column:auto}.ndt-home .ndt-home-rooms{grid-template-columns:1fr}.ndt-home .ndt-home-booktabs{grid-template-columns:1fr 1fr}.ndt-home .ndt-home-index{top:auto;bottom:24px;left:24px;right:24px;display:flex;flex-wrap:wrap;gap:4px;transform:none}.ndt-home .ndt-home-copy{bottom:auto}.ndt-home .ndt-home-room-body{padding:16px}.ndt-home .ndt-home-actions{width:100%}.ndt-home .ndt-home-actions>a{flex:1;min-width:0}.ndt-home .ndt-home-final{padding:24px}.ndt-home .ndt-home-journey-copy{padding:24px}}
 @media(prefers-reduced-motion:reduce){.ndt-home *{transition:none!important;animation:none!important}}
 
 .ndt-home .ndt-home-index button{color:#16333a;background:#ffffffc9;border-radius:8px;margin-bottom:8px;width:56px;height:48px;padding:0;text-align:center;font-size:15px}
@@ -1356,23 +1356,6 @@ body.ndt-premium-ui {
 
 .ndt-home-slide.is-active {
     transform: scale(1);
-}
-
-/* 4 ảnh hero đã chọn theo cùng phong cách kiến trúc / lưu trú hiện đại. */
-.ndt-home-slide--room {
-    background-image: url("https://images.unsplash.com/photo-1774311237295-a65a4c1ff38a?auto=format&fit=crop&fm=jpg&q=82&w=2400") !important;
-}
-
-.ndt-home-slide--smart {
-    background-image: url("https://images.unsplash.com/photo-1751945965597-71171ec7a458?auto=format&fit=crop&fm=jpg&q=82&w=2400") !important;
-}
-
-.ndt-home-slide--service {
-    background-image: url("https://images.unsplash.com/photo-1765862835260-47843a7bba45?auto=format&fit=crop&fm=jpg&q=82&w=2400") !important;
-}
-
-.ndt-home-slide--community {
-    background-image: url("https://upload.wikimedia.org/wikipedia/commons/7/78/Modern_apartment_building_%28Unsplash%29.jpg") !important;
 }
 
 /* Lớp phủ giúp chữ luôn đọc rõ trên cả ảnh sáng và tối. */
@@ -1654,12 +1637,17 @@ body.ndt-premium-ui {
 }
 
 </style>
+<link rel="stylesheet" href="{% static 'css/home-shell.css' %}">
+<link rel="stylesheet" href="{% static 'css/home-panel.css' %}">
+<link rel="stylesheet" href="{% static 'css/home-sections.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/public_discovery_support_post_p6.css' %}?v=post-p6-public-1">
 {% endblock %}
 
 
 
 {% block content %}
-<div class="ndt-home">
+<div class="ndt-home ndt-f5 ndt-public-discovery ndt-public-home" data-public-context="home">
 
     <!-- =====================================================
          HERO 4 SLIDES
@@ -1669,15 +1657,16 @@ body.ndt-premium-ui {
         aria-label="Nội dung nổi bật NDT MOTEL"
     >
 
-        <div class="ndt-home-slides">
+        <div class="ndt-home-slides" aria-live="polite">
 
             <!-- SLIDE 01 -->
-            {% with hero_room=phong|first %}
-            {% with hero_cover=hero_room.anh_dai_dien_hien_thi %}
             <article
                 class="ndt-home-slide ndt-home-slide--room is-active"
                 data-home-slide="0"
-                {% if hero_cover %}style="background-image: url('{{ hero_cover.anh.url }}') !important;"{% endif %}
+                role="group"
+                aria-label="1 / 4 · Phòng tiêu chuẩn"
+                aria-hidden="false"
+                style="background-image: url('{% get_media_prefix %}phong_mau/phong_tieu_chuan/TC01/01_toan_canh.jpg');"
             >
 
                 <div class="ndt-home-art">
@@ -1690,11 +1679,11 @@ body.ndt-premium-ui {
                 <div class="ndt-home-copy">
 
                     <span class="ndt-home-eyebrow">
-                        Không gian sống rõ ràng
+                        Không gian sống tiện nghi
                     </span>
 
                     <h1>
-                        Tìm phòng. Bắt đầu cuộc sống mới.
+                        Tìm phòng phù hợp. Bắt đầu cuộc sống mới.
                     </h1>
 
                     <p>
@@ -1712,13 +1701,15 @@ body.ndt-premium-ui {
                 </div>
 
             </article>
-            {% endwith %}
-            {% endwith %}
-
             <!-- SLIDE 02 -->
             <article
-                class="ndt-home-slide ndt-home-slide--smart"
+                class="ndt-home-slide ndt-home-slide--premium"
                 data-home-slide="1"
+                role="group"
+                aria-label="2 / 4 · Phòng cao cấp"
+                aria-hidden="true"
+                inert
+                style="background-image: url('{% get_media_prefix %}phong_mau/phong_cao_cap/CC01/01_toan_canh.jpg');"
             >
 
                 <div class="ndt-home-art">
@@ -1731,35 +1722,21 @@ body.ndt-premium-ui {
                 <div class="ndt-home-copy">
 
                     <span class="ndt-home-eyebrow">
-                        NDT Smart Living
+                        Tiện nghi nâng tầm
                     </span>
 
                     <h2>
-                        Lưu trú thuận tiện, mỗi ngày.
+                        Phòng cao cấp. Riêng tư đúng chất.
                     </h2>
 
                     <p>
-                        Đặt phòng, hợp đồng, hóa đơn, hỗ trợ và những tiện
-                        ích Smart Room được kết nối xuyên suốt trong một
-                        trải nghiệm thống nhất.
+                        Không gian chỉn chu, nội thất hiện đại và tiện nghi
+                        phù hợp cho nhịp sống riêng tư tại Đà Nẵng.
                     </p>
 
-                    {% if user.is_authenticated %}
-                        <a
-                            href="{% if user.is_staff or user.is_superuser %}{% url 'dashboard_admin' %}{% else %}{% url 'tai_khoan' %}{% endif %}"
-                            class="ndt-home-cta"
-                        >
-                            {% if user.is_staff or user.is_superuser %}Mở trung tâm quản trị{% else %}Mở trung tâm của tôi{% endif %}
-                        </a>
-                    {% else %}
-                        <a
-                            href="{% url 'dang_ky' %}"
-                            class="ndt-home-cta ndt-auth-open"
-                            data-auth-mode="register"
-                        >
-                            Tạo tài khoản
-                        </a>
-                    {% endif %}
+                    <a href="{% url 'danh_sach_phong' %}" class="ndt-home-cta">
+                        Xem phòng cao cấp
+                    </a>
 
                 </div>
 
@@ -1767,8 +1744,13 @@ body.ndt-premium-ui {
 
             <!-- SLIDE 03 -->
             <article
-                class="ndt-home-slide ndt-home-slide--service"
+                class="ndt-home-slide ndt-home-slide--loft"
                 data-home-slide="2"
+                role="group"
+                aria-label="3 / 4 · Phòng gác lửng"
+                aria-hidden="true"
+                inert
+                style="background-image: url('{% get_media_prefix %}phong_mau/phong_gac_lung/GL01/01_toan_canh.jpg');"
             >
 
                 <div class="ndt-home-art">
@@ -1781,34 +1763,21 @@ body.ndt-premium-ui {
                 <div class="ndt-home-copy">
 
                     <span class="ndt-home-eyebrow">
-                        Dịch vụ trong thời gian ở
+                        Không gian gác lửng
                     </span>
 
                     <h2>
-                        Dịch vụ trong tầm tay.
+                        Tách tầng linh hoạt. Sống thoáng hơn.
                     </h2>
 
                     <p>
-                        Theo dõi hóa đơn, thông báo, hợp đồng và yêu cầu hỗ
-                        trợ mà không phải chuyển qua nhiều kênh khác nhau.
+                        Bố cục hai tầng phân tách nghỉ ngơi và sinh hoạt,
+                        tạo thêm khoảng riêng trong cùng một căn phòng.
                     </p>
 
-                    {% if user.is_authenticated %}
-                        <a
-                            href="{% if user.is_staff or user.is_superuser %}{% url 'dashboard_admin' %}{% else %}{% url 'tai_khoan' %}{% endif %}"
-                            class="ndt-home-cta"
-                        >
-                            Xem tài khoản
-                        </a>
-                    {% else %}
-                        <a
-                            href="{% url 'dang_nhap' %}"
-                            class="ndt-home-cta ndt-auth-open"
-                            data-auth-mode="login"
-                        >
-                            Đăng nhập
-                        </a>
-                    {% endif %}
+                    <a href="{% url 'danh_sach_phong' %}" class="ndt-home-cta">
+                        Xem phòng gác lửng
+                    </a>
 
                 </div>
 
@@ -1816,8 +1785,13 @@ body.ndt-premium-ui {
 
             <!-- SLIDE 04 -->
             <article
-                class="ndt-home-slide ndt-home-slide--community"
+                class="ndt-home-slide ndt-home-slide--studio"
                 data-home-slide="3"
+                role="group"
+                aria-label="4 / 4 · Căn hộ mini"
+                aria-hidden="true"
+                inert
+                style="background-image: url('{% get_media_prefix %}phong_mau/can_ho_mini/CH01/01_toan_canh.jpg');"
             >
 
                 <div class="ndt-home-art">
@@ -1830,24 +1804,23 @@ body.ndt-premium-ui {
                 <div class="ndt-home-copy">
 
                     <span class="ndt-home-eyebrow">
-                        NDT MOTEL
+                        Căn hộ mini đủ đầy
                     </span>
 
                     <h2>
-                        Chọn nơi ở, hiểu rõ thông tin.
+                        Căn hộ mini. Trọn nhịp sống riêng.
                     </h2>
 
                     <p>
-                        Khám phá các cơ sở và phòng đang được quản lý trực
-                        tiếp trên hệ thống, với trạng thái và sức chứa được
-                        thể hiện rõ trước khi bạn quyết định.
+                        Khu bếp, bàn ăn và khoảng sinh hoạt liền mạch dành
+                        cho người muốn tự chủ trong không gian của mình.
                     </p>
 
                     <a
                         href="{% url 'danh_sach_phong' %}"
                         class="ndt-home-cta"
                     >
-                        Xem ngay
+                        Xem căn hộ mini
                     </a>
 
                 </div>
@@ -1866,7 +1839,7 @@ body.ndt-premium-ui {
                 class="is-active"
                 data-home-go="0"
                 aria-current="true"
-                aria-label="Slide 1"
+                aria-label="Chuyển đến ảnh 1 · Phòng tiêu chuẩn"
             >
                 01
             </button>
@@ -1875,7 +1848,7 @@ body.ndt-premium-ui {
                 type="button"
                 data-home-go="1"
                 aria-current="false"
-                aria-label="Slide 2"
+                aria-label="Chuyển đến ảnh 2 · Phòng cao cấp"
             >
                 02
             </button>
@@ -1884,7 +1857,7 @@ body.ndt-premium-ui {
                 type="button"
                 data-home-go="2"
                 aria-current="false"
-                aria-label="Slide 3"
+                aria-label="Chuyển đến ảnh 3 · Phòng gác lửng"
             >
                 03
             </button>
@@ -1893,583 +1866,412 @@ body.ndt-premium-ui {
                 type="button"
                 data-home-go="3"
                 aria-current="false"
-                aria-label="Slide 4"
+                aria-label="Chuyển đến ảnh 4 · Căn hộ mini"
             >
                 04
             </button>
-            <button type="button" class="ndt-home-pause" aria-pressed="false">Tạm dừng</button>
+            <span class="ndt-home-progress" aria-hidden="true">
+                <span class="ndt-home-progress-bar"></span>
+            </span>
+            <button
+                type="button"
+                class="ndt-home-pause"
+                aria-pressed="false"
+                aria-label="Tạm dừng trình chiếu tự động"
+            >
+                Tạm dừng
+            </button>
         </div>
 
     </section>
 
     <!-- =====================================================
-         QUICK ACCESS
-         Search and existing account shortcuts.
+         P3 ROLE-AWARE QUICK ACCESS
+         All panels remain readable without JavaScript. The enhancement script
+         applies hidden/inert after wiring the tab interaction.
          ===================================================== -->
-    <section class="ndt-home-bookbar">
+    <section class="ndt-home-tools" data-home-tools aria-label="Bảng chức năng nhanh">
+        <div class="ndt-home-tools-tabs" role="tablist" aria-label="Chức năng NDT MOTEL">
+            <button class="is-active" type="button" role="tab" id="home-tab-search"
+                    aria-selected="true" aria-controls="home-panel-search" tabindex="0">
+                <span>01</span>Tìm phòng
+            </button>
+            <button type="button" role="tab" id="home-tab-booking"
+                    aria-selected="false" aria-controls="home-panel-booking" tabindex="-1">
+                <span>02</span>Quản lý đặt phòng
+            </button>
+            <button type="button" role="tab" id="home-tab-smart"
+                    aria-selected="false" aria-controls="home-panel-smart" tabindex="-1">
+                <span>03</span>Smart Living
+            </button>
+            <button type="button" role="tab" id="home-tab-support"
+                    aria-selected="false" aria-controls="home-panel-support" tabindex="-1">
+                <span>04</span>Hỗ trợ
+            </button>
+            <button type="button" role="tab" id="home-tab-room"
+                    aria-selected="false" aria-controls="home-panel-room" tabindex="-1">
+                <span>05</span>Thông tin phòng
+            </button>
+        </div>
 
-        <nav
-            class="ndt-home-booktabs"
-            aria-label="Truy cập nhanh"
-        >
-
-            <a href="{% url 'danh_sach_phong' %}">
-                Tìm phòng
-            </a>
-
-            {% if user.is_authenticated %}
-                <a href="{% if user.is_staff or user.is_superuser %}{% url 'dashboard_admin' %}{% else %}{% url 'dat_phong_cua_toi' %}{% endif %}">
-                    {% if user.is_staff or user.is_superuser %}Quản lý đặt phòng{% else %}Đặt phòng của tôi{% endif %}
-                </a>
-            {% else %}
-                <a
-                    href="{% url 'dang_nhap' %}"
-                    class="ndt-auth-open"
-                    data-auth-mode="login"
-                >
-                    Quản lý đặt phòng
-                </a>
-            {% endif %}
-
-            {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
-
-                <a href="{% url 'hop_dong_cua_toi' %}">
-                    Hợp đồng của tôi
-                </a>
-
-                <a href="{% url 'hoa_don_cua_toi' %}">
-                    Hóa đơn &amp; thanh toán
-                </a>
-
-                <a href="{% url 'yeu_cau_sua_chua_cua_toi' %}">
-                    Hỗ trợ của tôi
-                </a>
-
-            {% else %}
-
-                <a href="#features">
-                    Smart Living
-                </a>
-
-                <a href="#support">
-                    Hỗ trợ
-                </a>
-
-                <a href="{% url 'danh_sach_phong' %}">
-                    Thông tin phòng
-                </a>
-
-            {% endif %}
-
-        </nav>
-
-        <form class="ndt-home-search" method="get" action="{% url 'danh_sach_phong' %}">
-            <div><label for="home-q">Bạn muốn tìm phòng ở đâu?</label>
-                <input id="home-q" name="q" type="search" placeholder="Số phòng, cơ sở, quận hoặc địa chỉ"></div>
-            <div><label for="home-price">Giá tối đa (đ/tháng)</label>
-                <input id="home-price" name="gia_max" type="number" min="0" step="any" placeholder="Không giới hạn"></div>
-            <button type="submit">Tìm phòng</button>
-        </form>
-        <a class="ndt-home-search-all" href="{% url 'danh_sach_phong' %}">Xem tất cả phòng</a>
-
-    </section>
-
-    <!-- =====================================================
-         FEATURED ROOMS
-         ===================================================== -->
-    <section class="ndt-home-section">
-
-        <div class="ndt-home-section-head">
-
-            <div>
-
-                <div class="ndt-home-kicker">
-                    Phòng tại NDT MOTEL
+        <div class="ndt-home-tools-body">
+            <div class="ndt-home-tools-panel is-active" id="home-panel-search" role="tabpanel"
+                 aria-labelledby="home-tab-search" tabindex="0">
+                <div class="ndt-home-tools-intro">
+                    <p class="ndt-home-tools-kicker">Khám phá NDT MOTEL</p>
+                    <h2>Tìm không gian phù hợp</h2>
+                    <p>Tìm theo số phòng, cơ sở, quận hoặc địa chỉ và giới hạn mức giá bạn mong muốn.</p>
                 </div>
-
-                <h2>
-                    Khám phá phòng đang có
-                </h2>
-
-                <p>
-                    Xem nhanh những phòng đang có trên hệ thống. Mỗi trang
-                    chi tiết cung cấp thêm tình trạng, sức chứa và thông tin
-                    cần thiết trước khi gửi yêu cầu đặt.
-                </p>
-
+                <form class="ndt-home-tools-search" method="get" action="{% url 'danh_sach_phong' %}">
+                    <div class="ndt-home-tools-field">
+                        <label for="home-q">Từ khóa</label>
+                        <input id="home-q" name="q" type="search"
+                               placeholder="Số phòng, cơ sở, quận hoặc địa chỉ">
+                    </div>
+                    <div class="ndt-home-tools-field">
+                        <label for="home-price">Giá tối đa <span>(đ/tháng)</span></label>
+                        <input id="home-price" name="gia_max" type="number" min="0" step="any"
+                               inputmode="decimal" placeholder="Không giới hạn">
+                    </div>
+                    <div class="ndt-home-tools-field">
+                        <label for="home-checkin">Ngày nhận phòng</label>
+                        <input id="home-checkin" name="ngay_nhan_phong" type="date">
+                    </div>
+                    <div class="ndt-home-tools-field">
+                        <label for="home-duration">Thời hạn thuê <span>(tháng)</span></label>
+                        <input id="home-duration" name="so_thang_thue" type="number" min="1" max="36" step="1" placeholder="Ví dụ: 3">
+                    </div>
+                    <button class="ndt-home-tools-primary" type="submit">Tìm phòng theo thời gian thuê</button>
+                </form>
+                <p class="ndt-home-tools-hint">Để kiểm tra phòng theo thời gian thuê, nhập cả ngày nhận phòng và thời hạn. Bạn vẫn có thể tìm phòng theo từ khóa hoặc giá.</p>
+                <a class="ndt-home-tools-textlink" href="{% url 'danh_sach_phong' %}">Xem tất cả phòng →</a>
             </div>
 
-            <a
-                href="{% url 'danh_sach_phong' %}"
-                class="ndt-home-more"
-            >
-                Xem tất cả phòng →
-            </a>
+            <div class="ndt-home-tools-panel" id="home-panel-booking" role="tabpanel"
+                 aria-labelledby="home-tab-booking" tabindex="0">
+                <div class="ndt-home-tools-intro">
+                    <p class="ndt-home-tools-kicker">Yêu cầu đặt phòng</p>
+                    <h2>Theo dõi hành trình thuê</h2>
+                    {% if home_panel.vai_tro == 'guest' %}
+                        <p>Đăng nhập để xem yêu cầu, tiền cọc và trạng thái xử lý của riêng bạn.</p>
+                    {% elif home_panel.vai_tro == 'admin' %}
+                        <p>Có <strong>{{ home_panel.so_dat_phong_cho_duyet }}</strong> yêu cầu đang chờ quản trị xử lý.</p>
+                    {% elif not home_panel.nguoi_thue %}
+                        <p>Tài khoản chưa có hồ sơ người thuê hoạt động.</p>
+                    {% elif home_panel.dat_phong_gan_nhat %}
+                        <p>Yêu cầu gần nhất của bạn tại phòng {{ home_panel.dat_phong_gan_nhat.phong.so_phong }}.</p>
+                    {% else %}
+                        <p>Bạn chưa gửi yêu cầu đặt phòng nào.</p>
+                    {% endif %}
+                </div>
+                <div class="ndt-home-tools-summary">
+                    {% if home_panel.vai_tro == 'guest' %}
+                        <span class="ndt-home-tools-status">Cần đăng nhập</span>
+                        <strong>Dữ liệu đặt phòng được bảo vệ theo tài khoản.</strong>
+                        <div class="ndt-home-tools-actions">
+                            <a class="ndt-home-tools-primary" href="{% url 'dang_nhap' %}?next={% url 'dat_phong_cua_toi' %}">Đăng nhập</a>
+                            <a class="ndt-home-tools-secondary" href="{% url 'danh_sach_phong' %}">Khám phá phòng</a>
+                        </div>
+                    {% elif home_panel.vai_tro == 'admin' %}
+                        <span class="ndt-home-tools-status">Quyền quản trị</span>
+                        <strong>{{ home_panel.so_dat_phong_cho_duyet }} yêu cầu chờ duyệt</strong>
+                        <a class="ndt-home-tools-primary" href="{% url 'quan_ly_dat_phong' %}">Mở quản lý đặt phòng</a>
+                    {% elif not home_panel.nguoi_thue %}
+                        <span class="ndt-home-tools-status">Thiếu hồ sơ</span>
+                        <strong>Hoàn thiện thông tin trước khi đặt phòng.</strong>
+                        <a class="ndt-home-tools-primary" href="{% url 'cap_nhat_thong_tin' %}">Cập nhật hồ sơ</a>
+                    {% elif home_panel.dat_phong_gan_nhat %}
+                        <span class="ndt-home-tools-status">{{ home_panel.dat_phong_gan_nhat.get_trang_thai_display }}</span>
+                        <strong>{{ home_panel.dat_phong_gan_nhat.ma_yeu_cau }}</strong>
+                        <small>Gửi ngày {{ home_panel.dat_phong_gan_nhat.ngay_dat|date:'d/m/Y' }}</small>
+                        <div class="ndt-home-tools-actions">
+                            <a class="ndt-home-tools-primary" href="{% url 'chi_tiet_dat_phong_cua_toi' home_panel.dat_phong_gan_nhat.id %}">Xem chi tiết</a>
+                            <a class="ndt-home-tools-secondary" href="{% url 'dat_phong_cua_toi' %}">Tất cả yêu cầu</a>
+                        </div>
+                    {% else %}
+                        <span class="ndt-home-tools-status">Chưa có yêu cầu</span>
+                        <strong>Bắt đầu từ danh sách phòng đang có.</strong>
+                        <a class="ndt-home-tools-primary" href="{% url 'danh_sach_phong' %}">Tìm phòng</a>
+                    {% endif %}
+                </div>
+            </div>
 
+            <div class="ndt-home-tools-panel" id="home-panel-smart" role="tabpanel"
+                 aria-labelledby="home-tab-smart" tabindex="0">
+                <div class="ndt-home-tools-intro">
+                    <p class="ndt-home-tools-kicker">Trải nghiệm lưu trú</p>
+                    <h2>Smart Living đúng quyền</h2>
+                    {% if home_panel.vai_tro == 'guest' %}
+                        <p>Tìm hiểu quy trình thuê và các tiện ích quản lý lưu trú an toàn tại NDT MOTEL.</p>
+                    {% elif home_panel.vai_tro == 'admin' %}
+                        <p>Theo dõi vận hành Smart Room bằng công cụ quản trị hiện có.</p>
+                    {% elif home_panel.hop_dong_hien_tai %}
+                        <p>Trạng thái Smart Living gắn với hợp đồng và phòng hiện tại của bạn.</p>
+                    {% else %}
+                        <p>Smart Living được mở khi bạn có hợp đồng lưu trú đang hiệu lực.</p>
+                    {% endif %}
+                </div>
+                <div class="ndt-home-tools-summary">
+                    {% if home_panel.vai_tro == 'guest' %}
+                        <span class="ndt-home-tools-status">Thông tin công khai</span>
+                        <strong>Không kích hoạt camera hoặc nhận diện từ trang chủ.</strong>
+                        <div class="ndt-home-tools-actions">
+                            <a class="ndt-home-tools-primary" href="{% url 'huong_dan_thue_phong' %}">Xem hướng dẫn</a>
+                            <a class="ndt-home-tools-secondary" href="{% url 'dang_nhap' %}?next={% url 'tai_khoan' %}">Đăng nhập</a>
+                        </div>
+                    {% elif home_panel.vai_tro == 'admin' %}
+                        <span class="ndt-home-tools-status">{{ home_panel.so_quyen_ra_vao_hieu_luc }} quyền hiệu lực</span>
+                        <strong>Dashboard Smart Room dành cho quản trị.</strong>
+                        <a class="ndt-home-tools-primary" href="{% url 'smart_room_dashboard' %}">Mở Smart Room</a>
+                    {% elif home_panel.hop_dong_hien_tai %}
+                        <span class="ndt-home-tools-status">{% if home_panel.quyen_ra_vao %}Quyền ra vào đang hoạt động{% else %}Chưa có quyền ra vào hiệu lực{% endif %}</span>
+                        <strong>Phòng {{ home_panel.hop_dong_hien_tai.dat_phong.phong.so_phong }}</strong>
+                        <small>Hợp đồng đến {{ home_panel.hop_dong_hien_tai.ngay_ket_thuc|date:'d/m/Y' }}</small>
+                        <a class="ndt-home-tools-primary" href="{% url 'nhan_dien_su_dung_phong' %}">Quản lý Face ID</a>
+                    {% else %}
+                        <span class="ndt-home-tools-status">Chưa đủ điều kiện</span>
+                        <strong>Không có hợp đồng lưu trú đang hiệu lực.</strong>
+                        <a class="ndt-home-tools-primary" href="{% url 'hop_dong_cua_toi' %}">Xem hợp đồng</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="ndt-home-tools-panel" id="home-panel-support" role="tabpanel"
+                 aria-labelledby="home-tab-support" tabindex="0">
+                <div class="ndt-home-tools-intro">
+                    <p class="ndt-home-tools-kicker">Hỗ trợ khi cần</p>
+                    <h2>Đúng kênh, đúng yêu cầu</h2>
+                    {% if home_panel.vai_tro == 'tenant' and home_panel.nguoi_thue %}
+                        <p>Bạn có {{ home_panel.so_yeu_cau_sua_chua_dang_mo }} yêu cầu sửa chữa đang mở.</p>
+                    {% elif home_panel.vai_tro == 'admin' %}
+                        <p>Có {{ home_panel.so_yeu_cau_sua_chua_dang_mo }} yêu cầu cần theo dõi trên hệ thống.</p>
+                    {% else %}
+                        <p>Xem hướng dẫn, câu hỏi thường gặp hoặc kết nối với NDT MOTEL.</p>
+                    {% endif %}
+                </div>
+                <div class="ndt-home-tools-linkgrid">
+                    {% if home_panel.vai_tro == 'tenant' and home_panel.nguoi_thue %}
+                        <a href="{% url 'yeu_cau_sua_chua_cua_toi' %}"><strong>Theo dõi sửa chữa</strong><span>Xem yêu cầu của bạn</span></a>
+                        {% if home_panel.hop_dong_hien_tai %}
+                            <a href="{% url 'tao_yeu_cau_sua_chua' %}"><strong>Tạo yêu cầu</strong><span>Báo sự cố phòng hiện tại</span></a>
+                        {% endif %}
+                        <a href="{% url 'trung_tam_tro_giup' %}"><strong>Trung tâm trợ giúp</strong><span>Tra cứu hướng dẫn</span></a>
+                    {% elif home_panel.vai_tro == 'admin' %}
+                        <a href="{% url 'quan_ly_sua_chua' %}"><strong>Xử lý sửa chữa</strong><span>Mở hàng đợi quản trị</span></a>
+                        <a href="{% url 'quan_ly_chinh_sach' %}"><strong>Chính sách hỗ trợ</strong><span>Quản lý nội dung hỗ trợ</span></a>
+                    {% else %}
+                        <a href="{% url 'trung_tam_tro_giup' %}"><strong>Trung tâm trợ giúp</strong><span>Câu hỏi thường gặp</span></a>
+                        <a href="{% url 'huong_dan_thue_phong' %}"><strong>Hướng dẫn thuê phòng</strong><span>Các bước rõ ràng</span></a>
+                        <a href="#contact"><strong>Liên hệ</strong><span>Kết nối với NDT MOTEL</span></a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="ndt-home-tools-panel" id="home-panel-room" role="tabpanel"
+                 aria-labelledby="home-tab-room" tabindex="0">
+                <div class="ndt-home-tools-intro">
+                    <p class="ndt-home-tools-kicker">Không gian của bạn</p>
+                    <h2>Thông tin phòng rõ ràng</h2>
+                    {% if home_panel.vai_tro == 'tenant' and home_panel.hop_dong_hien_tai %}
+                        <p>Thông tin lấy từ đúng hợp đồng lưu trú hiện tại của bạn.</p>
+                    {% elif home_panel.vai_tro == 'admin' %}
+                        <p>Tổng quan danh mục phòng, không hiển thị hồ sơ Tenant tùy ý.</p>
+                    {% else %}
+                        <p>Khám phá giá thuê, sức chứa và trạng thái phòng công khai.</p>
+                    {% endif %}
+                </div>
+                <div class="ndt-home-tools-summary">
+                    {% if home_panel.vai_tro == 'tenant' and home_panel.hop_dong_hien_tai %}
+                        <span class="ndt-home-tools-status">{{ home_panel.hop_dong_hien_tai.get_trang_thai_display }}</span>
+                        <strong>Phòng {{ home_panel.hop_dong_hien_tai.dat_phong.phong.so_phong }} · {{ home_panel.hop_dong_hien_tai.dat_phong.phong.co_so.ten_co_so }}</strong>
+                        <small>{{ home_panel.hop_dong_hien_tai.ngay_bat_dau|date:'d/m/Y' }} — {{ home_panel.hop_dong_hien_tai.ngay_ket_thuc|date:'d/m/Y' }}</small>
+                        <div class="ndt-home-tools-actions">
+                            <a class="ndt-home-tools-primary" href="{% url 'chi_tiet_hop_dong_cua_toi' home_panel.hop_dong_hien_tai.id %}">Xem hợp đồng</a>
+                            {% if home_panel.hoa_don_gan_nhat %}
+                                <a class="ndt-home-tools-secondary" href="{% url 'chi_tiet_hoa_don_cua_toi' home_panel.hoa_don_gan_nhat.id %}">Hóa đơn {{ home_panel.hoa_don_gan_nhat.thang }}/{{ home_panel.hoa_don_gan_nhat.nam }}</a>
+                            {% endif %}
+                        </div>
+                    {% elif home_panel.vai_tro == 'tenant' %}
+                        <span class="ndt-home-tools-status">Chưa có phòng hiện tại</span>
+                        <strong>Không có hợp đồng lưu trú đang hiệu lực.</strong>
+                        <a class="ndt-home-tools-primary" href="{% url 'danh_sach_phong' %}">Khám phá phòng</a>
+                    {% elif home_panel.vai_tro == 'admin' %}
+                        <span class="ndt-home-tools-status">{{ home_panel.so_phong }} phòng</span>
+                        <strong>Quản lý danh mục và trạng thái phòng.</strong>
+                        <a class="ndt-home-tools-primary" href="{% url 'quan_ly_phong' %}">Mở quản lý phòng</a>
+                    {% else %}
+                        <span class="ndt-home-tools-status">Thông tin công khai</span>
+                        <strong>So sánh phòng trước khi quyết định.</strong>
+                        <a class="ndt-home-tools-primary" href="{% url 'danh_sach_phong' %}">Xem danh sách phòng</a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
+    </section>
 
-        <div class="ndt-home-rooms">
+    <section class="ndt-home-section ndt-p4-featured" data-p4-section="featured" aria-labelledby="p4FeaturedTitle">
+        <header class="ndt-p4-heading">
+            <div>
+                <p class="ndt-p4-eyebrow">Phòng nổi bật</p>
+                <h2 id="p4FeaturedTitle">Chọn từ những phòng đang được gợi ý</h2>
+                <p>Tối đa sáu phòng từ danh mục công khai, với giá thuê, diện tích, cơ sở và trạng thái được trình bày ngay tại đây.</p>
+            </div>
+            <a class="ndt-p4-outline" data-p4-action href="{% url 'danh_sach_phong' %}">Xem tất cả phòng</a>
+        </header>
 
-            {% for phong in phong|slice:":6" %}
-
+        <div class="ndt-home-rooms ndt-p4-room-grid">
+            {% for phong in phong_goi_y %}
                 {% with cover=phong.anh_dai_dien_hien_thi %}
-                <article class="ndt-home-room">
-
-                    <div
-                        class="ndt-home-room-visual{% if cover %} has-room-image{% endif %}"
-                        data-room="{{ phong.so_phong }}"
-                    >
-                        {% if cover %}
-                            <img
-                                src="{{ cover.anh.url }}"
-                                alt="Phòng {{ phong.so_phong }} - {{ phong.co_so.ten_co_so }}"
-                                class="ndt-home-room-photo"
-                                loading="lazy"
-                            >
-                        {% endif %}
-
-                        {% if not cover %}
-                        <div class="ndt-home-room-fallback"><svg class="ndt-public-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V3h12v18M16 9h4v12M2 21h20M8 7h4M8 11h4M8 15h4M9 21v-3h2v3"></path></svg><span>Chưa có hình ảnh</span></div>
-                        {% endif %}
-
-                        {% if phong.trang_thai == "trong" %}
-
-                            <span class="ndt-home-room-status ndt-home-room-status--empty">
-                                Phòng trống
-                            </span>
-
-                        {% elif phong.trang_thai == "bao_tri" %}
-
-                            <span class="ndt-home-room-status ndt-home-room-status--maintenance">
-                                Bảo trì
-                            </span>
-
-                        {% elif phong.trang_thai == "da_dat" %}
-
-                            <span class="ndt-home-room-status ndt-home-room-status--booked">
-                                Đã đặt
-                            </span>
-
-                        {% elif phong.trang_thai == "dang_thue" %}
-
-                            <span class="ndt-home-room-status">
-                                Đang thuê
-                            </span>
-
-                        {% else %}
-
-                            <span class="ndt-home-room-status">
-                                {{ phong.trang_thai_hien_thi }}
-                            </span>
-
-                        {% endif %}
-
+                <article class="ndt-home-room ndt-p4-room" data-room="{{ phong.so_phong }}" data-p4-room>
+                    <div class="ndt-home-room-visual">
+                        <img src="{% if cover %}{{ cover.anh.url }}{% else %}{% static 'images/room-placeholder.svg' %}{% endif %}"
+                             alt="{% if cover %}Phòng {{ phong.so_phong }} tại {{ phong.co_so.ten_co_so }}{% else %}Ảnh mặc định cho phòng {{ phong.so_phong }}{% endif %}"
+                             class="ndt-home-room-photo" loading="lazy">
+                        <span class="ndt-home-room-status{% if phong.trang_thai == 'trong' %} ndt-home-room-status--empty{% elif phong.trang_thai == 'bao_tri' %} ndt-home-room-status--maintenance{% elif phong.trang_thai == 'da_dat' %} ndt-home-room-status--booked{% endif %}">{{ phong.trang_thai_hien_thi }}</span>
                     </div>
-
                     <div class="ndt-home-room-body">
-
+                        <p class="ndt-home-room-type">{{ phong.get_loai_phong_display }}</p>
                         <h3>Phòng {{ phong.so_phong }}</h3>
-                        <div class="ndt-home-room-type">{{ phong.get_loai_phong_display }}</div>
-
-                        <div class="ndt-home-room-location">
-
-                            <strong>
-                                {{ phong.co_so.ten_co_so }}
-                            </strong>
-
-                            {% if phong.co_so.quan %}
-                                · {{ phong.co_so.quan }}
-                            {% endif %}
-
-                            {% if phong.co_so.dia_chi %}
-                                <br>
-                                {{ phong.co_so.dia_chi }}
-                            {% endif %}
-
-                        </div>
-
+                        <p class="ndt-home-room-location"><strong>{{ phong.co_so.ten_co_so }}</strong>{% if phong.co_so.quan %} · {{ phong.co_so.quan }}{% endif %}{% if phong.co_so.dia_chi %}<br>{{ phong.co_so.dia_chi }}{% endif %}</p>
                         <div class="ndt-home-room-meta">
-
-                            {% if phong.dien_tich %}
-                                <span>
-                                    {{ phong.dien_tich }} m²
-                                </span>
-                            {% endif %}
-
-                            {% if phong.suc_chua_da_cau_hinh %}
-                                <span>
-                                    Tối đa {{ phong.suc_chua_hien_thi }} người
-                                </span>
-                            {% else %}
-                                <span>
-                                    Chưa cấu hình sức chứa
-                                </span>
-                            {% endif %}
-
+                            <span>{{ phong.dien_tich }} m²</span>
+                            <span>{% if phong.suc_chua_da_cau_hinh %}Tối đa {{ phong.suc_chua_hien_thi }} người{% else %}Chưa cấu hình sức chứa{% endif %}</span>
                         </div>
-
                         <div class="ndt-home-room-foot">
-
-                            <div class="ndt-home-price">
-
-                                <small>
-                                    Giá thuê
-                                </small>
-
-                                <strong>
-                                    {{ phong.gia_thue|vnd }} đ
-                                    <em>/ tháng</em>
-                                </strong>
-
+                            <div class="ndt-home-price"><small>Giá thuê mỗi tháng</small><strong>{{ phong.gia_thue|vnd }} đ</strong></div>
+                            <div class="ndt-home-actions">
+                                <a data-p4-action href="{% url 'chi_tiet_phong' phong.id %}" class="ndt-home-detail">Xem chi tiết</a>
+                                {% if phong.co_the_dat_phong_cong_khai and not user.is_staff and not user.is_superuser %}
+                                    {% if user.is_authenticated %}
+                                        <a data-p4-action data-p4-role-action href="{% url 'dat_phong' phong.id %}" class="ndt-home-book">Đặt phòng</a>
+                                    {% else %}
+                                        <a data-p4-action data-p4-role-action href="{% url 'dang_nhap' %}?next={% url 'dat_phong' phong.id %}" class="ndt-home-book">Đăng nhập để đặt</a>
+                                    {% endif %}
+                                {% endif %}
                             </div>
-
-                            <a
-                                href="{% url 'chi_tiet_phong' phong.id %}"
-                                class="ndt-home-detail"
-                            >
-                                Xem chi tiết
-                            </a>
-
                         </div>
-
                     </div>
-
                 </article>
                 {% endwith %}
-
             {% empty %}
-
-                <div class="ndt-home-empty">
-                    Hiện chưa có phòng để hiển thị.
+                <div class="ndt-home-empty ndt-p4-empty">
+                    <strong>Hiện chưa có phòng để hiển thị.</strong>
+                    <span>Bạn vẫn có thể mở danh sách phòng để kiểm tra thông tin mới nhất.</span>
+                    <a data-p4-action href="{% url 'danh_sach_phong' %}">Mở danh sách phòng</a>
                 </div>
-
             {% endfor %}
-
         </div>
-
     </section>
 
-    <!-- =====================================================
-         SMART LIVING
-         ===================================================== -->
-    <section
-        class="ndt-home-section"
-        id="features"
-    >
-
-        <div class="ndt-home-journey">
-
-            <div class="ndt-home-journey-copy">
-
-                <div class="ndt-home-kicker">
-                    NDT Smart Living
-                </div>
-
-                <h2>
-                    Smart Room, gắn với nơi bạn ở.
-                </h2>
-
-                <p>
-                    Quản lý người ở cùng, hồ sơ Face ID và quyền ra vào.
-                    Các chức năng hiển thị theo quyền sử dụng phòng của bạn.
-                </p>
-
-                {% if user.is_authenticated %}
-
-                    <a href="{% if user.is_staff or user.is_superuser %}{% url 'dashboard_admin' %}{% else %}{% url 'tai_khoan' %}{% endif %}">
-                        Mở trung tâm tài khoản
-                    </a>
-
-                {% else %}
-
-                    <a
-                        href="{% url 'dang_ky' %}"
-                        class="ndt-auth-open"
-                        data-auth-mode="register"
-                    >
-                        Đăng ký tài khoản
-                    </a>
-
-                {% endif %}
-
-            </div>
-
-            <div class="ndt-home-journey-grid">
-                <div class="ndt-home-journey-item"><span>01</span><strong>Người ở cùng & hồ sơ nhận diện</strong><p>Quản lý người ở cùng và hồ sơ Face ID gắn với phòng.</p></div>
-                <div class="ndt-home-journey-item"><span>02</span><strong>Quyền ra vào</strong><p>Theo dõi quyền sử dụng đúng phòng và thời gian hiệu lực.</p></div>
-                <div class="ndt-home-journey-item"><span>03</span><strong>Lịch sử ra vào</strong><p>Xem các lượt kiểm tra và kết quả cho phép hoặc từ chối.</p></div>
-            </div>
-
-        </div>
-
-    </section>
-
-    <!-- =====================================================
-         SUPPORT
-         ===================================================== -->
-    <section
-        class="ndt-home-section"
-        id="support"
-    >
-
-        <div class="ndt-home-section-head">
-
+    <section class="ndt-home-section ndt-p4-types" data-p4-section="types" aria-labelledby="p4TypesTitle">
+        <header class="ndt-p4-heading ndt-p4-heading--compact">
             <div>
-
-                <div class="ndt-home-kicker">
-                    Cần hỗ trợ?
-                </div>
-
-                <h2>
-                    Đi đúng nơi, nhanh hơn.
-                </h2>
-
-                <p>
-                    Theo dõi hợp đồng, hóa đơn, thanh toán, yêu cầu sửa chữa
-                    và thông báo trong tài khoản của bạn.
-                </p>
-
+                <p class="ndt-p4-eyebrow">Bốn loại phòng</p>
+                <h2 id="p4TypesTitle">Khám phá đúng phân loại đang có</h2>
+                <p>Đây là bốn phân loại được quản lý trong hệ thống. Danh sách phòng là nơi xem lựa chọn và tình trạng thực tế.</p>
             </div>
-
+        </header>
+        <div class="ndt-p4-type-grid">
+            <article class="ndt-p4-type ndt-p4-type--wide" data-p4-room-type>
+                <img src="{% get_media_prefix %}phong_mau/phong_tieu_chuan/TC01/01_toan_canh.jpg" alt="Không gian phòng tiêu chuẩn" loading="lazy">
+                <div><span>01</span><h3>Phòng tiêu chuẩn</h3><p>Phân loại phòng tiêu chuẩn trong danh mục NDT MOTEL.</p><a data-p4-action href="{% url 'danh_sach_phong' %}">Xem danh sách</a></div>
+            </article>
+            <article class="ndt-p4-type" data-p4-room-type>
+                <img src="{% get_media_prefix %}phong_mau/phong_cao_cap/CC01/01_toan_canh.jpg" alt="Không gian phòng cao cấp" loading="lazy">
+                <div><span>02</span><h3>Phòng cao cấp</h3><p>Xem thông tin phòng cao cấp hiện có trong danh mục.</p><a data-p4-action href="{% url 'danh_sach_phong' %}">Xem danh sách</a></div>
+            </article>
+            <article class="ndt-p4-type" data-p4-room-type>
+                <img src="{% get_media_prefix %}phong_mau/phong_gac_lung/GL01/01_toan_canh.jpg" alt="Không gian phòng có gác" loading="lazy">
+                <div><span>03</span><h3>Phòng có gác</h3><p>Phân loại có gác trong dữ liệu phòng của hệ thống.</p><a data-p4-action href="{% url 'danh_sach_phong' %}">Xem danh sách</a></div>
+            </article>
+            <article class="ndt-p4-type ndt-p4-type--wide" data-p4-room-type>
+                <img src="{% get_media_prefix %}phong_mau/can_ho_mini/CH01/01_toan_canh.jpg" alt="Không gian căn hộ mini" loading="lazy">
+                <div><span>04</span><h3>Căn hộ mini</h3><p>Một phân loại riêng trong danh mục phòng công khai.</p><a data-p4-action href="{% url 'danh_sach_phong' %}">Xem danh sách</a></div>
+            </article>
         </div>
-
-        <div class="ndt-home-support">
-
-            <a href="{% url 'danh_sach_phong' %}">
-
-                <div>
-                    <strong>
-                        Tìm và so sánh phòng
-                    </strong>
-
-                    <span>
-                        Xem giá, vị trí và thông tin chi tiết.
-                    </span>
-                </div>
-
-                <b>→</b>
-
-            </a>
-
-            {% if user.is_authenticated %}
-
-                <a href="{% if user.is_staff or user.is_superuser %}{% url 'dashboard_admin' %}{% else %}{% url 'tai_khoan' %}{% endif %}">
-
-                    <div>
-                        <strong>
-                            Trung tâm tài khoản
-                        </strong>
-
-                        <span>
-                            Tổng hợp hoạt động và thông tin của bạn.
-                        </span>
-                    </div>
-
-                    <b>→</b>
-
-                </a>
-
-            {% else %}
-
-                <a
-                    href="{% url 'dang_nhap' %}"
-                    class="ndt-auth-open"
-                    data-auth-mode="login"
-                >
-
-                    <div>
-                        <strong>
-                            Đăng nhập NDT MOTEL
-                        </strong>
-
-                        <span>
-                            Tiếp tục quản lý hành trình lưu trú.
-                        </span>
-                    </div>
-
-                    <b>→</b>
-
-                </a>
-
-            {% endif %}
-
-            <a href="#contact">
-
-                <div>
-                    <strong>
-                        Liên hệ NDT MOTEL
-                    </strong>
-
-                    <span>
-                        Thông tin hỗ trợ và kết nối.
-                    </span>
-                </div>
-
-                <b>→</b>
-
-            </a>
-
-        </div>
-
     </section>
 
-    <!-- =====================================================
-         FINAL CTA
-         ===================================================== -->
-    <section
-        class="ndt-home-final"
-        id="home-final"
-    >
-
-        <div>
-
-            <h2>
-                Sẵn sàng xem phòng phù hợp?
-            </h2>
-
-            <p>
-                Bạn có thể xem danh sách và thông tin phòng công khai trước
-                khi đăng nhập. Khi sẵn sàng gửi yêu cầu đặt phòng, hệ thống
-                sẽ hướng dẫn bạn tiếp tục bằng tài khoản NDT MOTEL.
-            </p>
-
+    <section class="ndt-home-section ndt-p4-amenities" data-p4-section="amenities" aria-labelledby="p4AmenitiesTitle">
+        <div class="ndt-p4-amenities-intro">
+            <p class="ndt-p4-eyebrow">Tiện ích nổi bật</p>
+            <h2 id="p4AmenitiesTitle">Thông tin đi cùng từng nơi ở</h2>
+            <p>Tiện ích được trình bày theo dữ liệu của từng phòng và từng cơ sở, để bạn kiểm tra trước khi gửi yêu cầu.</p>
+            <a class="ndt-p4-outline" data-p4-action href="{% url 'danh_sach_phong' %}">Đối chiếu từng phòng</a>
         </div>
+        <div class="ndt-p4-amenity-list">
+            <article><span>01</span><div><h3>Tiện ích trong phòng</h3><p>Xem mô tả tiện ích riêng trong trang chi tiết của mỗi phòng.</p></div></article>
+            <article><span>02</span><div><h3>Tiện ích theo cơ sở</h3><p>Thông tin chung được gắn với đúng cơ sở quản lý phòng.</p></div></article>
+            <article><span>03</span><div><h3>Công cụ lưu trú</h3><p>Hợp đồng, hóa đơn và yêu cầu sửa chữa được quản lý theo tài khoản và quyền hiện có.</p></div></article>
+        </div>
+    </section>
 
-        <div class="ndt-home-final-actions">
-            <a href="{% url 'danh_sach_phong' %}">Tìm phòng</a>
-            {% if user.is_authenticated %}
-                <a class="ndt-home-secondary" href="{% if user.is_staff or user.is_superuser %}{% url 'dashboard_admin' %}{% else %}{% url 'tai_khoan' %}{% endif %}">{% if user.is_staff or user.is_superuser %}Quản trị{% else %}Tài khoản{% endif %}</a>
+    <section class="ndt-home-section ndt-p4-process" data-p4-section="process" aria-labelledby="p4ProcessTitle">
+        <header class="ndt-p4-heading">
+            <div>
+                <p class="ndt-p4-eyebrow">Quy trình thuê phòng</p>
+                <h2 id="p4ProcessTitle">Năm bước, từ xem phòng đến hợp đồng</h2>
+                <p>Báo đã thanh toán là bước gửi thông tin để quản trị viên kiểm tra; hợp đồng chỉ được lập sau khi tiền cọc được xác nhận.</p>
+            </div>
+            <a class="ndt-p4-outline" data-p4-action href="{% url 'huong_dan_thue_phong' %}">Xem hướng dẫn đầy đủ</a>
+        </header>
+        <ol class="ndt-p4-steps">
+            <li data-p4-step><span>01</span><h3>Tìm phòng</h3><p>Xem giá thuê, sức chứa, tiện ích và tình trạng phòng công khai.</p></li>
+            <li data-p4-step><span>02</span><h3>Gửi yêu cầu</h3><p>Đăng nhập, chọn phòng phù hợp và gửi yêu cầu đặt phòng.</p></li>
+            <li data-p4-step><span>03</span><h3>Thanh toán cọc</h3><p>Thực hiện theo hướng dẫn và báo đã thanh toán trên hệ thống.</p></li>
+            <li data-p4-step><span>04</span><h3>Admin xác nhận</h3><p>Quản trị viên kiểm tra và xác nhận thông tin tiền cọc.</p></li>
+            <li data-p4-step><span>05</span><h3>Tạo hợp đồng</h3><p>Sau khi cọc được xác nhận, hợp đồng được lập theo quy trình.</p></li>
+        </ol>
+    </section>
+
+    <section class="ndt-home-section ndt-p4-smart" id="features" data-p4-section="smart" aria-labelledby="p4SmartTitle">
+        <div class="ndt-p4-smart-copy">
+            <p class="ndt-p4-eyebrow">Smart Living</p>
+            <h2 id="p4SmartTitle">Quyền sử dụng gắn với phòng và hợp đồng</h2>
+            <p>Face Profile lưu hồ sơ nhận diện; quyền ra vào xác định phạm vi và thời gian sử dụng; lịch sử ra vào lưu kết quả kiểm tra theo chức năng hiện có.</p>
+            <p class="ndt-p4-note">Trang chủ chỉ giới thiệu và dẫn tới công cụ đúng quyền, không khởi động camera, nhận diện hay ghi lịch sử.</p>
+            {% if home_panel.vai_tro == 'admin' %}
+                <a class="ndt-p4-primary" data-p4-action data-p4-role-action href="{% url 'smart_room_dashboard' %}">Mở Smart Room</a>
+            {% elif home_panel.vai_tro == 'tenant' and home_panel.hop_dong_hien_tai %}
+                <a class="ndt-p4-primary" data-p4-action data-p4-role-action href="{% url 'nhan_dien_su_dung_phong' %}">Quản lý Face ID</a>
+            {% elif home_panel.vai_tro == 'tenant' %}
+                <a class="ndt-p4-primary" data-p4-action data-p4-role-action href="{% url 'hop_dong_cua_toi' %}">Xem hợp đồng của tôi</a>
             {% else %}
-                <a class="ndt-home-secondary ndt-auth-open" data-auth-mode="login" href="{% url 'dang_nhap' %}">Đăng nhập</a>
+                <a class="ndt-p4-primary" data-p4-action data-p4-role-action href="{% url 'huong_dan_thue_phong' %}">Tìm hiểu quy trình thuê</a>
             {% endif %}
         </div>
+        <div class="ndt-p4-smart-list">
+            <article><span>01</span><h3>Face Profile</h3><p>Hồ sơ nhận diện gắn với người dùng đủ điều kiện.</p></article>
+            <article><span>02</span><h3>Quyền ra vào</h3><p>Quyền sử dụng được giới hạn theo phòng, hợp đồng và thời gian hiệu lực.</p></article>
+            <article><span>03</span><h3>Lịch sử ra vào</h3><p>Tra cứu thời điểm và kết quả truy cập trong công cụ được phân quyền.</p></article>
+        </div>
+    </section>
 
+    <section class="ndt-home-section ndt-p4-support" id="support" data-p4-section="support" aria-labelledby="p4SupportTitle">
+        <header class="ndt-p4-heading ndt-p4-heading--light">
+            <div>
+                <p class="ndt-p4-eyebrow">Hỗ trợ người thuê</p>
+                <h2 id="p4SupportTitle">Đi đúng kênh khi bạn cần trợ giúp</h2>
+                <p>Tra cứu hướng dẫn, chính sách hoặc mở công cụ sửa chữa theo đúng vai trò và tình trạng lưu trú.</p>
+            </div>
+        </header>
+        <nav class="ndt-p4-support-links" aria-label="Các kênh hỗ trợ">
+            {% if home_panel.vai_tro == 'admin' %}
+                <a data-p4-action data-p4-role-action href="{% url 'quan_ly_sua_chua' %}"><span>Yêu cầu sửa chữa</span><strong>Mở hàng đợi quản trị</strong><b>→</b></a>
+                <a data-p4-action href="{% url 'quan_ly_chinh_sach' %}"><span>Chính sách hỗ trợ</span><strong>Quản lý nội dung</strong><b>→</b></a>
+            {% elif home_panel.vai_tro == 'tenant' and home_panel.nguoi_thue %}
+                <a data-p4-action data-p4-role-action href="{% url 'yeu_cau_sua_chua_cua_toi' %}"><span>Sửa chữa</span><strong>Theo dõi yêu cầu của tôi</strong><b>→</b></a>
+                {% if home_panel.hop_dong_hien_tai %}<a data-p4-action href="{% url 'tao_yeu_cau_sua_chua' %}"><span>Phòng hiện tại</span><strong>Tạo yêu cầu sửa chữa</strong><b>→</b></a>{% endif %}
+            {% else %}
+                <a data-p4-action href="{% url 'huong_dan_thue_phong' %}"><span>Bắt đầu</span><strong>Hướng dẫn thuê phòng</strong><b>→</b></a>
+                <a data-p4-action href="#contact"><span>Kết nối</span><strong>Thông tin liên hệ</strong><b>→</b></a>
+            {% endif %}
+            <a data-p4-action href="{% url 'trung_tam_tro_giup' %}"><span>Tra cứu</span><strong>Trung tâm trợ giúp</strong><b>→</b></a>
+            <a data-p4-action href="{% url 'chinh_sach_ho_tro' %}"><span>Thông tin</span><strong>Chính sách hỗ trợ</strong><b>→</b></a>
+        </nav>
     </section>
 
 </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const hero = document.querySelector(".ndt-home-hero");
-
-    if (!hero) {
-        return;
-    }
-
-    const slides = Array.from(
-        hero.querySelectorAll("[data-home-slide]")
-    );
-
-    const buttons = Array.from(
-        hero.querySelectorAll("[data-home-go]")
-    );
-
-    let currentIndex = 0;
-    let autoTimer = null;
-    let paused = false;
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const pauseButton = hero.querySelector(".ndt-home-pause");
-
-    function showSlide(index) {
-
-        if (!slides.length) {
-            return;
-        }
-
-        currentIndex =
-            (index + slides.length) % slides.length;
-
-        slides.forEach(function (slide, slideIndex) {
-
-            slide.setAttribute("aria-hidden", slideIndex === currentIndex ? "false" : "true");
-            slide.inert = slideIndex !== currentIndex;
-            slide.classList.toggle(
-                "is-active",
-                slideIndex === currentIndex
-            );
-
-        });
-
-        buttons.forEach(function (button, buttonIndex) {
-
-            const active =
-                buttonIndex === currentIndex;
-
-            button.classList.toggle(
-                "is-active",
-                active
-            );
-
-            button.setAttribute(
-                "aria-current",
-                active ? "true" : "false"
-            );
-
-        });
-
-    }
-
-    function stopAutoPlay() {
-
-        if (autoTimer) {
-            window.clearInterval(autoTimer);
-            autoTimer = null;
-        }
-
-    }
-
-    function startAutoPlay() {
-
-        stopAutoPlay();
-
-        if (paused || motion.matches || hero.matches(":focus-within") || hero.matches(":hover") || document.hidden) return;
-        autoTimer = window.setInterval(
-            function () {
-                showSlide(currentIndex + 1);
-            },
-            6500
-        );
-
-    }
-
-    buttons.forEach(function (button, index) {
-
-        button.addEventListener(
-            "click",
-            function () {
-
-                showSlide(index);
-                startAutoPlay();
-
-            }
-        );
-
-    });
-
-    hero.addEventListener(
-        "mouseenter",
-        stopAutoPlay
-    );
-
-    hero.addEventListener(
-        "mouseleave",
-        startAutoPlay
-    );
-
-    pauseButton.addEventListener("click", function () {
-        paused = !paused;
-        pauseButton.setAttribute("aria-pressed", String(paused));
-        pauseButton.textContent = paused ? "Tiếp tục" : "Tạm dừng";
-        startAutoPlay();
-    });
-    hero.addEventListener("focusin", stopAutoPlay);
-    hero.addEventListener("focusout", function () { window.setTimeout(startAutoPlay, 0); });
-    motion.addEventListener("change", startAutoPlay);
-    document.addEventListener("visibilitychange", startAutoPlay);
-    showSlide(0);
-    startAutoPlay();
-
-});
-</script>
+<script src="{% static 'js/home-slider.js' %}" defer></script>
+<script src="{% static 'js/home-panel.js' %}" defer></script>
 {% endblock %}

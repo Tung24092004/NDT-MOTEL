@@ -1,133 +1,101 @@
 {% extends "core/tenant_base.html" %}
 {% load static bo_loc %}
+
 {% block title %}Chi tiết sửa chữa - NDT MOTEL{% endblock %}
 {% block page_title %}Chi tiết sửa chữa{% endblock %}
+
 {% block tenant_styles %}
-<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
-<link rel="stylesheet" href="{% static 'css/repair.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/repair_management_p6e.css' %}">
 {% endblock %}
+
 {% block tenant_content %}
-<div class="repair repair--tenant ndt-foundation" data-repair-screen="tenant-detail">
-    {% url 'yeu_cau_sua_chua_cua_toi' as list_url %}
-    {% include 'core/foundation/page_header.html' with breadcrumb='Tài khoản / Sửa chữa' title=yeu_cau.tieu_de subtitle='Theo dõi phòng, trạng thái xử lý và phản hồi mới nhất.' action_url=list_url action_label='Về danh sách' %}
+<main class="ndt-f5 ndt-f5-page ndt-repair-management" data-repair-screen="tenant-detail">
+    <div class="ndt-f5-container ndt-f5-container--full ndt-f5-stack">
+        <header class="ndt-f5-page-header">
+            <div class="ndt-f5-page-header__content">
+                <p class="ndt-f5-breadcrumb">Tài khoản / Sửa chữa / #{{ yeu_cau.id }}</p>
+                <h1 class="ndt-f5-page-header__title">{{ yeu_cau.tieu_de }}</h1>
+                <p class="ndt-f5-page-header__description">Theo dõi phòng, trạng thái xử lý và phản hồi mới nhất.</p>
+            </div>
+            <div class="ndt-f5-page-header__actions"><a class="ndt-f5-button ndt-f5-button--secondary" href="{% url 'yeu_cau_sua_chua_cua_toi' %}">Về danh sách</a></div>
+        </header>
 
-    <section class="ndt-surface repair-overview">
-        <div>
-            <span class="repair-eyebrow">Yêu cầu #{{ yeu_cau.id }}</span>
-            <h2>Phòng {{ yeu_cau.phong.so_phong }}</h2>
-            <p>Gửi {{ yeu_cau.ngay_tao|date:'d/m/Y H:i' }}{% if yeu_cau.phong.co_so %} · {{ yeu_cau.phong.co_so.ten_co_so }}{% endif %}</p>
-        </div>
-        <div class="repair-overview__badges">
-            {% include 'core/partials/repair_priority_badge.html' with repair=yeu_cau %}
-            {% include 'core/partials/repair_status_badge.html' with repair=yeu_cau %}
-        </div>
-    </section>
+        <section class="repair-detail-hero repair-detail-hero--{{ yeu_cau.trang_thai }}">
+            <div>
+                <p class="ndt-f5-eyebrow">Phòng {{ yeu_cau.phong.so_phong }}</p>
+                <h2>{{ yeu_cau.get_loai_su_co_display }}</h2>
+                <p>Gửi {{ yeu_cau.ngay_tao|date:'d/m/Y H:i' }}{% if yeu_cau.phong.co_so %} · {{ yeu_cau.phong.co_so.ten_co_so }}{% endif %}</p>
+            </div>
+            <div class="repair-badge-group">
+                {% include 'core/partials/repair_priority_badge.html' with repair=yeu_cau %}
+                {% include 'core/partials/repair_status_badge.html' with repair=yeu_cau %}
+            </div>
+        </section>
 
-    <section class="ndt-surface repair-next-panel" aria-labelledby="repair-next-title">
-        <span class="repair-eyebrow">Bước tiếp theo</span>
-        <h2 id="repair-next-title">
-            {% if yeu_cau.trang_thai == 'moi' %}Chờ quản lý tiếp nhận{% elif yeu_cau.trang_thai == 'dang_xu_ly' %}Đang được xử lý{% elif yeu_cau.trang_thai == 'cho_thay_the' %}Chờ thay thế vật tư{% elif yeu_cau.trang_thai == 'hoan_thanh' %}Đã hoàn thành{% elif yeu_cau.trang_thai == 'tu_choi' %}Yêu cầu bị từ chối{% else %}Theo dõi cập nhật{% endif %}
-        </h2>
-        <p>
-            {% if yeu_cau.trang_thai == 'moi' %}
-                Quản lý sẽ kiểm tra thông tin và phân công người xử lý.
-            {% elif yeu_cau.trang_thai == 'dang_xu_ly' %}
-                Theo dõi phản hồi từ quản lý; kỹ thuật đang kiểm tra hoặc xử lý tại phòng.
-            {% elif yeu_cau.trang_thai == 'cho_thay_the' %}
-                Yêu cầu đang chờ vật tư hoặc lịch thay thế trước khi hoàn tất.
-            {% elif yeu_cau.trang_thai == 'hoan_thanh' %}
-                Kiểm tra ghi chú, chi phí cập nhật và liên hệ quản lý nếu sự cố tái diễn.
-            {% elif yeu_cau.trang_thai == 'tu_choi' %}
-                Xem phản hồi từ quản lý; nếu vấn đề vẫn còn, gửi yêu cầu mới với thông tin bổ sung.
-            {% endif %}
-        </p>
-    </section>
+        <section class="ndt-f5-panel">
+            <p class="ndt-f5-eyebrow">Bước tiếp theo</p>
+            <h2 class="repair-section-heading">{% if yeu_cau.trang_thai == 'moi' %}Chờ quản lý tiếp nhận{% elif yeu_cau.trang_thai == 'dang_xu_ly' %}Đang được xử lý{% elif yeu_cau.trang_thai == 'cho_thay_the' %}Chờ thay thế vật tư{% elif yeu_cau.trang_thai == 'hoan_thanh' %}Đã hoàn thành{% elif yeu_cau.trang_thai == 'tu_choi' %}Yêu cầu bị từ chối{% else %}Theo dõi cập nhật{% endif %}</h2>
+            <p>{% if yeu_cau.trang_thai == 'moi' %}Quản lý sẽ kiểm tra thông tin và phân công người xử lý.{% elif yeu_cau.trang_thai == 'dang_xu_ly' %}Kỹ thuật đang kiểm tra hoặc xử lý tại phòng; hãy theo dõi phản hồi mới.{% elif yeu_cau.trang_thai == 'cho_thay_the' %}Yêu cầu đang chờ vật tư hoặc lịch thay thế trước khi hoàn tất.{% elif yeu_cau.trang_thai == 'hoan_thanh' %}Kiểm tra ghi chú, chi phí và liên hệ quản lý nếu sự cố tái diễn.{% elif yeu_cau.trang_thai == 'tu_choi' %}Xem phản hồi; nếu vấn đề vẫn còn, gửi yêu cầu mới với thông tin bổ sung.{% endif %}</p>
+        </section>
 
-    <ol class="repair-progress" aria-label="Tiến độ xử lý">
-        <li class="is-active">
-            <span>1</span>
-            <div><strong>Đã gửi</strong><small>{{ yeu_cau.ngay_tao|date:'d/m/Y H:i' }}</small></div>
-        </li>
-        <li class="{% if yeu_cau.trang_thai == 'dang_xu_ly' or yeu_cau.trang_thai == 'cho_thay_the' or yeu_cau.trang_thai == 'hoan_thanh' %}is-active{% endif %}">
-            <span>2</span>
-            <div><strong>Đang xử lý</strong><small>{{ yeu_cau.ngay_bat_dau_xu_ly|date:'d/m/Y H:i'|default:'Chưa bắt đầu' }}</small></div>
-        </li>
-        <li class="{% if yeu_cau.trang_thai == 'cho_thay_the' %}is-active{% endif %}">
-            <span>3</span>
-            <div><strong>Chờ thay thế</strong><small>Khi cần vật tư</small></div>
-        </li>
-        <li class="{% if yeu_cau.trang_thai == 'hoan_thanh' %}is-active{% endif %}">
-            <span>4</span>
-            <div><strong>Hoàn thành</strong><small>{{ yeu_cau.ngay_hoan_thanh|date:'d/m/Y H:i'|default:'Chưa hoàn thành' }}</small></div>
-        </li>
-    </ol>
+        <ol class="repair-progress" aria-label="Tiến độ xử lý">
+            <li class="is-active"><span>1</span><strong>Đã gửi</strong><small>{{ yeu_cau.ngay_tao|date:'d/m/Y H:i' }}</small></li>
+            <li class="{% if yeu_cau.trang_thai == 'dang_xu_ly' or yeu_cau.trang_thai == 'cho_thay_the' or yeu_cau.trang_thai == 'hoan_thanh' %}is-active{% endif %}"><span>2</span><strong>Đang xử lý</strong><small>{{ yeu_cau.ngay_bat_dau_xu_ly|date:'d/m/Y H:i'|default:'Chưa bắt đầu' }}</small></li>
+            <li class="{% if yeu_cau.trang_thai == 'cho_thay_the' %}is-active{% endif %}"><span>3</span><strong>Chờ thay thế</strong><small>Khi cần vật tư</small></li>
+            <li class="{% if yeu_cau.trang_thai == 'hoan_thanh' %}is-active{% endif %}"><span>4</span><strong>Hoàn thành</strong><small>{{ yeu_cau.ngay_hoan_thanh|date:'d/m/Y H:i'|default:'Chưa hoàn thành' }}</small></li>
+        </ol>
 
-    <div class="repair-detail-grid">
-        <main class="repair-main">
-            <section class="ndt-surface">
-                <h2>Mô tả sự cố</h2>
-                <div class="repair-prose">{{ yeu_cau.noi_dung|linebreaks }}</div>
-            </section>
-            {% if yeu_cau.hinh_anh %}
-                <section class="ndt-surface">
-                    <h2>Hình ảnh sự cố</h2>
-                    <figure class="repair-image">
-                        <img src="{{ yeu_cau.hinh_anh.url }}" alt="Hình ảnh sự cố {{ yeu_cau.tieu_de }}">
-                    </figure>
+        <div class="repair-detail-layout">
+            <div class="repair-detail-main">
+                <section class="ndt-f5-panel">
+                    <h2 class="repair-section-heading">Mô tả sự cố</h2>
+                    <div class="repair-prose">{{ yeu_cau.noi_dung|linebreaks }}</div>
+                    {% if yeu_cau.hinh_anh %}<figure class="repair-image"><img src="{{ yeu_cau.hinh_anh.url }}" alt="Hình ảnh sự cố {{ yeu_cau.tieu_de }}"></figure>{% endif %}
                 </section>
-            {% endif %}
-            {% if yeu_cau.ghi_chu_admin %}
-                <section class="ndt-surface">
-                    <h2>Phản hồi từ quản lý</h2>
-                    <div class="repair-callout">
-                        <p>{{ yeu_cau.ghi_chu_admin|linebreaksbr }}</p>
-                    </div>
-                </section>
-            {% endif %}
-            {% with lich_su=yeu_cau.lich_su.all %}
-                {% if lich_su %}
-                    <section class="ndt-surface">
-                        <h2>Lịch sử xử lý</h2>
-                        <div class="repair-timeline">
-                            {% for item in lich_su %}
-                                <div>
-                                    <span></span>
-                                    <p>
-                                        <strong>{{ item.get_hanh_dong_display }}</strong>
-                                        <small>{{ item.thoi_diem|date:'d/m/Y H:i' }}</small>
-                                        {% if item.noi_dung %}{{ item.noi_dung }}{% endif %}
-                                    </p>
-                                </div>
-                            {% endfor %}
-                        </div>
+
+                {% if yeu_cau.ghi_chu_admin %}
+                    <section class="ndt-f5-panel">
+                        <h2 class="repair-section-heading">Phản hồi từ quản lý</h2>
+                        <div class="repair-callout"><p>{{ yeu_cau.ghi_chu_admin|linebreaksbr }}</p></div>
                     </section>
                 {% endif %}
-            {% endwith %}
-        </main>
 
-        <aside class="repair-side">
-            <section class="ndt-surface">
-                <h2>Thông tin yêu cầu</h2>
-                <dl class="repair-facts repair-facts--stack">
-                    <div><dt>Phòng</dt><dd>{{ yeu_cau.phong.so_phong }} · {{ yeu_cau.phong.co_so.ten_co_so|default:'NDT MOTEL' }}</dd></div>
-                    <div><dt>Loại sự cố</dt><dd>{{ yeu_cau.get_loai_su_co_display }}</dd></div>
-                    <div><dt>Mức độ</dt><dd>{% include 'core/partials/repair_priority_badge.html' with repair=yeu_cau %}</dd></div>
-                    <div><dt>Trạng thái</dt><dd>{% include 'core/partials/repair_status_badge.html' with repair=yeu_cau %}</dd></div>
-                    <div><dt>Người xử lý</dt><dd>{{ yeu_cau.nguoi_xu_ly|default:'Chưa phân công' }}</dd></div>
-                    <div><dt>Chi phí</dt><dd>{{ yeu_cau.chi_phi|vnd }} đ</dd></div>
-                    <div><dt>Cập nhật cuối</dt><dd>{{ yeu_cau.ngay_cap_nhat|date:'d/m/Y H:i' }}</dd></div>
-                </dl>
-                {% if yeu_cau.chi_tiet_chi_phi %}
-                    <div class="repair-callout">
-                        <strong>Chi tiết chi phí</strong>
-                        <p>{{ yeu_cau.chi_tiet_chi_phi|linebreaksbr }}</p>
-                    </div>
-                {% endif %}
-            </section>
-        </aside>
+                {% with lich_su=yeu_cau.lich_su.all %}
+                    {% if lich_su %}
+                        <section class="ndt-f5-panel">
+                            <h2 class="repair-section-heading">Lịch sử xử lý</h2>
+                            <div class="repair-timeline">
+                                {% for item in lich_su %}
+                                    <div class="repair-timeline__item">
+                                        <span class="repair-timeline__dot" aria-hidden="true"></span>
+                                        <strong>{{ item.get_hanh_dong_display }}</strong>
+                                        <small>{{ item.thoi_diem|date:'d/m/Y H:i' }}</small>
+                                        {% if item.noi_dung %}<div>{{ item.noi_dung }}</div>{% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </section>
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <aside class="repair-detail-side">
+                <section class="ndt-f5-panel">
+                    <h2 class="repair-section-heading">Thông tin yêu cầu</h2>
+                    <dl class="repair-facts repair-facts--stack">
+                        <div><dt>Phòng</dt><dd>{{ yeu_cau.phong.so_phong }}</dd></div>
+                        <div><dt>Cơ sở</dt><dd>{{ yeu_cau.phong.co_so.ten_co_so|default:'NDT MOTEL' }}</dd></div>
+                        <div><dt>Loại sự cố</dt><dd>{{ yeu_cau.get_loai_su_co_display }}</dd></div>
+                        <div><dt>Mức độ</dt><dd>{% include 'core/partials/repair_priority_badge.html' with repair=yeu_cau %}</dd></div>
+                        <div><dt>Trạng thái</dt><dd>{% include 'core/partials/repair_status_badge.html' with repair=yeu_cau %}</dd></div>
+                        <div><dt>Người xử lý</dt><dd>{{ yeu_cau.nguoi_xu_ly|default:'Chưa phân công' }}</dd></div>
+                        <div><dt>Chi phí</dt><dd>{{ yeu_cau.chi_phi|vnd }} đ</dd></div>
+                    </dl>
+                    {% if yeu_cau.chi_tiet_chi_phi %}<div class="repair-callout"><strong>Chi tiết chi phí</strong><p>{{ yeu_cau.chi_tiet_chi_phi|linebreaksbr }}</p></div>{% endif %}
+                </section>
+            </aside>
+        </div>
     </div>
-</div>
+</main>
 {% endblock %}

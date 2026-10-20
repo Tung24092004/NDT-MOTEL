@@ -1,7 +1,11 @@
+from unittest.mock import patch
+
 from django.urls import reverse
 
 from core.models import LichSuThongBao, ThongBao
 from core.du_lieu_test.du_lieu_test_dat_phong import Phase5BookingFixture
+from core.private_storage import private_payment_evidence_storage
+from core.tests.test_thanh_toan import evidence_upload
 
 
 class Phase6NotificationsToastsTests(Phase5BookingFixture):
@@ -13,9 +17,19 @@ class Phase6NotificationsToastsTests(Phase5BookingFixture):
             tien_phong=2500000, han_thanh_toan=self.today,
         )
         report_url = reverse("thanh_toan_hoa_don_cua_toi", args=[invoice.pk])
-        payload = {"buoc": "xac_thuc", "phuong_thuc": "chuyen_khoan", "xac_nhan": "dong_y"}
+        payload = {
+            "buoc": "xac_thuc",
+            "phuong_thuc": "chuyen_khoan",
+            "xac_nhan": "dong_y",
+            "anh_chung_tu": evidence_upload(),
+        }
         self.client.force_login(self.user)
-        self.assertEqual(self.client.post(report_url, payload).status_code, 302)
+        with patch.object(
+            private_payment_evidence_storage,
+            "save",
+            side_effect=lambda name, content, max_length=None: name,
+        ):
+            self.assertEqual(self.client.post(report_url, payload).status_code, 302)
         notice = ThongBao.objects.get(
             nguoi_nhan_user=self.admin,
             ma_tham_chieu=f"INVOICE:{invoice.pk}:PAYMENT_REPORTED:{self.admin.pk}",
@@ -76,7 +90,7 @@ class Phase6NotificationsToastsTests(Phase5BookingFixture):
     def test_empty_admin_inbox_has_styled_empty_state_and_zero_badge(self):
         self.client.force_login(self.admin)
         response = self.client.get(reverse("thong_bao_admin"))
-        self.assertContains(response, 'class="empty-state" role="status"')
+        self.assertContains(response, 'class="ndt-f5-empty" role="status"')
         self.assertContains(response, 'data-notification-badge hidden')
         self.assertContains(response, reverse("kiem_tra_thong_bao_admin_moi"))
 
@@ -209,8 +223,10 @@ class Phase6NotificationsToastsTests(Phase5BookingFixture):
             reverse("chi_tiet_thong_bao_admin", args=[admin_notice.pk]),
         ):
             response = self.client.get(url)
-            self.assertContains(response, "ndt-foundation")
-            self.assertContains(response, "css/notification.css")
+            self.assertContains(response, "ndt-notification-management")
+            self.assertContains(response, "css/foundation/p5.css")
+            self.assertContains(response, "css/notification_management_p6f.css")
+            self.assertNotContains(response, "css/notification.css")
 
         self.client.force_login(self.user)
         for url in (
@@ -218,5 +234,7 @@ class Phase6NotificationsToastsTests(Phase5BookingFixture):
             reverse("chi_tiet_thong_bao_cua_toi", args=[tenant_notice.pk]),
         ):
             response = self.client.get(url)
-            self.assertContains(response, "ndt-foundation")
-            self.assertContains(response, "css/notification.css")
+            self.assertContains(response, "ndt-notification-management")
+            self.assertContains(response, "css/foundation/p5.css")
+            self.assertContains(response, "css/notification_management_p6f.css")
+            self.assertNotContains(response, "css/notification.css")

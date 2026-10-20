@@ -5,6 +5,9 @@
     {% if action_url and action_label %}
     <div class="ndt-empty-state__action">
         <a class="ndt-button ndt-button--secondary" href="{{ action_url }}">{{ action_label }}</a>
+        {% if secondary_action_url and secondary_action_label %}<a class="ndt-empty-state__secondary" href="{{ secondary_action_url }}">{{ secondary_action_label }}</a>{% endif %}
     </div>
+    {% elif secondary_action_url and secondary_action_label %}
+    <div class="ndt-empty-state__action"><a class="ndt-empty-state__secondary" href="{{ secondary_action_url }}">{{ secondary_action_label }}</a></div>
     {% endif %}
 </div>

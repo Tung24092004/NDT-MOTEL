@@ -1,71 +1,7 @@
 {% extends "core/tenant_base.html" %}
 {% load static %}
-
-{% block title %}Đăng ký Face ID - NDT Motel{% endblock %}
-{% block page_title %}Đăng ký Face ID{% endblock %}
-{% block tenant_styles %}
-<link rel="stylesheet" href="{% static 'css/smart_room.css' %}">
-<link rel="stylesheet" href="{% static 'css/tenant/face_id_unavailable.css' %}">
-<link rel="stylesheet" href="{% static 'css/bill_smart_full_refresh.css' %}">
-{% endblock %}
-
+{% block title %}Face ID chưa khả dụng - NDT MOTEL{% endblock %}
+{% block page_title %}Face ID{% endblock %}
+{% block tenant_styles %}<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}"><link rel="stylesheet" href="{% static 'css/smart_room_p6h.css' %}">{% endblock %}
 {% block tenant_content %}
-<main class="face-unavailable-page">
-    <nav class="face-breadcrumb" aria-label="Breadcrumb">
-        <a href="{% url 'tai_khoan' %}">Tài khoản</a><span aria-hidden="true">/</span><span>Đăng ký Face ID</span>
-    </nav>
-
-    <header class="face-intro">
-        <div>
-            <span class="face-intro-kicker">Smart Room · Hồ sơ nhận diện</span>
-            <h1>Đăng ký Face ID</h1>
-            <p>Lưu hồ sơ khuôn mặt để sử dụng quyền ra vào phòng khi hợp đồng đáp ứng điều kiện.</p>
-        </div>
-        <a href="{% url 'tai_khoan' %}" class="face-back"><span aria-hidden="true">←</span> Tài khoản</a>
-    </header>
-
-    <div class="face-unavailable-layout">
-        <section class="face-camera-panel" aria-labelledby="camera-title">
-            <div class="face-camera-head">
-                <div><span>Thiết bị</span><h2 id="camera-title">Khu vực camera</h2></div>
-                <span class="face-device-state"><i aria-hidden="true"></i> Chưa kích hoạt</span>
-            </div>
-            <div class="face-camera-placeholder">
-                <span class="face-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-                <div>
-                    <span class="face-camera-symbol" aria-hidden="true">CAM</span>
-                    <strong>Camera chưa được yêu cầu</strong>
-                    <p>Hệ thống chỉ xin quyền camera sau khi xác định được hợp đồng Smart Room hợp lệ.</p>
-                </div>
-            </div>
-            <div class="face-privacy-note"><strong>Quyền riêng tư</strong><span>Trang này không chụp hoặc gửi hình ảnh. Không có dữ liệu khuôn mặt nào được tạo trong trạng thái hiện tại.</span></div>
-        </section>
-
-        <aside class="face-status-panel" aria-labelledby="face-status-title">
-            <span class="face-status-label">Trạng thái hồ sơ</span>
-            <h2 id="face-status-title">Chưa thể đăng ký Face ID</h2>
-            <p>Chưa xác định được duy nhất một hợp đồng Smart Room đang hiệu lực cho tài khoản này.</p>
-            <dl>
-                <div><dt>Người áp dụng</dt><dd>{{ nguoi_thue.ho_ten }}</dd></div>
-                <div><dt>FaceProfile</dt><dd>Chưa có hồ sơ</dd></div>
-                <div><dt>Quyền ra vào</dt><dd>Chưa được cấp</dd></div>
-                <div><dt>Camera</dt><dd>Chưa sử dụng</dd></div>
-            </dl>
-        </aside>
-    </div>
-
-    <section class="face-next-steps" aria-labelledby="face-steps-title">
-        <header><span>Điều kiện đăng ký</span><h2 id="face-steps-title">Các bước tiếp theo</h2></header>
-        <ol>
-            <li class="is-current"><span>1</span><div><strong>Kiểm tra hợp đồng</strong><p>Cần có duy nhất một hợp đồng Smart Room đang hiệu lực.</p></div></li>
-            <li><span>2</span><div><strong>Mở camera</strong><p>Cho phép camera và chụp ảnh khi trang đăng ký khả dụng.</p></div></li>
-            <li><span>3</span><div><strong>Hoàn tất hồ sơ</strong><p>Hệ thống lưu FaceProfile và quyền ra vào theo hợp đồng.</p></div></li>
-        </ol>
-    </section>
-
-    <section class="face-resolution" role="status">
-        <div><span aria-hidden="true">i</span><p><strong>Cần kiểm tra hợp đồng</strong> Xem hợp đồng hiện tại hoặc liên hệ quản lý nếu thông tin chưa chính xác.</p></div>
-        <div class="face-actions"><a class="face-action primary" href="{% url 'hop_dong_cua_toi' %}">Xem hợp đồng của tôi <span aria-hidden="true">→</span></a><a class="face-action" href="{% url 'tai_khoan' %}">Quay lại tài khoản</a></div>
-    </section>
-</main>
-{% endblock %}
+<main class="ndt-f5 ndt-f5-page ndt-smart-room-management" data-smart-screen="face-unavailable"><div class="ndt-f5-container ndt-f5-container--readable"><div class="ndt-f5-empty"><div class="ndt-f5-empty__icon" aria-hidden="true">ID</div><h1 class="ndt-f5-empty__title">Chưa thể đăng ký Face ID</h1><p class="ndt-f5-empty__description">Xin chào {{ nguoi_thue.ho_ten }}. {{ ly_do_khong_du_dieu_kien|default:'Tài khoản hiện chưa có một hợp đồng lưu trú hợp lệ, duy nhất để liên kết hồ sơ nhận diện.' }}</p><div class="ndt-f5-alert ndt-f5-alert--info">Face ID chỉ được kích hoạt khi hợp đồng đang hiệu lực, người thuê đang lưu trú và đã tự consent hợp lệ.</div><div class="ndt-f5-empty__action ndt-f5-actions"><a class="ndt-f5-button ndt-f5-button--primary" href="{% url 'hop_dong_cua_toi' %}">Xem hợp đồng của tôi</a><a class="ndt-f5-button ndt-f5-button--secondary" href="{% url 'tai_khoan' %}">Quay lại tài khoản</a></div></div></div></main>{% endblock %}

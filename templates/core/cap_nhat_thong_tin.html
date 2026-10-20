@@ -5,79 +5,83 @@
 {% block page_title %}Cập nhật hồ sơ{% endblock %}
 
 {% block tenant_styles %}
-<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
-<link rel="stylesheet" href="{% static 'css/tenant/cap_nhat_thong_tin.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/account_auth_p6i.css' %}">
 {% endblock %}
 
 {% block tenant_content %}
-<div class="account-profile-edit ndt-foundation">
-    {% url 'tai_khoan' as account_url %}
-    {% include 'core/foundation/page_header.html' with breadcrumb='Tài khoản / Hồ sơ' title='Cập nhật thông tin cá nhân' subtitle='Giữ hồ sơ thuê phòng chính xác để việc liên hệ và xử lý dịch vụ thuận tiện hơn.' action_url=account_url action_label='Về tài khoản' %}
+<main class="ndt-f5 ndt-account-auth ndt-f5-page">
+    <div class="ndt-f5-container ndt-f5-container--form">
+        <header class="ndt-f5-page-header">
+            <div class="ndt-f5-page-header__content">
+                <p class="ndt-f5-breadcrumb">Tài khoản / Hồ sơ</p>
+                <h1 class="ndt-f5-page-header__title">Cập nhật thông tin cá nhân</h1>
+                <p class="ndt-f5-page-header__description">Giữ hồ sơ thuê phòng chính xác để việc liên hệ và xử lý dịch vụ thuận tiện hơn.</p>
+            </div>
+            <div class="ndt-f5-page-header__actions">
+                <a class="ndt-f5-button ndt-f5-button--secondary" href="{% url 'tai_khoan' %}">Về tài khoản</a>
+            </div>
+        </header>
 
-    <section class="ndt-card account-form-card" aria-labelledby="profile-form-title">
-        <div class="ndt-card__header">
-            <h2 id="profile-form-title">Thông tin cá nhân</h2>
-            <p>Các thông tin có thể chỉnh sửa trong tài khoản của bạn.</p>
-        </div>
-        <div class="ndt-card__body">
-            <form method="POST" class="account-form">
-                {% csrf_token %}
-
-                <div class="account-form-grid">
-                    <div class="ndt-field">
-                        <label class="ndt-label" for="ho_ten">Họ và tên <span class="ndt-required">*</span></label>
-                        <input class="ndt-control" type="text" id="ho_ten" name="ho_ten" value="{{ nguoi_thue.ho_ten|default:'' }}" autocomplete="name" required>
-                    </div>
-
-                    <div class="ndt-field">
-                        <label class="ndt-label" for="so_dien_thoai">Số điện thoại</label>
-                        <input class="ndt-control" type="tel" id="so_dien_thoai" name="so_dien_thoai" value="{{ nguoi_thue.so_dien_thoai|default:'' }}" autocomplete="tel" inputmode="tel">
-                    </div>
-
-                    <div class="ndt-field">
-                        <label class="ndt-label" for="email">Email</label>
-                        <input class="ndt-control" type="email" id="email" name="email" value="{{ nguoi_thue.email|default:'' }}" autocomplete="email">
-                    </div>
-
-                    <div class="ndt-field">
-                        <label class="ndt-label" for="nghe_nghiep">Nghề nghiệp</label>
-                        <input class="ndt-control" type="text" id="nghe_nghiep" name="nghe_nghiep" value="{{ nguoi_thue.nghe_nghiep|default:'' }}">
-                    </div>
-
-                    <div class="ndt-field">
-                        <label class="ndt-label" for="que_quan">Quê quán</label>
-                        <input class="ndt-control" type="text" id="que_quan" name="que_quan" value="{{ nguoi_thue.que_quan|default:'' }}">
-                    </div>
-
-                    <div class="ndt-field">
-                        <label class="ndt-label" for="nguoi_lien_he">Người liên hệ</label>
-                        <input class="ndt-control" type="text" id="nguoi_lien_he" name="nguoi_lien_he" value="{{ nguoi_thue.nguoi_lien_he|default:'' }}">
-                    </div>
-
-                    <div class="ndt-field account-form-grid__wide">
-                        <label class="ndt-label" for="dia_chi_thuong_tru">Địa chỉ thường trú</label>
-                        <input class="ndt-control" type="text" id="dia_chi_thuong_tru" name="dia_chi_thuong_tru" value="{{ nguoi_thue.dia_chi_thuong_tru|default:'' }}" autocomplete="street-address">
-                    </div>
-
-                    <div class="ndt-field">
-                        <label class="ndt-label" for="sdt_nguoi_lien_he">SĐT người liên hệ</label>
-                        <input class="ndt-control" type="tel" id="sdt_nguoi_lien_he" name="sdt_nguoi_lien_he" value="{{ nguoi_thue.sdt_nguoi_lien_he|default:'' }}" inputmode="tel">
-                    </div>
+        <section class="ndt-f5-card" aria-labelledby="profile-form-title">
+            <div class="ndt-f5-card__header">
+                <h2 class="ndt-f5-card__title" id="profile-form-title">Thông tin cá nhân</h2>
+                <p>Các thông tin có thể chỉnh sửa trong tài khoản của bạn.</p>
+            </div>
+            <div class="ndt-f5-card__body">
+                {% if profile_errors %}
+                <div class="ndt-f5-alert ndt-f5-alert--danger p6i-validation-summary" role="alert" tabindex="-1" data-p6i-error-summary>
+                    <span class="ndt-f5-alert__mark" aria-hidden="true">!</span>
+                    <div><strong>Chưa thể lưu hồ sơ.</strong><p>Vui lòng kiểm tra trường được báo lỗi bên dưới.</p></div>
                 </div>
-
-                <p class="account-form-note">
-                    CCCD, ngày sinh và giới tính được quản lý trong hồ sơ người thuê, không chỉnh sửa trực tiếp tại đây.
-                </p>
-
-                <div class="ndt-actions account-form-actions">
-                    <a href="{{ account_url }}" class="ndt-button ndt-button--secondary">Quay lại</a>
-                    <button type="submit" class="ndt-button ndt-button--primary">Lưu thay đổi</button>
-                </div>
-            </form>
-        </div>
-    </section>
-</div>
+                {% endif %}
+                <form method="POST" class="p6i-form" data-p6i-form>
+                    {% csrf_token %}
+                    <div class="ndt-f5-form-grid">
+                        <div class="ndt-f5-field">
+                            <label class="ndt-f5-label" for="ho_ten">Họ và tên <span class="ndt-f5-required">*</span></label>
+                            <input class="ndt-f5-control" type="text" id="ho_ten" name="ho_ten" value="{{ profile_values.ho_ten }}" autocomplete="name" required{% if profile_errors.ho_ten %} aria-invalid="true" aria-describedby="ho_ten-error"{% endif %}>
+                            {% if profile_errors.ho_ten %}<p class="ndt-f5-error" id="ho_ten-error">{{ profile_errors.ho_ten }}</p>{% endif %}
+                        </div>
+                        <div class="ndt-f5-field">
+                            <label class="ndt-f5-label" for="so_dien_thoai">Số điện thoại</label>
+                            <input class="ndt-f5-control" type="tel" id="so_dien_thoai" name="so_dien_thoai" value="{{ profile_values.so_dien_thoai }}" autocomplete="tel" inputmode="tel">
+                        </div>
+                        <div class="ndt-f5-field">
+                            <label class="ndt-f5-label" for="email">Email</label>
+                            <input class="ndt-f5-control" type="email" id="email" name="email" value="{{ profile_values.email }}" autocomplete="email"{% if profile_errors.email %} aria-invalid="true" aria-describedby="email-error"{% endif %}>
+                            {% if profile_errors.email %}<p class="ndt-f5-error" id="email-error">{{ profile_errors.email }}</p>{% endif %}
+                        </div>
+                        <div class="ndt-f5-field">
+                            <label class="ndt-f5-label" for="nghe_nghiep">Nghề nghiệp</label>
+                            <input class="ndt-f5-control" type="text" id="nghe_nghiep" name="nghe_nghiep" value="{{ profile_values.nghe_nghiep }}">
+                        </div>
+                        <div class="ndt-f5-field">
+                            <label class="ndt-f5-label" for="que_quan">Quê quán</label>
+                            <input class="ndt-f5-control" type="text" id="que_quan" name="que_quan" value="{{ profile_values.que_quan }}">
+                        </div>
+                        <div class="ndt-f5-field">
+                            <label class="ndt-f5-label" for="nguoi_lien_he">Người liên hệ</label>
+                            <input class="ndt-f5-control" type="text" id="nguoi_lien_he" name="nguoi_lien_he" value="{{ profile_values.nguoi_lien_he }}">
+                        </div>
+                        <div class="ndt-f5-field ndt-f5-field--full">
+                            <label class="ndt-f5-label" for="dia_chi_thuong_tru">Địa chỉ thường trú</label>
+                            <input class="ndt-f5-control" type="text" id="dia_chi_thuong_tru" name="dia_chi_thuong_tru" value="{{ profile_values.dia_chi_thuong_tru }}" autocomplete="street-address">
+                        </div>
+                        <div class="ndt-f5-field">
+                            <label class="ndt-f5-label" for="sdt_nguoi_lien_he">SĐT người liên hệ</label>
+                            <input class="ndt-f5-control" type="tel" id="sdt_nguoi_lien_he" name="sdt_nguoi_lien_he" value="{{ profile_values.sdt_nguoi_lien_he }}" inputmode="tel">
+                        </div>
+                    </div>
+                    <p class="ndt-f5-help p6i-form-note">CCCD, ngày sinh và giới tính được quản lý trong hồ sơ người thuê, không chỉnh sửa trực tiếp tại đây.</p>
+                    <div class="ndt-f5-actions">
+                        <a href="{% url 'tai_khoan' %}" class="ndt-f5-button ndt-f5-button--secondary">Quay lại</a>
+                        <button type="submit" class="ndt-f5-button ndt-f5-button--primary">Lưu thay đổi</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+</main>
+<script src="{% static 'js/account_auth_p6i.js' %}" defer></script>
 {% endblock %}

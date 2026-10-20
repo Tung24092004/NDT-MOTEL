@@ -1,9 +1,38 @@
-from django.db import models
+from django.db import IntegrityError, models, transaction
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.utils import timezone
-from .booking_identifiers import booking_reference, deposit_reference, normalize_cccd
+from .booking_identifiers import (
+    booking_reference,
+    deposit_reference,
+    normalize_cccd,
+    normalize_companion_cccd,
+)
+from .private_storage import (
+    private_cotenant_identity_evidence_storage, private_payment_evidence_storage,
+)
+import uuid
+from pathlib import Path
+
+
+def payment_evidence_upload_to(instance, filename):
+    suffix = Path(filename).suffix.lower()
+    if suffix == ".jpeg":
+        suffix = ".jpg"
+    if suffix not in (".jpg", ".png", ".webp"):
+        suffix = ".bin"
+    return f"{timezone.localdate():%Y/%m}/{uuid.uuid4().hex}{suffix}"
+
+
+def cotenant_identity_evidence_upload_to(instance, filename):
+    """Ignore client paths/names; only the service-controlled suffix survives."""
+    suffix = Path(filename).suffix.lower()
+    if suffix == ".jpeg":
+        suffix = ".jpg"
+    if suffix not in (".jpg", ".png", ".webp"):
+        suffix = ".bin"
+    return f"{timezone.localdate():%Y/%m}/{uuid.uuid4().hex}{suffix}"
 
 
 # =========================================================
@@ -246,26 +275,9 @@ class Phong(models.Model):
     # =====================================================
 
     def hop_dong_dang_hieu_luc(self):
-
-        dat_phong = (
-            self.dat_phong
-            .filter(
-                trang_thai="da_duyet",
-                hop_dong__trang_thai__in=[
-                    "dang_hieu_luc",
-                    "sap_het_han",
-                ],
-            )
-            .select_related(
-                "hop_dong"
-            )
-            .first()
-        )
-
-        if dat_phong:
-            return dat_phong.hop_dong
-
-        return None
+        # Local import avoids importing services while Django builds models.
+        from core.dich_vu.luu_tru import lay_hop_dong_luu_tru_hien_tai
+        return lay_hop_dong_luu_tru_hien_tai(phong=self)
 
     # =====================================================
     # XÁC ĐỊNH TRẠNG THÁI NGHIỆP VỤ
@@ -292,17 +304,7 @@ class Phong(models.Model):
         # 1. ĐANG THUÊ
         # -------------------------------------------------
 
-        co_hop_dong_dang_thue = (
-            self.dat_phong
-            .filter(
-                trang_thai="da_duyet",
-                hop_dong__trang_thai__in=[
-                    "dang_hieu_luc",
-                    "sap_het_han",
-                ],
-            )
-            .exists()
-        )
+        co_hop_dong_dang_thue = self.hop_dong_dang_hieu_luc() is not None
 
         if co_hop_dong_dang_thue:
             return "dang_thue"
@@ -331,8 +333,13 @@ class Phong(models.Model):
             self.dat_phong
             .filter(
                 trang_thai="da_duyet",
-                hop_dong__trang_thai=
-                    "cho_hieu_luc",
+            )
+            .filter(
+                models.Q(hop_dong__trang_thai="cho_hieu_luc")
+                | models.Q(
+                    hop_dong__trang_thai__in=["dang_hieu_luc", "sap_het_han"],
+                    hop_dong__ngay_bat_dau__gt=timezone.localdate(),
+                )
             )
             .exists()
         )
@@ -616,6 +623,12 @@ class NguoiThue(models.Model):
         ("khac", "Khác"),
     ]
 
+    TRANG_THAI_LUU_TRU = [
+        ("dang_o", "Đang ở"),
+        ("tam_vang", "Tạm vắng"),
+        ("da_tra_phong", "Đã trả phòng"),
+    ]
+
     tai_khoan = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -686,6 +699,12 @@ class NguoiThue(models.Model):
     ghi_chu = models.TextField(blank=True)
 
     dang_hoat_dong = models.BooleanField(default=True)
+
+    trang_thai_luu_tru = models.CharField(
+        max_length=20,
+        choices=TRANG_THAI_LUU_TRU,
+        default="dang_o"
+    )
 
     ngay_tao = models.DateTimeField(auto_now_add=True)
 
@@ -1030,6 +1049,7 @@ class ThanhToanCocDatPhong(models.Model):
     TRANG_THAI = [(value, value) for value in (*ACTIVE_STATES, 'tu_choi', 'da_huy', 'da_hoan_tien')]
     dat_phong = models.ForeignKey(DatPhong, on_delete=models.PROTECT, related_name='giao_dich_coc')
     so_tien = models.DecimalField(max_digits=12, decimal_places=0, validators=[MinValueValidator(0)])
+    so_tien_thuc_nhan = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True)
     phuong_thuc = models.CharField(max_length=20, choices=[('chuyen_khoan', 'Chuyen khoan'), ('tien_mat', 'Tien mat')], default='chuyen_khoan')
     ma_tham_chieu = models.CharField(max_length=35, unique=True, default=deposit_reference, editable=False)
     noi_dung_chuyen_khoan = models.CharField(max_length=80, unique=True, editable=False)
@@ -1077,6 +1097,51 @@ class ThanhToanCocDatPhong(models.Model):
     def __str__(self):
         return self.ma_tham_chieu
 
+
+class QuyetToanCocDatPhong(models.Model):
+    """An immutable record of an externally completed deposit settlement."""
+
+    KET_QUA = [
+        ('hoan_tien', 'REFUNDED'),
+        ('giu_lai', 'RETAINED'),
+    ]
+    giao_dich_coc = models.OneToOneField(
+        ThanhToanCocDatPhong,
+        on_delete=models.PROTECT,
+        related_name='quyet_toan',
+    )
+    ket_qua = models.CharField(max_length=20, choices=KET_QUA)
+    so_tien = models.DecimalField(
+        max_digits=12,
+        decimal_places=0,
+        validators=[MinValueValidator(1)],
+    )
+    nguoi_quyet_toan = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name='quyet_toan_coc_da_ghi_nhan',
+    )
+    thoi_diem = models.DateTimeField(auto_now_add=True)
+    ly_do = models.TextField()
+
+    def save(self, *args, **kwargs):
+        if self.pk and not self._state.adding:
+            previous = type(self).objects.get(pk=self.pk)
+            immutable_fields = ('giao_dich_coc_id', 'ket_qua', 'so_tien', 'nguoi_quyet_toan_id', 'thoi_diem', 'ly_do')
+            if any(getattr(previous, field) != getattr(self, field) for field in immutable_fields):
+                raise ValidationError('Quyet toan coc da ghi nhan la bat bien.')
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=models.Q(so_tien__gt=0), name='deposit_settlement_amount_positive'),
+        ]
+        ordering = ['-thoi_diem']
+
+    def __str__(self):
+        return f'{self.giao_dich_coc} - {self.ket_qua}'
+
 # =========================================================
 # 5. HỢP ĐỒNG
 # =========================================================
@@ -1084,6 +1149,10 @@ class ThanhToanCocDatPhong(models.Model):
 class HopDong(models.Model):
 
     TRANG_THAI = [
+        ("nhap", "Hợp đồng nháp"),
+        ("cho_nguoi_thue_xac_nhan", "Chờ người thuê xác nhận"),
+        ("yeu_cau_chinh_sua", "Yêu cầu chỉnh sửa"),
+        ("cho_kich_hoat", "Chờ kích hoạt"),
         ("cho_hieu_luc", "Chờ hiệu lực"),
         ("dang_hieu_luc", "Đang hiệu lực"),
         ("sap_het_han", "Sắp hết hạn"),
@@ -1111,6 +1180,14 @@ class HopDong(models.Model):
         decimal_places=0,
         default=0,
         validators=[MinValueValidator(0)]
+    )
+
+    tien_coc_thuc_nhan = models.DecimalField(
+        max_digits=12,
+        decimal_places=0,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
     )
 
     tien_thue_thang = models.DecimalField(
@@ -1153,7 +1230,7 @@ class HopDong(models.Model):
     ghi_chu = models.TextField(blank=True)
 
     trang_thai = models.CharField(
-        max_length=20,
+        max_length=30,
         choices=TRANG_THAI,
         default="cho_hieu_luc"
     )
@@ -1190,10 +1267,19 @@ class HopDong(models.Model):
         related_name="hop_dong_da_cap_nhat"
     )
 
+    phien_ban_hien_tai = models.ForeignKey(
+        "PhienBanHopDong",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="la_phien_ban_hien_tai_cua",
+    )
+
     class Meta:
         verbose_name = "Hợp đồng"
         verbose_name_plural = "Hợp đồng"
         ordering = ["-ngay_tao"]
+
 
     def __str__(self):
         return (
@@ -1214,6 +1300,15 @@ class HopDong(models.Model):
             self.ngay_ket_thuc
             and self.ngay_ket_thuc < timezone.localdate()
         )
+
+    def clean(self):
+        super().clean()
+        if (
+            self.phien_ban_hien_tai_id
+            and self.pk
+            and self.phien_ban_hien_tai.hop_dong_id != self.pk
+        ):
+            raise ValidationError({"phien_ban_hien_tai": "Phien ban khong thuoc hop dong nay."})
 
 
 # =========================================================
@@ -1484,13 +1579,269 @@ class YeuCauGiaHanHopDong(models.Model):
             f"{self.nguoi_yeu_cau.ho_ten} - "
             f"{self.get_trang_thai_display()}"
         )
+
+
+class BanChupHopDong(models.Model):
+    """Noi dung hop dong bat bien tai thoi diem ky/chuyen doi legacy."""
+
+    hop_dong = models.OneToOneField(
+        HopDong, on_delete=models.PROTECT, related_name="ban_chup_goc"
+    )
+    du_lieu = models.JSONField(default=dict)
+    ngay_chot = models.DateTimeField(default=timezone.now)
+    nguoi_chot = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="ban_chup_hop_dong_da_chot",
+    )
+    nguon = models.CharField(max_length=30, default="tao_hop_dong")
+    la_du_lieu_legacy = models.BooleanField(default=False)
+    ngay_tao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Ban chup hop dong"
+        verbose_name_plural = "Ban chup hop dong"
+
+
+class PhienBanHopDong(models.Model):
+    """Phien ban review bat bien gui nguoi thue."""
+
+    hop_dong = models.ForeignKey(HopDong, on_delete=models.PROTECT, related_name="phien_ban")
+    so_phien_ban = models.PositiveIntegerField()
+    du_lieu = models.JSONField(default=dict)
+    ma_bam_sha256 = models.CharField(
+        max_length=64,
+        validators=[RegexValidator(r"^[0-9a-f]{64}$", "Hash SHA-256 khong hop le.")],
+    )
+    nguoi_gui = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="phien_ban_hop_dong_da_gui",
+    )
+    thoi_diem_gui = models.DateTimeField(default=timezone.now)
+    ngay_tao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["so_phien_ban"]
+        constraints = [
+            models.UniqueConstraint(fields=("hop_dong", "so_phien_ban"), name="unique_contract_review_version"),
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.pk:
+            old = type(self).objects.get(pk=self.pk)
+            immutable = ("hop_dong_id", "so_phien_ban", "du_lieu", "ma_bam_sha256", "nguoi_gui_id", "thoi_diem_gui")
+            if any(getattr(old, field) != getattr(self, field) for field in immutable):
+                raise ValidationError("Phien ban review da gui khong duoc sua.")
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            self.clean()
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.hop_dong.so_hop_dong} v{self.so_phien_ban}"
+
+
+class PhanHoiHopDong(models.Model):
+    """Immutable tenant decision for one review version."""
+    HANH_DONG = [("chap_thuan", "Chap thuan"), ("yeu_cau_chinh_sua", "Yeu cau chinh sua")]
+    phien_ban = models.OneToOneField(PhienBanHopDong, on_delete=models.PROTECT, related_name="phan_hoi")
+    nguoi_phan_hoi = models.ForeignKey(User, on_delete=models.PROTECT, related_name="phan_hoi_hop_dong")
+    hanh_dong = models.CharField(max_length=30, choices=HANH_DONG)
+    ly_do = models.TextField(blank=True)
+    ma_bam_phien_ban = models.CharField(max_length=64, validators=[RegexValidator(r"^[0-9a-f]{64}$")])
+    phuong_thuc_xac_nhan = models.CharField(max_length=40, default="xac_nhan_dien_tu_he_thong")
+    dia_chi_ip = models.GenericIPAddressField(null=True, blank=True)
+    thoi_diem_phan_hoi = models.DateTimeField(default=timezone.now)
+    ngay_tao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-thoi_diem_phan_hoi"]
+
+    def clean(self):
+        super().clean()
+        if self.ma_bam_phien_ban != self.phien_ban.ma_bam_sha256:
+            raise ValidationError("Hash phien ban khong khop.")
+        if self.hanh_dong == "yeu_cau_chinh_sua" and not self.ly_do.strip():
+            raise ValidationError({"ly_do": "Can neu ly do chinh sua."})
+        if self.pk:
+            raise ValidationError("Phan hoi hop dong da tao khong duoc sua.")
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            self.clean()
+        return super().save(*args, **kwargs)
+
+
+class PhuLucHopDong(models.Model):
+    LOAI = [
+        ("gia_han", "Gia han"),
+        ("thay_doi_cu_tru", "Thay doi cu tru"),
+    ]
+    TRANG_THAI = [
+        ("da_duyet", "Da duyet"),
+        ("legacy", "Legacy"),
+    ]
+
+    hop_dong = models.ForeignKey(
+        HopDong, on_delete=models.PROTECT, related_name="phu_luc"
+    )
+    yeu_cau_gia_han = models.OneToOneField(
+        YeuCauGiaHanHopDong, on_delete=models.PROTECT, null=True, blank=True,
+        related_name="phu_luc",
+    )
+    loai = models.CharField(max_length=30, choices=LOAI)
+    ma_phu_luc = models.CharField(max_length=80, unique=True)
+    trang_thai = models.CharField(max_length=20, choices=TRANG_THAI, default="da_duyet")
+    ngay_hieu_luc = models.DateField()
+    noi_dung = models.TextField(blank=True)
+    ly_do = models.TextField(blank=True)
+    ngay_ket_thuc_cu = models.DateField(null=True, blank=True)
+    ngay_ket_thuc_moi = models.DateField(null=True, blank=True)
+    du_lieu_snapshot = models.JSONField(default=dict)
+    nguoi_tao = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="phu_luc_hop_dong_da_tao",
+    )
+    nguoi_duyet = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="phu_luc_hop_dong_da_duyet",
+    )
+    ngay_duyet = models.DateTimeField(null=True, blank=True)
+    ngay_tao = models.DateTimeField(auto_now_add=True)
+    ngay_cap_nhat = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["ngay_tao", "id"]
+        indexes = [
+            models.Index(fields=("hop_dong", "loai", "ngay_hieu_luc"), name="appendix_contract_kind_date"),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    ~models.Q(loai="gia_han")
+                    | (
+                        models.Q(ngay_ket_thuc_cu__isnull=False)
+                        & models.Q(ngay_ket_thuc_moi__isnull=False)
+                        & models.Q(ngay_ket_thuc_moi__gt=models.F("ngay_ket_thuc_cu"))
+                    )
+                ),
+                name="renewal_appendix_dates_valid",
+            ),
+            models.CheckConstraint(
+                check=(
+                    ~models.Q(loai="gia_han")
+                    | models.Q(yeu_cau_gia_han__isnull=False)
+                ),
+                name="renewal_appendix_requires_request",
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.loai == "gia_han":
+            if not self.yeu_cau_gia_han_id:
+                raise ValidationError({
+                    "yeu_cau_gia_han": "Phu luc gia han phai gan voi yeu cau gia han."
+                })
+            if self.hop_dong_id != self.yeu_cau_gia_han.hop_dong_id:
+                raise ValidationError({
+                    "yeu_cau_gia_han": "Yeu cau gia han khong thuoc hop dong cua phu luc."
+                })
+        elif self.yeu_cau_gia_han_id:
+            raise ValidationError({
+                "yeu_cau_gia_han": "Chi phu luc gia han moi duoc gan yeu cau gia han."
+            })
+
+    def __str__(self):
+        return f"{self.ma_phu_luc} - {self.hop_dong.so_hop_dong}"
+
+
+class BanChupNguoiOCungHopDong(models.Model):
+    LOAI_SU_KIEN = [
+        ("co_mat_khi_ky", "Co mat khi ky"),
+        ("them_sau_ky", "Them sau ky"),
+        ("roi_sau_ky", "Roi sau ky"),
+        ("tu_choi", "Tu choi/thu hoi"),
+        ("yeu_cau_bo_sung", "Yeu cau bo sung"),
+        ("legacy_khong_xac_dinh", "Legacy khong xac dinh"),
+    ]
+    NGUON = [
+        ("khai_bao_dat_phong", "Khai bao dat phong"),
+        ("ho_so_nguoi_o_cung", "Ho so nguoi o cung"),
+        ("legacy_migration", "Legacy migration"),
+    ]
+
+    hop_dong = models.ForeignKey(
+        HopDong, on_delete=models.PROTECT, related_name="ban_chup_nguoi_o_cung"
+    )
+    phu_luc = models.ForeignKey(
+        PhuLucHopDong, on_delete=models.PROTECT, null=True, blank=True,
+        related_name="thay_doi_nguoi_o_cung",
+    )
+    khai_bao_dat_phong = models.ForeignKey(
+        KhaiBaoNguoiOCungDatPhong, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="ban_chup_hop_dong",
+    )
+    nguoi_o_cung = models.ForeignKey(
+        "NguoiOCungPhong", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="ban_chup_hop_dong",
+    )
+    ho_ten = models.CharField(max_length=150)
+    ngay_sinh = models.DateField(null=True, blank=True)
+    gioi_tinh = models.CharField(max_length=10, blank=True)
+    cccd = models.CharField(max_length=20, blank=True)
+    so_dien_thoai = models.CharField(max_length=20, blank=True)
+    quan_he = models.CharField(max_length=50, blank=True)
+    trang_thai_xac_minh = models.CharField(max_length=30, blank=True)
+    loai_su_kien = models.CharField(max_length=30, choices=LOAI_SU_KIEN)
+    ngay_hieu_luc = models.DateField()
+    nguon = models.CharField(max_length=30, choices=NGUON)
+    la_du_lieu_legacy = models.BooleanField(default=False)
+    ghi_chu = models.TextField(blank=True)
+    ngay_tao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["ngay_hieu_luc", "id"]
+        indexes = [
+            models.Index(fields=("hop_dong", "loai_su_kien", "ngay_hieu_luc"), name="occupant_snapshot_event"),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=("hop_dong", "khai_bao_dat_phong", "loai_su_kien"),
+                name="unique_booking_occupant_snapshot",
+            ),
+            models.UniqueConstraint(
+                fields=("phu_luc", "nguoi_o_cung", "loai_su_kien"),
+                name="unique_appendix_resident_event",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.ho_ten} - {self.get_loai_su_kien_display()}"
 # =========================================================
 # 6. HÓA ĐƠN / THANH TOÁN
 # =========================================================
 
 class HoaDon(models.Model):
 
+    FINANCIAL_SNAPSHOT_FIELDS = (
+        "thang",
+        "nam",
+        "tien_phong",
+        "tien_dien",
+        "chi_so_dien_cu",
+        "chi_so_dien_moi",
+        "don_gia_dien",
+        "tien_nuoc",
+        "tien_dich_vu",
+        "phi_khac",
+        "chi_tiet_phi",
+        "han_thanh_toan",
+    )
+
     TRANG_THAI = [
+        ("draft", "Bản nháp"),
         ("chua_thanh_toan", "Chưa thanh toán"),
         ("cho_xac_nhan", "Chờ xác nhận"),
         ("da_thanh_toan", "Đã thanh toán"),
@@ -1520,6 +1871,30 @@ class HoaDon(models.Model):
         decimal_places=0,
         default=0,
         validators=[MinValueValidator(0)]
+    )
+
+    chi_so_dien_cu = models.DecimalField(
+        max_digits=12,
+        decimal_places=0,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+    )
+
+    chi_so_dien_moi = models.DecimalField(
+        max_digits=12,
+        decimal_places=0,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+    )
+
+    don_gia_dien = models.DecimalField(
+        max_digits=12,
+        decimal_places=0,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(100000)],
     )
 
     tien_nuoc = models.DecimalField(
@@ -1616,6 +1991,45 @@ class HoaDon(models.Model):
             f"{self.hop_dong.so_hop_dong}"
         )
 
+    def financial_snapshot_is_locked(self):
+        """Whether a persisted invoice may no longer change its billed snapshot."""
+        if not self.pk:
+            return False
+        persisted_status = type(self).objects.filter(pk=self.pk).values_list(
+            "trang_thai", flat=True
+        ).first()
+        return (
+            persisted_status != "draft"
+            or ChungTuThanhToan.objects.filter(hoa_don_id=self.pk).exists()
+        )
+
+    def save(self, *args, **kwargs):
+        """Freeze billed amounts after finalization or the first payment attempt."""
+        update_fields = kwargs.get("update_fields")
+        protected_write = (
+            update_fields is None
+            or bool(set(update_fields) & set(self.FINANCIAL_SNAPSHOT_FIELDS))
+        )
+        if self.pk and not self._state.adding and protected_write:
+            previous = type(self).objects.filter(pk=self.pk).values(
+                "trang_thai", *self.FINANCIAL_SNAPSHOT_FIELDS
+            ).first()
+            if previous:
+                snapshot_changed = any(
+                    getattr(self, field) != previous[field]
+                    for field in self.FINANCIAL_SNAPSHOT_FIELDS
+                )
+                if snapshot_changed and (
+                    previous["trang_thai"] != "draft"
+                    or self.trang_thai != "draft"
+                    or ChungTuThanhToan.objects.filter(hoa_don_id=self.pk).exists()
+                ):
+                    raise ValidationError(
+                        "Hoa don da phat hanh hoac da co chung tu thanh toan; "
+                        "khong the thay doi du lieu tai chinh da chot."
+                    )
+        return super().save(*args, **kwargs)
+
     @property
     def tong_tien(self):
         return (
@@ -1695,6 +2109,105 @@ class LichSuThanhToan(models.Model):
             f"{self.so_tien:,.0f}đ - "
             f"{self.thoi_diem.strftime('%d/%m/%Y %H:%M:%S')}"
         )
+
+
+class RaSoatThanhToanHoaDonCu(models.Model):
+    """Immutable review of a non-canonical historical paid invoice."""
+    MUC_DO_BANG_CHUNG = [('partial_evidence', 'Partial evidence'), ('no_evidence', 'No evidence')]
+    hoa_don = models.OneToOneField(HoaDon, on_delete=models.PROTECT, related_name='ra_soat_thanh_toan_cu')
+    muc_do_bang_chung = models.CharField(max_length=20, choices=MUC_DO_BANG_CHUNG)
+    truong_canonical_con_thieu = models.JSONField(default=list)
+    ghi_chu_ra_soat = models.TextField()
+    nguoi_ra_soat = models.ForeignKey(User, on_delete=models.PROTECT, related_name='ra_soat_thanh_toan_cu_da_thuc_hien')
+    thoi_diem_ra_soat = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.pk and not self._state.adding:
+            raise ValidationError('Ban ghi ra soat thanh toan cu la bat bien.')
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+
+class ChungTuThanhToan(models.Model):
+    TRANG_THAI = [
+        ("cho_doi_soat", "Chờ đối soát"),
+        ("da_chap_nhan", "Đã chấp nhận"),
+        ("tu_choi", "Từ chối"),
+    ]
+
+    giao_dich_coc = models.OneToOneField(
+        ThanhToanCocDatPhong, on_delete=models.PROTECT, null=True, blank=True,
+        related_name="chung_tu",
+    )
+    hoa_don = models.ForeignKey(
+        HoaDon, on_delete=models.PROTECT, null=True, blank=True,
+        related_name="chung_tu_thanh_toan",
+    )
+    so_lan = models.PositiveIntegerField(
+        null=True, blank=True, validators=[MinValueValidator(1)],
+        help_text="Thứ tự attempt của chứng từ hóa đơn; cọc không dùng trường này.",
+    )
+    nguoi_tai_len = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="chung_tu_thanh_toan_da_tai",
+    )
+    anh = models.ImageField(storage=private_payment_evidence_storage, upload_to=payment_evidence_upload_to)
+    mime_type = models.CharField(max_length=30)
+    ma_doi_chieu = models.CharField(max_length=100, db_index=True)
+    trang_thai = models.CharField(max_length=20, choices=TRANG_THAI, default="cho_doi_soat")
+    nguoi_xu_ly = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="chung_tu_thanh_toan_da_xu_ly",
+    )
+    thoi_diem_xu_ly = models.DateTimeField(null=True, blank=True)
+    ghi_chu_doi_soat = models.TextField(blank=True)
+    ngay_tao = models.DateTimeField(auto_now_add=True)
+    ngay_cap_nhat = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        super().clean()
+        if bool(self.giao_dich_coc_id) == bool(self.hoa_don_id):
+            raise ValidationError("Chứng từ phải thuộc đúng một giao dịch cọc hoặc một hóa đơn.")
+        if self.hoa_don_id and not self.so_lan:
+            raise ValidationError("Chứng từ hóa đơn phải có số lần attempt.")
+        if self.giao_dich_coc_id and self.so_lan is not None:
+            raise ValidationError("Chứng từ cọc không có số lần attempt hóa đơn.")
+
+    def save(self, *args, **kwargs):
+        if self.pk and not self._state.adding:
+            previous = type(self).objects.only(
+                "giao_dich_coc_id", "hoa_don_id", "so_lan", "nguoi_tai_len_id",
+                "anh", "mime_type", "ma_doi_chieu",
+            ).get(pk=self.pk)
+            immutable_fields = (
+                "giao_dich_coc_id", "hoa_don_id", "so_lan", "nguoi_tai_len_id",
+                "anh", "mime_type", "ma_doi_chieu",
+            )
+            if any(getattr(previous, field) != getattr(self, field) for field in immutable_fields):
+                raise ValidationError("Chứng từ đã lưu là bằng chứng bất biến và không được ghi đè.")
+        return super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ["-ngay_tao"]
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    models.Q(giao_dich_coc__isnull=False, hoa_don__isnull=True)
+                    | models.Q(giao_dich_coc__isnull=True, hoa_don__isnull=False)
+                ),
+                name="payment_evidence_exactly_one_target",
+            ),
+            models.UniqueConstraint(
+                fields=["hoa_don", "so_lan"],
+                name="unique_invoice_payment_evidence_attempt",
+            ),
+            models.CheckConstraint(
+                check=(
+                    models.Q(giao_dich_coc__isnull=False, hoa_don__isnull=True, so_lan__isnull=True)
+                    | models.Q(giao_dich_coc__isnull=True, hoa_don__isnull=False, so_lan__gte=1)
+                ),
+                name="payment_evidence_invoice_attempt_number",
+            ),
+        ]
 
 
 # =========================================================
@@ -2106,11 +2619,142 @@ class LichSuThongBao(models.Model):
 # 10. NGƯỜI Ở CÙNG PHÒNG
 # =========================================================
 
+class DanhTinhNguoiOCung(models.Model):
+    """Stable identity; every ``NguoiOCungPhong`` is one residency period."""
+
+    cccd = models.CharField(max_length=12, unique=True, null=True, blank=True)
+    ngay_tao = models.DateTimeField(auto_now_add=True)
+    ngay_cap_nhat = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Danh tinh nguoi o cung"
+        verbose_name_plural = "Danh tinh nguoi o cung"
+
+    def clean(self):
+        super().clean()
+        self.cccd = normalize_companion_cccd(self.cccd)
+
+    def save(self, *args, **kwargs):
+        self.cccd = normalize_companion_cccd(self.cccd)
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.cccd or f"Danh tinh chua doi chieu #{self.pk}"
+
+
+class YeuCauNguoiOCung(models.Model):
+    TRANG_THAI = [("cho_xac_minh", "Cho xac minh"), ("cho_bo_sung", "Cho bo sung"), ("da_duyet", "Da duyet"), ("tu_choi", "Tu choi"), ("da_huy", "Da huy")]
+    hop_dong = models.ForeignKey(HopDong, on_delete=models.PROTECT, related_name="yeu_cau_nguoi_o_cung")
+    nguoi_yeu_cau = models.ForeignKey(NguoiThue, on_delete=models.PROTECT, related_name="yeu_cau_nguoi_o_cung")
+    identity = models.ForeignKey(DanhTinhNguoiOCung, null=True, blank=True, on_delete=models.PROTECT, related_name="yeu_cau")
+    residency = models.OneToOneField("NguoiOCungPhong", null=True, blank=True, on_delete=models.PROTECT, related_name="yeu_cau_nguon")
+    ho_ten = models.CharField(max_length=150)
+    ngay_sinh = models.DateField(null=True, blank=True)
+    gioi_tinh = models.CharField(max_length=10, blank=True)
+    cccd = models.CharField(max_length=12)
+    so_dien_thoai = models.CharField(max_length=20, blank=True)
+    quan_he = models.CharField(max_length=50, blank=True)
+    ngay_vao = models.DateField()
+    trang_thai = models.CharField(max_length=20, choices=TRANG_THAI, default="cho_xac_minh")
+    revision = models.PositiveIntegerField(default=1)
+    ma_idempotency = models.CharField(max_length=64, unique=True)
+    ly_do = models.TextField(blank=True)
+    nguoi_xu_ly = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="yeu_cau_nguoi_o_cung_xu_ly")
+    ngay_xu_ly = models.DateTimeField(null=True, blank=True)
+    ngay_tao = models.DateTimeField(auto_now_add=True)
+    ngay_cap_nhat = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=("hop_dong", "ma_idempotency"), name="unique_cotenant_request_contract_key")]
+
+    def clean(self):
+        self.cccd = normalize_companion_cccd(self.cccd) or ""
+        if self.trang_thai in ("da_duyet", "tu_choi", "da_huy") and not self.ngay_xu_ly:
+            raise ValidationError("Request terminal phai co thoi diem xu ly.")
+
+    def save(self, *args, **kwargs):
+        """Keep lifecycle changes on the domain-service path.
+
+        ``QuerySet.update`` remains deliberately absent from services; this guard
+        prevents accidental model-save transitions from reopening a terminal
+        request or skipping the optimistic revision.
+        """
+        self.cccd = normalize_companion_cccd(self.cccd) or ""
+        if self.pk:
+            previous = type(self).objects.filter(pk=self.pk).values(
+                "trang_thai", "revision"
+            ).first()
+            if previous:
+                old_state = previous["trang_thai"]
+                if old_state in ("da_duyet", "tu_choi", "da_huy"):
+                    raise ValidationError("Request terminal la immutable.")
+                transitions = {
+                    "cho_xac_minh": {"cho_xac_minh", "cho_bo_sung", "da_duyet", "tu_choi", "da_huy"},
+                    "cho_bo_sung": {"cho_bo_sung", "cho_xac_minh", "tu_choi", "da_huy"},
+                }
+                if self.trang_thai not in transitions[old_state]:
+                    raise ValidationError("Transition request khong hop le.")
+                if self.revision != previous["revision"] + 1:
+                    raise ValidationError("Request mutation phai tang revision mot lan.")
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+
+class ChungTuDanhTinhNguoiOCung(models.Model):
+    """Immutable, private identity evidence; residency never owns the file."""
+
+    danh_tinh = models.ForeignKey(
+        DanhTinhNguoiOCung, on_delete=models.PROTECT, related_name="chung_tu_danh_tinh"
+    )
+    yeu_cau_nguon = models.ForeignKey(
+        YeuCauNguoiOCung, null=True, blank=True, on_delete=models.PROTECT,
+        related_name="chung_tu_danh_tinh_gui_len",
+    )
+    nguoi_tai_len = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="chung_tu_danh_tinh_nguoi_o_cung_da_tai"
+    )
+    so_phien_ban = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    ma_idempotency = models.CharField(max_length=64)
+    tep = models.ImageField(
+        storage=private_cotenant_identity_evidence_storage,
+        upload_to=cotenant_identity_evidence_upload_to,
+    )
+    ten_tap_tin_goc = models.CharField(max_length=255)
+    mime_type = models.CharField(max_length=30)
+    kich_thuoc = models.PositiveIntegerField()
+    ngay_tao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["danh_tinh_id", "so_phien_ban"]
+        constraints = [
+            models.UniqueConstraint(fields=["danh_tinh", "so_phien_ban"], name="unique_cotenant_identity_evidence_version"),
+            models.UniqueConstraint(fields=["danh_tinh", "nguoi_tai_len", "ma_idempotency"], name="unique_cotenant_identity_evidence_retry"),
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.pk and not self._state.adding:
+            previous = type(self).objects.only(
+                "danh_tinh_id", "yeu_cau_nguon_id", "nguoi_tai_len_id", "so_phien_ban",
+                "ma_idempotency", "tep", "ten_tap_tin_goc", "mime_type", "kich_thuoc",
+            ).get(pk=self.pk)
+            immutable_fields = (
+                "danh_tinh_id", "yeu_cau_nguon_id", "nguoi_tai_len_id", "so_phien_ban",
+                "ma_idempotency", "tep", "ten_tap_tin_goc", "mime_type", "kich_thuoc",
+            )
+            if any(getattr(previous, field) != getattr(self, field) for field in immutable_fields):
+                raise ValidationError("Chung tu danh tinh da luu la bat bien va khong duoc ghi de.")
+        return super().save(*args, **kwargs)
+
+
 class NguoiOCungPhong(models.Model):
 
     TRANG_THAI = [
+        ("cho_bo_sung", "Chờ bổ sung"),
+        ("cho_xac_minh", "Chờ xác minh"),
+        ("da_xac_minh", "Đã xác minh"),
         ("dang_o", "Đang ở"),
         ("da_roi", "Đã rời đi"),
+        ("tu_choi", "Từ chối"),
     ]
 
     GIOI_TINH = [
@@ -2123,6 +2767,13 @@ class NguoiOCungPhong(models.Model):
         HopDong,
         on_delete=models.CASCADE,
         related_name="nguoi_o_cung"
+    )
+
+    identity = models.ForeignKey(
+        DanhTinhNguoiOCung,
+        on_delete=models.PROTECT,
+        related_name="lich_su_luu_tru",
+        help_text="Danh tinh ben vung; moi ban ghi la mot dot luu tru rieng.",
     )
 
     ho_ten = models.CharField(max_length=150)
@@ -2143,6 +2794,14 @@ class NguoiOCungPhong(models.Model):
         blank=True
     )
 
+    active_identity_key = models.BigIntegerField(
+        null=True,
+        blank=True,
+        editable=False,
+        unique=True,
+        help_text="Khoa DB cho duy nhat mot dot luu tru dang o cua mot danh tinh.",
+    )
+
     so_dien_thoai = models.CharField(
         max_length=20,
         blank=True
@@ -2157,6 +2816,14 @@ class NguoiOCungPhong(models.Model):
         max_length=20,
         choices=TRANG_THAI,
         default="dang_o"
+    )
+
+    da_xac_minh_boi_admin = models.BooleanField(
+        default=False,
+        help_text=(
+            "Admin da doi chieu thu cong ho so. Gia tri mac dinh False "
+            "de khong coi du lieu cu la da xac minh."
+        ),
     )
 
     ngay_vao = models.DateField()
@@ -2176,6 +2843,55 @@ class NguoiOCungPhong(models.Model):
         verbose_name = "Người ở cùng phòng"
         verbose_name_plural = "Người ở cùng phòng"
         ordering = ["-ngay_tao"]
+
+    @staticmethod
+    def _identity_for_cccd(cccd):
+        """Get/create a canonical identity safely under concurrent creates."""
+        if cccd is None:
+            return DanhTinhNguoiOCung.objects.create()
+        try:
+            return DanhTinhNguoiOCung.objects.get(cccd=cccd)
+        except DanhTinhNguoiOCung.DoesNotExist:
+            try:
+                # A savepoint makes a unique-key race recoverable even inside
+                # the caller's transaction.
+                with transaction.atomic():
+                    return DanhTinhNguoiOCung.objects.create(cccd=cccd)
+            except IntegrityError:
+                return DanhTinhNguoiOCung.objects.get(cccd=cccd)
+
+    def clean(self):
+        super().clean()
+        if self.cccd:
+            self.cccd = normalize_companion_cccd(self.cccd)
+        elif self.identity_id:
+            self.cccd = self.identity.cccd or ""
+        if self.identity_id and self.cccd and self.identity.cccd != self.cccd:
+            raise ValidationError({"cccd": "CCCD cua residency phai khop danh tinh."})
+        if self.ngay_ra and self.ngay_ra < self.ngay_vao:
+            raise ValidationError({"ngay_ra": "Ngay roi khong duoc truoc ngay vao."})
+
+    def save(self, *args, **kwargs):
+        # ``cccd`` remains a read-compatible mirror for existing screens and
+        # immutable snapshots; identity.cccd is canonical for every new save.
+        normalized_cccd = normalize_companion_cccd(self.cccd) if self.cccd else None
+        with transaction.atomic():
+            if not self.identity_id:
+                self.identity = self._identity_for_cccd(normalized_cccd)
+            elif normalized_cccd is not None and self.identity.cccd != normalized_cccd:
+                self.identity = self._identity_for_cccd(normalized_cccd)
+            elif normalized_cccd is None:
+                normalized_cccd = self.identity.cccd
+
+            self.cccd = normalized_cccd or ""
+            self.active_identity_key = self.identity_id if self.trang_thai == "dang_o" else None
+            self.clean()
+            return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError(
+            "Residency la du lieu lich su; hay ghi nhan da roi thay vi xoa."
+        )
 
     def __str__(self):
         phong = self.hop_dong.dat_phong.phong.so_phong
@@ -2208,12 +2924,21 @@ class FaceProfile(models.Model):
         related_name="face_profile"
     )
 
+    danh_tinh_nguoi_o_cung = models.OneToOneField(
+        DanhTinhNguoiOCung,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="face_profile",
+        help_text="Chu the sinh trac hoc on dinh; khong gan vao mot dot cu tru lich su.",
+    )
+
     nguoi_o_cung = models.OneToOneField(
         NguoiOCungPhong,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="face_profile"
+        related_name="face_profile",
     )
 
     loai_chu_the = models.CharField(
@@ -2225,6 +2950,15 @@ class FaceProfile(models.Model):
         upload_to="face_profiles/",
         blank=True,
         null=True
+    )
+
+    dong_y_du_lieu_khuon_mat = models.BooleanField(
+        default=False
+    )
+
+    thoi_diem_dong_y_du_lieu_khuon_mat = models.DateTimeField(
+        null=True,
+        blank=True
     )
 
     face_encoding = models.TextField(
@@ -2248,20 +2982,29 @@ class FaceProfile(models.Model):
 
         co_nguoi_thue = bool(self.nguoi_thue_id)
 
-        co_nguoi_o_cung = bool(self.nguoi_o_cung_id)
+        co_danh_tinh_nguoi_o_cung = bool(self.danh_tinh_nguoi_o_cung_id)
 
-        if co_nguoi_thue and co_nguoi_o_cung:
+        if co_nguoi_thue and co_danh_tinh_nguoi_o_cung:
             raise ValidationError(
                 "FaceProfile chỉ được liên kết với một người "
                 "(người thuê chính HOẶC người ở cùng)."
             )
 
-        if not co_nguoi_thue and not co_nguoi_o_cung:
+        if not co_nguoi_thue and not co_danh_tinh_nguoi_o_cung:
             raise ValidationError(
                 "FaceProfile phải liên kết với ít nhất một người."
             )
 
     class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name="face_profile_exactly_one_supported_subject",
+                check=(
+                    models.Q(nguoi_thue__isnull=False, danh_tinh_nguoi_o_cung__isnull=True)
+                    | models.Q(nguoi_thue__isnull=True, danh_tinh_nguoi_o_cung__isnull=False)
+                ),
+            ),
+        ]
         verbose_name = "Hồ sơ khuôn mặt"
         verbose_name_plural = "Hồ sơ khuôn mặt"
         ordering = ["-ngay_tao"]
@@ -2271,10 +3014,46 @@ class FaceProfile(models.Model):
         if self.nguoi_thue:
             return f"FaceProfile - {self.nguoi_thue.ho_ten}"
 
-        if self.nguoi_o_cung:
-            return f"FaceProfile - {self.nguoi_o_cung.ho_ten}"
+        if self.danh_tinh_nguoi_o_cung:
+            return f"FaceProfile - Danh tinh #{self.danh_tinh_nguoi_o_cung_id}"
 
         return f"FaceProfile #{self.pk}"
+
+
+# =========================================================
+# 11B. CONSENT SINH TRẮC HỌC NGƯỜI Ở CÙNG
+# =========================================================
+
+class SuKienDongYSinhTracHoc(models.Model):
+    """Append-only personal biometric-consent history for a co-tenant identity."""
+
+    SU_KIEN = [("dong_y", "Đồng ý"), ("rut_lai", "Rút lại")]
+    danh_tinh = models.ForeignKey(
+        DanhTinhNguoiOCung, on_delete=models.PROTECT,
+        related_name="su_kien_dong_y_sinh_trac_hoc",
+    )
+    su_kien = models.CharField(max_length=12, choices=SU_KIEN)
+    thoi_diem = models.DateTimeField()
+    nguoi_ghi_nhan = models.ForeignKey(
+        User, on_delete=models.PROTECT,
+        related_name="su_kien_dong_y_sinh_trac_hoc_da_ghi_nhan",
+    )
+    ma_muc_dich = models.CharField(max_length=80, default="face_id_v1")
+    ngay_tao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["thoi_diem", "pk"]
+        constraints = [
+            models.CheckConstraint(
+                name="biometric_consent_event_is_known",
+                check=models.Q(su_kien__in=["dong_y", "rut_lai"]),
+            ),
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValidationError("Sự kiện đồng ý sinh trắc học là bất biến.")
+        return super().save(*args, **kwargs)
 
 
 # =========================================================
@@ -2295,6 +3074,10 @@ class QuyenRaVao(models.Model):
     )
     nguon_cap = models.CharField(
         max_length=20, choices=NGUON_CAP, default="legacy_unknown",
+    )
+    active_access_key = models.CharField(
+        max_length=160, null=True, blank=True, unique=True, editable=False,
+        help_text="Khoa DB cho duy nhat mot quyen dang hoat dong tren mot chu the/phong/hop dong.",
     )
 
     LOAI_QUYEN = [
@@ -2395,6 +3178,16 @@ class QuyenRaVao(models.Model):
         verbose_name = "Quyền ra vào"
         verbose_name_plural = "Quyền ra vào"
         ordering = ["-ngay_tao"]
+        constraints = [
+            models.CheckConstraint(
+                name="quyen_ra_vao_known_source_exactly_one_valid_subject",
+                check=(
+                    models.Q(nguon_cap="legacy_unknown")
+                    | models.Q(nguon_cap__in=["thu_cong", "face_id", "duyet_ghep"], loai_quyen="chu_phong", nguoi_thue__isnull=False, nguoi_o_cung__isnull=True)
+                    | models.Q(nguon_cap__in=["thu_cong", "face_id", "duyet_ghep"], loai_quyen="nguoi_o_cung", nguoi_thue__isnull=True, nguoi_o_cung__isnull=False)
+                ),
+            )
+        ]
 
     def __str__(self):
 
@@ -2424,6 +3217,12 @@ class LichSuRaVao(models.Model):
         ("the_tu", "Thẻ từ"),
         ("camera", "Nhận diện camera"),
         ("ma_pin", "Mã PIN"),
+    ]
+
+    KET_QUA = [
+        ("cho_phep", "Cho phép"),
+        ("tu_choi", "Từ chối"),
+        ("khong_xac_dinh", "Không xác định"),
     ]
 
     quyen_ra_vao = models.ForeignKey(
@@ -2470,6 +3269,14 @@ class LichSuRaVao(models.Model):
         max_length=20,
         choices=NGUON_DU_LIEU,
         default="thu_cong"
+    )
+
+    ket_qua = models.CharField(
+        max_length=20,
+        choices=KET_QUA,
+        default="khong_xac_dinh",
+        db_index=True,
+        help_text="Kết quả quyết định truy cập có cấu trúc; ghi chú chỉ lưu diễn giải."
     )
 
     thoi_diem = models.DateTimeField(

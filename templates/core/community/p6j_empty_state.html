@@ -1,0 +1,10 @@
+<div class="ndt-f5-empty" role="status">
+    {% if icon %}<div class="ndt-f5-empty__icon" aria-hidden="true">{{ icon }}</div>{% endif %}
+    <h2 class="ndt-f5-empty__title">{{ title }}</h2>
+    {% if description %}<p class="ndt-f5-empty__description">{{ description }}</p>{% endif %}
+    {% if action_url and action_label %}
+    <div class="ndt-f5-empty__action">
+        <a class="ndt-f5-button ndt-f5-button--secondary" href="{{ action_url }}">{{ action_label }}</a>
+    </div>
+    {% endif %}
+</div>

@@ -16,7 +16,7 @@ from django.utils import timezone
 from core.du_lieu_test import tap_hop_views as views
 from core.models import (
     CoSo, Phong, NguoiThue, DatPhong, HopDong, NguoiOCungPhong,
-    YeuCauGhepNguoi, HoaDon, LichSuThanhToan, QuyenRaVao, FaceProfile,
+    YeuCauGhepNguoi, HoaDon, LichSuThanhToan, QuyenRaVao, FaceProfile, ChungTuThanhToan,
     LichSuRaVao, ThongBao, NhatKyThaoTac, LichSuHopDong, ChinhSachHoTro,
 )
 
@@ -237,7 +237,12 @@ from django.test import override_settings
 from django.utils import timezone
 
 from core.models import DatPhong, KhaiBaoNguoiOCungDatPhong, NguoiOCungPhong, ThanhToanCocDatPhong, LichSuThanhToan, NhatKyThaoTac
-from core.dich_vu.dat_phong import create_booking, calculate_checkout, room_has_hold
+from core.dich_vu.dat_phong import (
+    create_booking,
+    calculate_checkout,
+    room_has_hold,
+    room_is_bookable_for_rental,
+)
 from core.dich_vu.tien_coc import get_or_create_deposit, report_paid, confirm_deposit, reject_deposit, vietqr_data
 from core.du_lieu_test.du_lieu_test_nghiep_vu import BusinessFixture
 
@@ -252,6 +257,15 @@ class BookingDepositServiceTests(BusinessFixture):
 
     def payment(self):
         return get_or_create_deposit(actor=self.user, booking_id=self.create().pk)
+
+    def evidence(self, payment):
+        return ChungTuThanhToan.objects.create(
+            giao_dich_coc=payment,
+            nguoi_tai_len=self.user,
+            anh='payment_evidence/test-receipt.png',
+            mime_type='image/png',
+            ma_doi_chieu=payment.ma_tham_chieu,
+        )
 
     def test_valid_booking_snapshots_and_terms_are_frozen(self):
         booking = self.create(people=2, companions=[dict(ho_ten='Companion', cccd='000000000003')], allow_sharing=True)
@@ -300,6 +314,32 @@ class BookingDepositServiceTests(BusinessFixture):
         booking.save()
         self.assertNotEqual(self.create().ma_yeu_cau, booking.ma_yeu_cau)
 
+    def test_period_availability_allows_non_overlapping_future_stay_and_rejects_stale_conflict(self):
+        future_start = self.today + timedelta(days=90)
+        self.create(checkin=future_start, months=1)
+        self.assertTrue(room_is_bookable_for_rental(self.room, self.today, 1))
+        earlier_booking = self.create(checkin=self.today, months=1)
+        self.assertEqual(earlier_booking.ngay_nhan_phong, self.today)
+
+        stale_start = self.today + timedelta(days=40)
+        self.assertTrue(room_is_bookable_for_rental(self.room, stale_start, 1))
+        self.create(checkin=stale_start, months=1)
+        with self.assertRaises(ValidationError):
+            self.create(checkin=stale_start, months=1)
+
+    def test_open_ended_valid_hold_blocks_future_availability(self):
+        booking = self.create(months=1)
+        booking.ngay_tra_du_kien = None
+        booking.save(update_fields=["ngay_tra_du_kien"])
+
+        self.assertFalse(
+            room_is_bookable_for_rental(
+                self.room,
+                self.today + timedelta(days=90),
+                1,
+            )
+        )
+
     def test_expired_unpaid_hold_is_released_but_reported_payment_is_not(self):
         payment = self.payment()
         DatPhong.objects.filter(pk=payment.dat_phong_id).update(han_thanh_toan_coc=timezone.now()-timedelta(seconds=1))
@@ -308,13 +348,14 @@ class BookingDepositServiceTests(BusinessFixture):
             report_paid(actor=self.user, payment_id=payment.pk)
         DatPhong.objects.filter(pk=payment.dat_phong_id).update(han_thanh_toan_coc=timezone.now()+timedelta(hours=1))
         report_paid(actor=self.user, payment_id=payment.pk)
+        self.evidence(payment)
         DatPhong.objects.filter(pk=payment.dat_phong_id).update(han_thanh_toan_coc=timezone.now()-timedelta(seconds=1))
         self.assertTrue(room_has_hold(self.room))
-        self.assertEqual(confirm_deposit(actor=self.admin, payment_id=payment.pk).trang_thai, 'da_xac_nhan')
+        self.assertEqual(confirm_deposit(actor=self.admin, payment_id=payment.pk, actual_amount=payment.so_tien).trang_thai, 'da_xac_nhan')
 
     def test_checkout_matches_existing_calendar_rule(self):
         from core.dich_vu.ngay_thue import tinh_ngay_ket_thuc_theo_thang
-        for start in (date(2026, 1, 31), date(2024, 2, 29), date(2026, 9, 18)):
+        for start in (date(2024, 2, 1), date(2026, 1, 31), date(2024, 2, 29), date(2026, 9, 18)):
             for months in (1, 12, 36):
                 self.assertEqual(calculate_checkout(start, months), tinh_ngay_ket_thuc_theo_thang(start, months))
 
@@ -359,11 +400,12 @@ class BookingDepositServiceTests(BusinessFixture):
     def test_admin_confirmation_once_and_no_contract_or_resident(self):
         payment = self.payment()
         report_paid(actor=self.user, payment_id=payment.pk)
-        confirmed = confirm_deposit(actor=self.admin, payment_id=payment.pk)
+        self.evidence(payment)
+        confirmed = confirm_deposit(actor=self.admin, payment_id=payment.pk, actual_amount=payment.so_tien)
         self.assertEqual(confirmed.trang_thai, 'da_xac_nhan')
         self.assertEqual(confirmed.nguoi_xac_nhan, self.admin)
         with self.assertRaises(ValidationError):
-            confirm_deposit(actor=self.admin, payment_id=payment.pk)
+            confirm_deposit(actor=self.admin, payment_id=payment.pk, actual_amount=payment.so_tien)
         self.assertEqual(confirmed.dat_phong.trang_thai, 'cho_duyet')
         self.assertFalse(hasattr(confirmed.dat_phong, 'hop_dong'))
         self.assertEqual(NguoiOCungPhong.objects.count(), 0)
@@ -373,9 +415,10 @@ class BookingDepositServiceTests(BusinessFixture):
         report_paid(actor=self.user, payment_id=payment.pk)
         for actor in (self.user, self.other_user, AnonymousUser()):
             with self.subTest(actor=str(actor)), self.assertRaises(PermissionDenied):
-                confirm_deposit(actor=actor, payment_id=payment.pk)
+                confirm_deposit(actor=actor, payment_id=payment.pk, actual_amount=payment.so_tien)
         superuser = User.objects.create_user('deposit-super', is_superuser=True, is_staff=False)
-        self.assertEqual(confirm_deposit(actor=superuser, payment_id=payment.pk).nguoi_xac_nhan, superuser)
+        self.evidence(payment)
+        self.assertEqual(confirm_deposit(actor=superuser, payment_id=payment.pk, actual_amount=payment.so_tien).nguoi_xac_nhan, superuser)
 
     def test_foreign_user_cannot_create_or_report_deposit(self):
         payment = self.payment()
@@ -429,6 +472,16 @@ from core.models import DatPhong, KhaiBaoNguoiOCungDatPhong, ThanhToanCocDatPhon
 
 
 class TenantBookingUITests(Phase5BookingFixture):
+    def test_period_from_room_search_prefills_booking_form(self):
+        start = self.today + timedelta(days=1)
+        response = self.client.get(reverse('dat_phong', args=[self.room.pk]), {
+            'ngay_nhan_phong': start.isoformat(),
+            'so_thang_thue': '2',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['quote_form'].initial['ngay_nhan_phong'], start)
+        self.assertEqual(response.context['quote_form'].initial['so_thang_thue'], 2)
+
     def test_guest_redirects_to_login(self):
         self.client.logout()
         self.assertIn(reverse('dang_nhap'), self.submit().url)

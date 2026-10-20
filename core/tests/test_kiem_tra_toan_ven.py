@@ -429,7 +429,8 @@ class HistoricalAccessTests(baseline.BusinessFixture):
         return FaceProfile.objects.create(
             nguoi_thue=None if resident else self.tenant, nguoi_o_cung=resident,
             loai_chu_the='nguoi_o_cung' if resident else 'nguoi_thue',
-            trang_thai='da_xac_thuc', face_encoding='audit-vector', anh_dai_dien='audit.jpg')
+            trang_thai='da_xac_thuc', face_encoding='audit-vector',
+            anh_dai_dien='audit.jpg', dong_y_du_lieu_khuon_mat=True)
 
     def test_old_permission_does_not_inherit_new_contract(self):
         old_contract = self.contract('da_het_han', start=self.today-timedelta(days=200), end=self.today-timedelta(days=100))

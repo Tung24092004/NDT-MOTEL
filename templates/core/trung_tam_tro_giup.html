@@ -1,0 +1,110 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Trung tâm trợ giúp - NDT MOTEL{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
+<link rel="stylesheet" href="{% static 'css/trung_tam_tro_giup.css' %}?v=help-center-v1">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/public_discovery_support_post_p6.css' %}?v=post-p6-public-1">
+{% endblock %}
+
+{% block content %}
+<main class="help-center ndt-foundation ndt-f5 ndt-public-discovery ndt-public-help" data-public-context="help-center" aria-labelledby="helpTitle">
+    <section class="help-hero">
+        <div class="help-hero__content">
+            <p class="help-kicker">NDT MOTEL SUPPORT</p>
+            <h1 id="helpTitle">Trung tâm trợ giúp</h1>
+            <p>Tìm nhanh hướng dẫn về đặt phòng, tiền cọc, hợp đồng, hóa đơn, sửa chữa và Smart Room mà không cần truy cập dữ liệu nghiệp vụ riêng tư.</p>
+            <label class="help-search" for="helpSearch">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path></svg>
+                <span class="ndt-f5-sr-only">Tìm trong Trung tâm trợ giúp</span>
+                <input id="helpSearch" type="search" placeholder="Tìm đặt phòng, tiền cọc, hợp đồng, hóa đơn..." autocomplete="off">
+                <button id="helpClearSearch" type="button" aria-label="Xóa tìm kiếm" hidden>×</button>
+            </label>
+            <p id="helpSearchStatus" class="help-search-status" role="status" aria-live="polite"></p>
+        </div>
+    </section>
+
+    <div class="help-center__inner">
+        <nav class="help-breadcrumb" aria-label="Đường dẫn">
+            <a href="{% url 'home' %}">Trang chủ</a><span aria-hidden="true">/</span><span>Trung tâm trợ giúp</span>
+        </nav>
+
+        <section class="help-section" aria-labelledby="quickTitle">
+            <div class="help-section__head">
+                <div><p class="help-kicker">LIÊN KẾT NHANH</p><h2 id="quickTitle">Chọn đúng nội dung bạn cần</h2></div>
+                <a class="help-text-link" href="{% url 'huong_dan_thue_phong' %}">Xem hành trình thuê phòng <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="help-topic-grid">
+                <a class="help-topic" href="{% url 'danh_sach_phong' %}" data-help-search="tìm phòng chọn phòng gia thuê tiện ích tình trạng phòng">
+                    <span class="help-topic__icon"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 20V8l7-4 7 4v12M9 12h2M9 16h2M15 12h1M15 16h1"></path></svg></span>
+                    <span><strong>Tìm và chọn phòng</strong><small>Xem giá thuê, tiện ích và tình trạng phòng công khai.</small></span><b aria-hidden="true">→</b>
+                </a>
+                <a class="help-topic" href="{% url 'huong_dan_thue_phong' %}" data-help-search="đặt phòng tiền cọc thanh toán cọc">
+                    <span class="help-topic__icon"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"></path></svg></span>
+                    <span><strong>Đặt phòng và tiền cọc</strong><small>Theo dõi từ lúc gửi yêu cầu đến khi tiền cọc được xác nhận.</small></span><b aria-hidden="true">→</b>
+                </a>
+                <a class="help-topic" href="#faq" data-help-search="hợp đồng gia hạn thời hạn hiệu lực">
+                    <span class="help-topic__icon"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6zM14 3v4h4M9 11h6M9 15h6"></path></svg></span>
+                    <span><strong>Hợp đồng và gia hạn</strong><small>Hiểu trạng thái hợp đồng, thời hạn và yêu cầu gia hạn.</small></span><b aria-hidden="true">→</b>
+                </a>
+                <a class="help-topic" href="#faq" data-help-search="hóa đơn thanh toán chuyển khoản xác nhận">
+                    <span class="help-topic__icon"><svg viewBox="0 0 24 24"><path d="M5 3h14v18l-3-2-4 2-4-2-3 2zM8 8h8M8 12h8"></path></svg></span>
+                    <span><strong>Hóa đơn và thanh toán</strong><small>Xem hóa đơn, hạn thanh toán và quy trình xác nhận.</small></span><b aria-hidden="true">→</b>
+                </a>
+                <a class="help-topic" href="#faq" data-help-search="sửa chữa sự cố yêu cầu hỗ trợ lưu trú">
+                    <span class="help-topic__icon"><svg viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0-5 5L4 17l3 3 5.5-5.5a4 4 0 0 0 5-5L15 12l-3-3z"></path></svg></span>
+                    <span><strong>Sửa chữa</strong><small>Gửi yêu cầu và theo dõi quá trình xử lý sự cố.</small></span><b aria-hidden="true">→</b>
+                </a>
+                <a class="help-topic" href="#faq" data-help-search="smart room face id khuôn mặt quyền ra vào lịch sử">
+                    <span class="help-topic__icon"><svg viewBox="0 0 24 24"><path d="M5 10a7 7 0 0 1 14 0v6a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3zM9 14h.01M15 14h.01M9 6 7 4M15 6l2-2"></path></svg></span>
+                    <span><strong>Smart Room và Face ID</strong><small>Điều kiện đăng ký và phạm vi sử dụng quyền ra vào.</small></span><b aria-hidden="true">→</b>
+                </a>
+            </div>
+        </section>
+
+        <section class="help-process" aria-labelledby="processTitle">
+            <div class="help-section__head"><div><p class="help-kicker">QUY TRÌNH</p><h2 id="processTitle">Một hành trình, bốn chặng rõ ràng</h2></div></div>
+            <ol>
+                <li><span>01</span><div><strong>Chuẩn bị</strong><p>Tạo tài khoản và hoàn thiện thông tin cần thiết.</p></div></li>
+                <li><span>02</span><div><strong>Đặt phòng</strong><p>Chọn phòng, gửi yêu cầu và thực hiện tiền cọc.</p></div></li>
+                <li><span>03</span><div><strong>Ký kết</strong><p>Chờ xác nhận, theo dõi hợp đồng và ngày hiệu lực.</p></div></li>
+                <li><span>04</span><div><strong>Lưu trú</strong><p>Sử dụng hóa đơn, sửa chữa và Smart Room đúng quyền.</p></div></li>
+            </ol>
+            <a class="ndt-button ndt-button--primary" href="{% url 'huong_dan_thue_phong' %}">Xem hướng dẫn từng bước</a>
+        </section>
+
+        <section id="faq" class="help-section" aria-labelledby="faqTitle">
+            <div class="help-section__head"><div><p class="help-kicker">FAQ</p><h2 id="faqTitle">Câu hỏi thường gặp</h2></div></div>
+            <div id="helpFaq" class="help-faq">
+                <details id="help-room" data-help-search="xem phòng tìm phòng chưa đăng nhập"><summary>Tôi có thể xem phòng khi chưa đăng nhập không?<span></span></summary><p>Có. Danh sách và thông tin phòng công khai có thể xem trước khi đăng nhập. Bạn cần tài khoản khi thực hiện yêu cầu đặt phòng.</p></details>
+                <details id="help-booking" data-help-search="tiền cọc thanh toán báo đã thanh toán"><summary>Báo đã thanh toán tiền cọc có đồng nghĩa đã được xác nhận không?<span></span></summary><p>Không. Thao tác báo thanh toán chuyển yêu cầu sang trạng thái chờ xác nhận. Quản trị viên phải kiểm tra và xác nhận trước khi quy trình tiếp tục.</p></details>
+                <details id="help-contract" data-help-search="hợp đồng tạo khi nào hiệu lực gia hạn"><summary>Khi nào hợp đồng được tạo?<span></span></summary><p>Hợp đồng được tạo theo quy trình xử lý yêu cầu đặt phòng sau khi khoản cọc đủ điều kiện và được quản trị viên xác nhận.</p></details>
+                <details id="help-invoice" data-help-search="hóa đơn thanh toán xác nhận"><summary>Thanh toán hóa đơn được ghi nhận như thế nào?<span></span></summary><p>Sau khi bạn báo đã thanh toán, hóa đơn chuyển sang chờ xác nhận. Trạng thái hoàn tất chỉ được cập nhật sau bước xác nhận của quản trị viên.</p></details>
+                <details id="help-repair" data-help-search="sửa chữa sự cố yêu cầu"><summary>Tôi gửi yêu cầu sửa chữa ở đâu?<span></span></summary><p>Sau khi đăng nhập, mở khu vực hỗ trợ của người thuê và chọn Yêu cầu sửa chữa để tạo và theo dõi yêu cầu.</p></details>
+                <details id="help-smart" data-help-search="face id đăng ký smart room quyền ra vào"><summary>Khi nào tôi có thể đăng ký Face ID?<span></span></summary><p>Chức năng chỉ khả dụng khi tài khoản và điều kiện lưu trú đáp ứng quy định của hệ thống. Face ID không tự động tạo quyền ra vào; quyền vẫn phải được cấp theo nghiệp vụ.</p></details>
+            </div>
+            <div id="helpEmpty" class="help-empty" hidden>
+                Không tìm thấy nội dung phù hợp.
+                <button id="helpEmptyClear" type="button">Xóa tìm kiếm</button>
+            </div>
+        </section>
+
+        <section class="help-contact" aria-labelledby="contactTitle">
+            <div><p class="help-kicker">LIÊN HỆ</p><h2 id="contactTitle">Vẫn cần người hỗ trợ?</h2><p>Liên hệ quản lý NDT MOTEL khi câu hỏi liên quan trực tiếp đến yêu cầu, hợp đồng hoặc khoản thanh toán của bạn.</p></div>
+            <div class="help-contact__details">
+                {% if lien_he_ho_tro.so_dien_thoai %}<a href="tel:{{ lien_he_ho_tro.so_dien_thoai }}"><span>Điện thoại</span><strong>{{ lien_he_ho_tro.so_dien_thoai }}</strong></a>{% endif %}
+                {% if lien_he_ho_tro.email %}<a href="mailto:{{ lien_he_ho_tro.email }}"><span>Email</span><strong>{{ lien_he_ho_tro.email }}</strong></a>{% endif %}
+                {% if lien_he_ho_tro.thoi_gian %}<div><span>Thời gian hỗ trợ</span><strong>{{ lien_he_ho_tro.thoi_gian }}</strong></div>{% endif %}
+                {% if not lien_he_ho_tro.so_dien_thoai and not lien_he_ho_tro.email %}<a class="ndt-button ndt-button--secondary" href="{% url 'home' %}#contact">Xem thông tin liên hệ</a>{% endif %}
+            </div>
+        </section>
+    </div>
+</main>
+<script src="{% static 'js/trung_tam_tro_giup.js' %}?v=help-center-v1" defer></script>
+{% endblock %}

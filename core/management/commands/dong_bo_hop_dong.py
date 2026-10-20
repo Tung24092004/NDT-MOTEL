@@ -1,4 +1,4 @@
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
@@ -252,6 +252,11 @@ class Command(BaseCommand):
                 self.style.SUCCESS(
                     "Đồng bộ hợp đồng hoàn tất."
                 )
+            )
+
+        if tong_loi:
+            raise CommandError(
+                f"Đồng bộ hợp đồng hoàn tất với {tong_loi} lỗi; xem stderr để biết chi tiết."
             )
 
     def _xac_dinh_trang_thai_du_kien(

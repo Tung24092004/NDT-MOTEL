@@ -1,0 +1,18 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Rà soát thanh toán cũ</h1>
+<dl>
+  <dt>Hóa đơn</dt><dd>{{ invoice.pk }}</dd>
+  <dt>Trạng thái</dt><dd>{{ invoice.trang_thai }}</dd>
+  <dt>Số tiền</dt><dd>{{ invoice.tong_tien }}</dd>
+  <dt>Ngày thanh toán đã lưu</dt><dd>{% if invoice.ngay_thanh_toan %}{{ invoice.ngay_thanh_toan|date:"Y-m-d" }}{% else %}Không có / UNKNOWN{% endif %}</dd>
+  <dt>Phương thức thanh toán đã lưu</dt><dd>{{ legacy_facts.payment_method }}</dd>
+  <dt>Tham chiếu giao dịch đã lưu</dt><dd>{{ legacy_facts.transaction_reference }}</dd>
+  <dt>Người xác nhận đã lưu</dt><dd>{{ legacy_facts.confirmer }}</dd>
+  <dt>Lịch sử thanh toán khớp</dt><dd>{% if legacy_facts.payment_history_exists %}Có{% else %}Không có / UNKNOWN{% endif %}</dd>
+  <dt>Provenance chuẩn còn thiếu</dt><dd>{% if legacy_facts.missing_provenance %}{{ legacy_facts.missing_provenance|join:", " }}{% else %}Không có{% endif %}</dd>
+</dl>
+<p><strong>Rà soát này chỉ ghi nhận tình trạng dữ liệu lịch sử hiện có. Thao tác không xác nhận đã nhận tiền và không tạo lịch sử thanh toán.</strong></p>
+<p><code>partial_evidence</code>: một số dữ liệu thanh toán lịch sử đang tồn tại nhưng provenance chuẩn chưa đầy đủ; <code>no_evidence</code>: không có dữ liệu lịch sử có ý nghĩa ngoài trạng thái đã thanh toán.</p>
+<form method="post">{% csrf_token %}{{ form.as_p }}<input type="submit" value="Ghi nhận rà soát dữ liệu thanh toán cũ"></form>
+{% endblock %}

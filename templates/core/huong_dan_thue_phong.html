@@ -1,0 +1,71 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Hướng dẫn thuê phòng - NDT MOTEL{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
+<link rel="stylesheet" href="{% static 'css/huong_dan_thue_phong.css' %}?v=guide-v2">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/public_discovery_support_post_p6.css' %}?v=post-p6-public-1">
+{% endblock %}
+
+{% block content %}
+<main class="rental-guide ndt-foundation ndt-f5 ndt-public-discovery ndt-public-guide" data-public-context="rental-guide" aria-labelledby="rentalGuideTitle">
+    <div class="rental-guide__inner">
+        <section class="rental-guide__intro">
+            <div>
+                <p class="rental-guide__eyebrow">NDT MOTEL</p>
+                <h1 id="rentalGuideTitle">Hướng dẫn thuê phòng</h1>
+                <p>Đi theo từng bước từ lúc xem phòng, đăng ký tài khoản, đặt phòng, thanh toán tiền cọc đến khi hợp đồng có hiệu lực và bắt đầu lưu trú.</p>
+            </div>
+            <div class="rental-guide__actions">
+                <a class="ndt-button ndt-button--primary" href="{% url 'danh_sach_phong' %}">Xem phòng</a>
+                <a class="ndt-button ndt-button--secondary ndt-auth-open" href="{% url 'dang_ky' %}" data-auth-mode="register">Đăng ký</a>
+                <a class="ndt-button ndt-button--secondary ndt-auth-open" href="{% url 'dang_nhap' %}" data-auth-mode="login">Đăng nhập</a>
+            </div>
+        </section>
+
+        <ol class="rental-guide__steps">
+            <li>
+                <span>01</span>
+                <div>
+                    <h2>Xem phòng</h2>
+                    <p>Mở danh sách phòng công khai để xem giá thuê, sức chứa, tiện ích và tình trạng phòng đang có.</p>
+                </div>
+            </li>
+            <li>
+                <span>02</span>
+                <div>
+                    <h2>Đăng ký và đăng nhập</h2>
+                    <p>Tạo tài khoản NDT MOTEL, cập nhật thông tin cá nhân cần thiết và đăng nhập trước khi gửi yêu cầu đặt phòng.</p>
+                </div>
+            </li>
+            <li>
+                <span>03</span>
+                <div>
+                    <h2>Đặt phòng</h2>
+                    <p>Chọn phòng phù hợp, đồng ý điều khoản đặt phòng và theo dõi trạng thái xử lý trong khu vực tài khoản.</p>
+                </div>
+            </li>
+            <li>
+                <span>04</span>
+                <div>
+                    <h2>Thanh toán tiền cọc</h2>
+                    <p>Khi yêu cầu được tiếp nhận, thực hiện thanh toán tiền cọc theo hướng dẫn và báo đã thanh toán để quản trị viên xác nhận.</p>
+                </div>
+            </li>
+            <li>
+                <span>05</span>
+                <div>
+                    <h2>Hợp đồng và lưu trú</h2>
+                    <p>Sau khi tiền cọc được xác nhận, hợp đồng được lập theo quy trình. Người thuê có thể xem hóa đơn, gửi yêu cầu sửa chữa và sử dụng Smart Room theo quyền được cấp.</p>
+                </div>
+            </li>
+        </ol>
+    </div>
+</main>
+{% endblock %}

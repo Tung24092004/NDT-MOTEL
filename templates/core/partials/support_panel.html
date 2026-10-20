@@ -1,0 +1,33 @@
+<div id="ndtSupport" class="ndt-support">
+    <noscript><a class="ndt-support-fallback" href="{% url 'trung_tam_tro_giup' %}">Trung tâm trợ giúp</a></noscript>
+    <button id="ndtSupportToggle" class="ndt-support-toggle" type="button" aria-label="Cần hỗ trợ?" aria-expanded="false" aria-controls="ndtSupportPanel" hidden>
+        <span class="ndt-support-icon" aria-hidden="true">?</span><span>Cần hỗ trợ?</span>
+    </button>
+    <section id="ndtSupportPanel" class="ndt-support-panel" role="dialog" aria-modal="false" aria-labelledby="ndtSupportTitle" hidden>
+        <header class="ndt-support-head">
+            <div><h2 id="ndtSupportTitle">Bạn cần hỗ trợ gì?</h2><p>Chọn chủ đề để xem hướng dẫn hoặc liên hệ quản lý.</p></div>
+            <button id="ndtSupportClose" type="button" aria-label="Đóng hỗ trợ" title="Đóng hỗ trợ">&times;</button>
+        </header>
+        <nav class="ndt-support-topics" aria-label="Chủ đề hỗ trợ">
+            {% if request.user.is_authenticated and not request.user.is_staff and not request.user.is_superuser %}
+            <a href="{% url 'trung_tam_tro_giup' %}#help-contract">Hợp đồng và gia hạn<span aria-hidden="true">&rsaquo;</span></a>
+            <a href="{% url 'trung_tam_tro_giup' %}#help-invoice">Hóa đơn và thanh toán<span aria-hidden="true">&rsaquo;</span></a>
+            <a href="{% url 'trung_tam_tro_giup' %}#help-repair">Gửi yêu cầu sửa chữa<span aria-hidden="true">&rsaquo;</span></a>
+            <a href="{% url 'trung_tam_tro_giup' %}#help-smart">Smart Room và Face ID<span aria-hidden="true">&rsaquo;</span></a>
+            {% endif %}
+            <a href="{% url 'trung_tam_tro_giup' %}#help-room">Tìm và chọn phòng<span aria-hidden="true">&rsaquo;</span></a>
+            <a href="{% url 'trung_tam_tro_giup' %}#help-booking">Đặt phòng và tiền cọc<span aria-hidden="true">&rsaquo;</span></a>
+            {% if not request.user.is_authenticated or request.user.is_staff or request.user.is_superuser %}
+            <a href="{% url 'trung_tam_tro_giup' %}#help-contract">Hợp đồng và gia hạn<span aria-hidden="true">&rsaquo;</span></a>
+            <a href="{% url 'trung_tam_tro_giup' %}#help-invoice">Hóa đơn và thanh toán<span aria-hidden="true">&rsaquo;</span></a>
+            <a href="{% url 'trung_tam_tro_giup' %}#help-repair">Gửi yêu cầu sửa chữa<span aria-hidden="true">&rsaquo;</span></a>
+            <a href="{% url 'trung_tam_tro_giup' %}#help-smart">Smart Room và Face ID<span aria-hidden="true">&rsaquo;</span></a>
+            {% endif %}
+        </nav>
+        <div class="ndt-support-actions">
+            <a class="ndt-support-primary" href="{% url 'trung_tam_tro_giup' %}">Mở Trung tâm trợ giúp</a>
+            <a href="{% url 'huong_dan_thue_phong' %}">Xem hướng dẫn thuê phòng</a>
+            <a href="{% url 'home' %}#contact">Liên hệ quản lý</a>
+        </div>
+    </section>
+</div>

@@ -3,7 +3,7 @@ from decimal import Decimal, InvalidOperation
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.db.models import Q, Count, Exists, OuterRef
-from django.utils import timezone
+from django.core.exceptions import ValidationError
 from core.tien_ich import ghi_nhat_ky
 from core.models import (
     CoSo,
@@ -31,6 +31,7 @@ from core.models import (
     NhatKyThaoTac,
 )
 from core.dich_vu.phan_quyen import la_admin
+from core.dich_vu.sua_chua import create_repair_request, transition_repair_request
 from core.views_tai_khoan import _lay_nguoi_thue_dang_dang_nhap
 
 
@@ -284,38 +285,19 @@ def xu_ly_sua_chua(request, id):
         ),
     }
 
-    now = timezone.now()
-
     # =========================================================
     # CẬP NHẬT YÊU CẦU SỬA CHỮA
     # =========================================================
 
-    yeu_cau.trang_thai = trang_thai
-    yeu_cau.nguoi_xu_ly = nguoi_xu_ly
-    yeu_cau.chi_phi = chi_phi
-    yeu_cau.chi_tiet_chi_phi = chi_tiet_chi_phi
-    yeu_cau.ghi_chu_admin = ghi_chu_admin
-
-    if trang_thai == "dang_xu_ly":
-        if not yeu_cau.ngay_bat_dau_xu_ly:
-            yeu_cau.ngay_bat_dau_xu_ly = now
-
-    else:
-        if trang_thai == "moi":
-            yeu_cau.ngay_bat_dau_xu_ly = None
-            yeu_cau.nguoi_xu_ly = ""
-
-    if trang_thai == "hoan_thanh":
-        if not yeu_cau.ngay_bat_dau_xu_ly:
-            yeu_cau.ngay_bat_dau_xu_ly = now
-
-        if not yeu_cau.ngay_hoan_thanh:
-            yeu_cau.ngay_hoan_thanh = now
-
-    else:
-        yeu_cau.ngay_hoan_thanh = None
-
-    yeu_cau.save()
+    try:
+        yeu_cau = transition_repair_request(
+            actor=request.user, repair_id=yeu_cau.pk, target_status=trang_thai,
+            handler=nguoi_xu_ly, cost=chi_phi, cost_detail=chi_tiet_chi_phi,
+            admin_note=ghi_chu_admin,
+        )
+    except ValidationError as error:
+        messages.error(request, str(error))
+        return redirect("chi_tiet_sua_chua", id=yeu_cau.id)
 
     # =========================================================
     # DỮ LIỆU MỚI SAU KHI CẬP NHẬT
@@ -510,22 +492,17 @@ def tao_sua_chua(request):
                             ""
                         ).strip()
 
-                        yeu_cau_moi = YeuCauSuaChua.objects.create(
-                            nguoi_thue=nguoi_thue,
-                            phong=phong,
-                            tieu_de=tieu_de,
-                            noi_dung=noi_dung,
-                            loai_su_co=loai_su_co,
-                            muc_do=muc_do,
-                            hinh_anh=request.FILES.get(
-                                "hinh_anh"
-                            ),
-                            trang_thai="moi",
-                            nguoi_xu_ly="",
-                            chi_phi=chi_phi,
-                            chi_tiet_chi_phi=chi_tiet_chi_phi,
-                            ghi_chu_admin=ghi_chu_admin,
-                        )
+                        try:
+                            yeu_cau_moi = create_repair_request(
+                                actor=request.user, tenant_id=nguoi_thue.pk, room_id=phong.pk,
+                                title=tieu_de, content=noi_dung, issue_type=loai_su_co,
+                                priority=muc_do, image=request.FILES.get("hinh_anh"),
+                                cost=chi_phi, cost_detail=chi_tiet_chi_phi,
+                                admin_note=ghi_chu_admin,
+                            )
+                        except ValidationError as error:
+                            messages.error(request, str(error))
+                            return redirect("tao_sua_chua")
 
                         ghi_nhat_ky(
                             request=request,
@@ -731,22 +708,21 @@ def tao_yeu_cau_sua_chua(request):
                 )
 
             else:
-                YeuCauSuaChua.objects.create(
-                    nguoi_thue=nguoi_thue,
-                    phong=phong,
-                    tieu_de=tieu_de,
-                    noi_dung=noi_dung,
-                    loai_su_co=loai_su_co,
-                    muc_do=muc_do,
-                    hinh_anh=request.FILES.get(
-                        "hinh_anh"
-                    ),
-                    trang_thai="moi",
-                    nguoi_xu_ly="",
-                    chi_phi=Decimal("0"),
-                    chi_tiet_chi_phi="",
-                    ghi_chu_admin="",
-                )
+                try:
+                    create_repair_request(
+                        actor=request.user, tenant_id=nguoi_thue.pk, room_id=phong.pk,
+                        title=tieu_de, content=noi_dung, issue_type=loai_su_co,
+                        priority=muc_do, image=request.FILES.get("hinh_anh"),
+                    )
+                except ValidationError as error:
+                    repair_errors["phong"] = str(error)
+                    messages.error(request, str(error))
+                    return render(
+                        request, "core/tao_yeu_cau_sua_chua.html",
+                        {"phongs": phongs, "loai_su_co": YeuCauSuaChua.LOAI_SU_CO,
+                         "muc_do": YeuCauSuaChua.MUC_DO, "repair_errors": repair_errors,
+                         "submitted": submitted},
+                    )
 
                 messages.success(
                     request,

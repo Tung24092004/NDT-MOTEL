@@ -2,488 +2,27 @@
 from decimal import Decimal, InvalidOperation
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from django.db.models import Q, Count, Exists, OuterRef
+from django.db.models import Q
 from django.db import transaction
-from django.core.paginator import Paginator
+from django.utils import timezone
 from core.tien_ich import ghi_nhat_ky
 from core.models import (
     CoSo,
     Phong,
     HinhAnhPhong,
-    NguoiThue,
     DatPhong,
     HopDong,
-    LichSuHopDong,
-    YeuCauGiaHanHopDong,
-    HoaDon,
-    YeuCauSuaChua,
-    ChinhSachHoTro,
-    ThongBao,
-    YeuCauGhepNguoi,
-    LichSuThanhToan,
 
     # Smart Room — Phase 1
-    NguoiOCungPhong,
     FaceProfile,
     QuyenRaVao,
-    LichSuRaVao,
 
     # Nhật ký thao tác
-    NhatKyThaoTac,
 )
 from core.dich_vu.phan_quyen import la_admin
-from core.dich_vu.dieu_kien_o_ghep import dieu_kien_o_ghep
-from core.dich_vu.gallery_phong import chuan_bi_gallery_hien_thi
-
-
-def danh_sach_phong(request):
-
-    # =====================================================
-    # LẤY TẤT CẢ PHÒNG
-    # =====================================================
-
-    phong = (
-        Phong.objects
-        .select_related("co_so")
-        .prefetch_related("hinh_anh")
-        .order_by(
-            "co_so__quan",
-            "co_so__ten_co_so",
-            "so_phong",
-        )
-    )
-
-    # =====================================================
-    # TỪ KHÓA TÌM KIẾM
-    # =====================================================
-
-    tu_khoa = request.GET.get(
-        "q",
-        "",
-    ).strip()
-
-    if tu_khoa:
-
-        phong = phong.filter(
-            Q(
-                so_phong__icontains=tu_khoa
-            )
-            |
-            Q(
-                co_so__ten_co_so__icontains=tu_khoa
-            )
-            |
-            Q(
-                co_so__quan__icontains=tu_khoa
-            )
-            |
-            Q(
-                co_so__dia_chi__icontains=tu_khoa
-            )
-        )
-
-    # =====================================================
-    # LỌC GIÁ THUÊ TỐI ĐA
-    # =====================================================
-
-    gia_max = request.GET.get(
-        "gia_max",
-        "",
-    ).strip()
-
-    if gia_max:
-
-        try:
-
-            gia_max_value = Decimal(
-                gia_max
-            )
-
-            if gia_max_value >= 0:
-
-                phong = phong.filter(
-                    gia_thue__lte=gia_max_value
-                )
-
-        except (
-            InvalidOperation,
-            ValueError,
-            TypeError,
-        ):
-            pass
-
-    # Phan trang sau khi loc, truoc khi bo sung du lieu hien thi tung phong.
-    # Cach nay tranh evaluate toan bo queryset tren moi request.
-    paginator = Paginator(phong, 12)
-    page_obj = paginator.get_page(request.GET.get("page"))
-    phong = page_obj.object_list
-    chuan_bi_gallery_hien_thi(phong)
-
-    query_params = request.GET.copy()
-    query_params.pop("page", None)
-    pagination_query = query_params.urlencode()
-
-    # =====================================================
-    # BỔ SUNG DỮ LIỆU PUBLIC CHO TỪNG PHÒNG
-    # =====================================================
-
-    for item in phong:
-
-        # -------------------------------------------------
-        # HỢP ĐỒNG HIỆN TẠI
-        # -------------------------------------------------
-
-        hop_dong_hien_tai = (
-            HopDong.objects
-            .filter(
-                dat_phong__phong=item,
-                trang_thai__in=[
-                    "dang_hieu_luc",
-                    "sap_het_han",
-                ],
-            )
-            .select_related(
-                "dat_phong",
-                "dat_phong__nguoi_thue",
-            )
-            .order_by("-id")
-            .first()
-        )
-
-        # -------------------------------------------------
-        # SỨC CHỨA
-        #
-        # 0 / None = chưa cấu hình.
-        # Không tự biến thành 1 người.
-        # -------------------------------------------------
-
-        suc_chua = (
-            item.so_nguoi_toi_da
-            if item.so_nguoi_toi_da
-            else 0
-        )
-
-        suc_chua_da_cau_hinh = (
-            suc_chua > 0
-        )
-
-        # -------------------------------------------------
-        # SỐ NGƯỜI ĐANG Ở
-        # -------------------------------------------------
-
-        if hop_dong_hien_tai:
-
-            so_nguoi_hien_tai = (
-                item.so_nguoi_dang_o
-            )
-
-        else:
-
-            so_nguoi_hien_tai = 0
-
-        # Phòng mới được đặt nhưng chưa có hợp đồng
-        # chưa được tính là đang có người ở.
-        if (
-            item.trang_thai == "da_dat"
-            and not hop_dong_hien_tai
-        ):
-
-            so_nguoi_hien_tai = 0
-
-        # -------------------------------------------------
-        # CHỖ CÒN LẠI + % SỬ DỤNG
-        # -------------------------------------------------
-
-        if suc_chua_da_cau_hinh:
-
-            cho_con_lai = max(
-                suc_chua - so_nguoi_hien_tai,
-                0,
-            )
-
-            ty_le_su_dung = round(
-                (
-                    so_nguoi_hien_tai
-                    / suc_chua
-                )
-                * 100
-            )
-
-            ty_le_su_dung = min(
-                ty_le_su_dung,
-                100,
-            )
-
-        else:
-
-            cho_con_lai = 0
-            ty_le_su_dung = 0
-
-        # -------------------------------------------------
-        # Ở GHÉP
-        # -------------------------------------------------
-
-        cho_phep_ghep_hien_tai = bool(
-            hop_dong_hien_tai
-            and suc_chua_da_cau_hinh
-            and hop_dong_hien_tai.cho_phep_ghep
-            and cho_con_lai > 0
-        )
-
-        # -------------------------------------------------
-        # GẮN DỮ LIỆU CHO TEMPLATE
-        # -------------------------------------------------
-
-        item.hop_dong_hien_tai = (
-            hop_dong_hien_tai
-        )
-
-        item.suc_chua_hien_thi = (
-            suc_chua
-        )
-
-        item.suc_chua_da_cau_hinh = (
-            suc_chua_da_cau_hinh
-        )
-
-        item.so_nguoi_hien_tai = (
-            so_nguoi_hien_tai
-        )
-
-        item.cho_con_lai = (
-            cho_con_lai
-        )
-
-        item.phan_tram_su_dung = (
-            ty_le_su_dung
-        )
-
-        item.cho_phep_ghep_hien_tai = (
-            cho_phep_ghep_hien_tai
-        )
-
-        item.trang_thai_hien_thi = (
-            item.get_trang_thai_display()
-        )
-
-    # =====================================================
-    # RENDER
-    # =====================================================
-
-    return render(
-        request,
-        "core/danh_sach_phong.html",
-        {
-            "phong": phong,
-            "page_obj": page_obj,
-            "tong_phong": paginator.count,
-            "pagination_query": pagination_query,
-            "tu_khoa": tu_khoa,
-            "gia_max": gia_max,
-        },
-    )
-
-
-def chi_tiet_phong(request, id):
-
-    phong = get_object_or_404(
-        Phong.objects.select_related("co_so").prefetch_related("hinh_anh"),
-        id=id,
-    )
-    chuan_bi_gallery_hien_thi([phong])
-    dieu_kien = dieu_kien_o_ghep(phong)
-
-    # -----------------------------------------------------
-    # HỢP ĐỒNG ĐANG HOẠT ĐỘNG
-    # -----------------------------------------------------
-
-    hop_dong_hien_tai = dieu_kien["hop_dong"]
-
-    # -----------------------------------------------------
-    # NGƯỜI THUÊ ĐANG ĐĂNG NHẬP
-    # -----------------------------------------------------
-
-    nguoi_thue_hien_tai = None
-
-    if request.user.is_authenticated:
-
-        nguoi_thue_hien_tai = (
-            NguoiThue.objects
-            .filter(
-                tai_khoan=request.user,
-                dang_hoat_dong=True,
-            )
-            .first()
-        )
-
-    # -----------------------------------------------------
-    # SỨC CHỨA
-    #
-    # 0 / None = chưa cấu hình.
-    # Không tự chuyển thành 1 người.
-    # -----------------------------------------------------
-
-    suc_chua = (
-        phong.so_nguoi_toi_da
-        if phong.so_nguoi_toi_da
-        else 0
-    )
-
-    suc_chua_da_cau_hinh = (
-        suc_chua > 0
-    )
-
-    # -----------------------------------------------------
-    # SỐ NGƯỜI ĐANG Ở
-    # -----------------------------------------------------
-
-    if hop_dong_hien_tai:
-
-        so_nguoi_hien_tai = (
-            dieu_kien["so_nguoi_hien_tai"]
-        )
-
-    else:
-
-        so_nguoi_hien_tai = 0
-
-    # -----------------------------------------------------
-    # CHỖ CÒN LẠI + % SỬ DỤNG
-    # -----------------------------------------------------
-
-    if suc_chua_da_cau_hinh:
-
-        cho_con_lai = max(
-            suc_chua - so_nguoi_hien_tai,
-            0,
-        )
-
-        ty_le_su_dung = round(
-            (
-                so_nguoi_hien_tai
-                / suc_chua
-            )
-            * 100
-        )
-
-        ty_le_su_dung = min(
-            max(
-                ty_le_su_dung,
-                0,
-            ),
-            100,
-        )
-
-    else:
-
-        cho_con_lai = 0
-        ty_le_su_dung = 0
-
-    # -----------------------------------------------------
-    # KIỂM TRA CHỦ HỢP ĐỒNG
-    # -----------------------------------------------------
-
-    la_chu_phong = False
-
-    if (
-        hop_dong_hien_tai
-        and nguoi_thue_hien_tai
-        and
-        hop_dong_hien_tai.dat_phong.nguoi_thue_id
-        == nguoi_thue_hien_tai.id
-    ):
-        la_chu_phong = True
-
-    # -----------------------------------------------------
-    # YÊU CẦU GHÉP ĐANG CHỜ
-    # -----------------------------------------------------
-
-    yeu_cau_ghep_dang_cho = None
-
-    if (
-        hop_dong_hien_tai
-        and nguoi_thue_hien_tai
-        and not la_chu_phong
-    ):
-
-        yeu_cau_ghep_dang_cho = (
-            YeuCauGhepNguoi.objects
-            .filter(
-                hop_dong=hop_dong_hien_tai,
-                nguoi_dang_ky=nguoi_thue_hien_tai,
-                trang_thai="cho_duyet",
-            )
-            .first()
-        )
-
-    # -----------------------------------------------------
-    # CÓ THỂ ĐĂNG KÝ Ở GHÉP
-    # -----------------------------------------------------
-
-    co_the_dang_ky_ghep = bool(
-        dieu_kien["phong_co_the_ghep"]
-        and suc_chua_da_cau_hinh
-        and hop_dong_hien_tai.cho_phep_ghep
-        and cho_con_lai > 0
-        and nguoi_thue_hien_tai
-        and not la_chu_phong
-        and not yeu_cau_ghep_dang_cho
-        and not la_admin(request)
-    )
-
-    # -----------------------------------------------------
-    # RENDER
-    # -----------------------------------------------------
-
-    return render(
-        request,
-        "core/chi_tiet_phong.html",
-        {
-            **{key: value for key, value in dieu_kien.items() if key != "hop_dong"},
-            "an_menu_ghep_phong": not dieu_kien["phong_co_the_ghep"],
-            "phong": phong,
-            "hinh_anh_phong": phong.gallery_hien_thi,
-            "anh_dai_dien": phong.anh_dai_dien_hien_thi,
-
-            "hop_dong_hien_tai": (
-                hop_dong_hien_tai
-            ),
-
-            "suc_chua": suc_chua,
-
-            "suc_chua_da_cau_hinh": (
-                suc_chua_da_cau_hinh
-            ),
-
-            "so_nguoi_hien_tai": (
-                so_nguoi_hien_tai
-            ),
-
-            "cho_con_lai": (
-                cho_con_lai
-            ),
-
-            "ty_le_su_dung": (
-                ty_le_su_dung
-            ),
-
-            "nguoi_thue_hien_tai": (
-                nguoi_thue_hien_tai
-            ),
-
-            "la_chu_phong": (
-                la_chu_phong
-            ),
-
-            "yeu_cau_ghep_dang_cho": (
-                yeu_cau_ghep_dang_cho
-            ),
-
-            "co_the_dang_ky_ghep": (
-                co_the_dang_ky_ghep
-            ),
-        },
-    )
+from core.dich_vu.luu_tru import cap_nhat_trang_thai_luu_tru
+from core.dich_vu.trang_thai_phong import transition_room_maintenance
+from django.core.exceptions import ValidationError
 
 
 def quan_ly_phong(request):
@@ -1289,6 +828,61 @@ def sua_phong(request, id):
         .order_by("ten_co_so")
     )
 
+    def lay_thong_tin_luu_tru():
+        hom_nay = timezone.localdate()
+        hop_dong = (
+            HopDong.objects
+            .filter(
+                dat_phong__phong=phong,
+                dat_phong__trang_thai="da_duyet",
+                ngay_bat_dau__lte=hom_nay,
+                ngay_ket_thuc__gte=hom_nay,
+                trang_thai__in=[
+                    "dang_hieu_luc",
+                    "sap_het_han",
+                ],
+            )
+            .select_related(
+                "dat_phong",
+                "dat_phong__nguoi_thue",
+                "dat_phong__phong",
+            )
+            .order_by("-ngay_bat_dau", "-id")
+            .first()
+        )
+
+        nguoi_thue = None
+        face_profile = None
+        quyen_ra_vao = None
+
+        if hop_dong:
+            nguoi_thue = hop_dong.dat_phong.nguoi_thue
+
+            face_profile = (
+                FaceProfile.objects
+                .filter(nguoi_thue=nguoi_thue)
+                .first()
+            )
+
+            quyen_ra_vao = (
+                QuyenRaVao.objects
+                .filter(
+                    hop_dong=hop_dong,
+                    phong=phong,
+                    nguoi_thue=nguoi_thue,
+                    nguoi_o_cung__isnull=True,
+                )
+                .order_by("-id")
+                .first()
+            )
+
+        return {
+            "hop_dong": hop_dong,
+            "nguoi_thue": nguoi_thue,
+            "face_profile": face_profile,
+            "quyen_ra_vao": quyen_ra_vao,
+        }
+
     # =====================================================
     # HÀM RENDER FORM
     # =====================================================
@@ -1318,6 +912,7 @@ def sua_phong(request, id):
                     .all()
                     .order_by("thu_tu", "id")
                 ),
+                "thong_tin_luu_tru": lay_thong_tin_luu_tru(),
             }
         )
 
@@ -1327,6 +922,52 @@ def sua_phong(request, id):
 
     if request.method != "POST":
         return render_form()
+
+    if request.POST.get("hanh_dong") == "cap_nhat_luu_tru":
+        thong_tin_luu_tru = lay_thong_tin_luu_tru()
+        nguoi_thue = thong_tin_luu_tru["nguoi_thue"]
+
+        if not nguoi_thue:
+            messages.error(
+                request,
+                "Phòng hiện không có người thuê đang ở để cập nhật lưu trú."
+            )
+            return redirect("sua_phong", id=phong.id)
+
+        trang_thai_moi = request.POST.get(
+            "trang_thai_luu_tru",
+            ""
+        ).strip()
+
+        try:
+            so_quyen_thu_hoi = cap_nhat_trang_thai_luu_tru(
+                nguoi_thue,
+                trang_thai_moi,
+                nguoi_thuc_hien=request.user,
+            )
+        except ValueError:
+            messages.error(
+                request,
+                "Trạng thái lưu trú không hợp lệ."
+            )
+            return redirect("sua_phong", id=phong.id)
+
+        if trang_thai_moi == "da_tra_phong":
+            messages.success(
+                request,
+                (
+                    "Đã đánh dấu người thuê là đã trả phòng và thu hồi "
+                    f"{so_quyen_thu_hoi} quyền ra vào đang hiệu lực. "
+                    "Tài khoản người thuê vẫn được giữ để đăng nhập."
+                )
+            )
+        else:
+            messages.success(
+                request,
+                "Đã cập nhật trạng thái lưu trú của người thuê."
+            )
+
+        return redirect("sua_phong", id=phong.id)
 
     # =====================================================
     # LẤY DỮ LIỆU POST
@@ -1738,75 +1379,16 @@ def sua_phong(request, id):
         phong.trang_thai_nghiep_vu()
     )
 
-    # =====================================================
-    # YÊU CẦU CHUYỂN SANG BẢO TRÌ
-    # =====================================================
+    maintenance_transition = (
+        trang_thai_yeu_cau == "bao_tri"
+        or phong.trang_thai == "bao_tri"
+    )
 
-    if trang_thai_yeu_cau == "bao_tri":
-
-        # Chỉ phòng thực sự trống mới được bảo trì.
-        if trang_thai_nghiep_vu != "trong":
-
-            messages.error(
-                request,
-                (
-                    "Không thể chuyển phòng sang bảo trì "
-                    "vì phòng hiện đang có đơn đặt phòng "
-                    "được duyệt hoặc hợp đồng còn hiệu lực."
-                )
-            )
-
-            return render_form()
-
-        trang_thai_luu = "bao_tri"
-
-    # =====================================================
-    # KHÔNG PHẢI BẢO TRÌ
-    # =====================================================
-
+    if maintenance_transition:
+        # The service re-reads all facts under the room lock.  Do not trust this
+        # pre-transaction state for either entering or leaving maintenance.
+        trang_thai_luu = None
     else:
-
-        # -------------------------------------------------
-        # PHÒNG ĐANG BẢO TRÌ
-        # -------------------------------------------------
-
-        if phong.trang_thai == "bao_tri":
-
-            # Kết thúc bảo trì phải quay về đúng trạng thái
-            # được xác định từ booking / hợp đồng.
-            if (
-                trang_thai_yeu_cau
-                != trang_thai_nghiep_vu
-            ):
-
-                ten_trang_thai = dict(
-                    Phong.TRANG_THAI
-                ).get(
-                    trang_thai_nghiep_vu,
-                    trang_thai_nghiep_vu
-                )
-
-                messages.error(
-                    request,
-                    (
-                        "Không thể chọn trạng thái này. "
-                        "Sau khi kết thúc bảo trì, "
-                        "trạng thái đúng của phòng phải là "
-                        f"'{ten_trang_thai}'."
-                    )
-                )
-
-                return render_form()
-
-            trang_thai_luu = (
-                trang_thai_nghiep_vu
-            )
-
-        # -------------------------------------------------
-        # PHÒNG KHÔNG BẢO TRÌ
-        # -------------------------------------------------
-
-        else:
 
             # Không cho Admin tự sửa các trạng thái:
             #
@@ -1817,33 +1399,23 @@ def sua_phong(request, id):
             # Các trạng thái này phải được xác định
             # từ đơn đặt phòng và hợp đồng.
 
-            if (
-                trang_thai_yeu_cau
-                != trang_thai_nghiep_vu
-            ):
+        if trang_thai_yeu_cau != trang_thai_nghiep_vu:
 
-                ten_trang_thai = dict(
-                    Phong.TRANG_THAI
-                ).get(
-                    trang_thai_nghiep_vu,
-                    trang_thai_nghiep_vu
-                )
-
-                messages.error(
-                    request,
-                    (
-                        "Trạng thái phòng được hệ thống "
-                        "xác định tự động theo đặt phòng "
-                        "và hợp đồng. Trạng thái đúng "
-                        f"hiện tại là '{ten_trang_thai}'."
-                    )
-                )
-
-                return render_form()
-
-            trang_thai_luu = (
-                trang_thai_nghiep_vu
+            ten_trang_thai = dict(Phong.TRANG_THAI).get(
+                trang_thai_nghiep_vu, trang_thai_nghiep_vu
             )
+
+            messages.error(
+                request,
+                (
+                    "Trạng thái phòng được hệ thống xác định tự động theo đặt phòng "
+                    f"và hợp đồng. Trạng thái đúng hiện tại là '{ten_trang_thai}'."
+                )
+            )
+
+            return render_form()
+
+        trang_thai_luu = trang_thai_nghiep_vu
 
     # =====================================================
     # LƯU DỮ LIỆU CŨ CHO NHẬT KÝ
@@ -1892,6 +1464,17 @@ def sua_phong(request, id):
 
     with transaction.atomic():
 
+        if maintenance_transition:
+            try:
+                phong = transition_room_maintenance(
+                    actor=request.user,
+                    room_id=phong.pk,
+                    entering=trang_thai_yeu_cau == "bao_tri",
+                )
+            except ValidationError as error:
+                messages.error(request, str(error))
+                return render_form()
+
         phong.co_so = co_so
 
         phong.so_phong = so_phong
@@ -1926,9 +1509,8 @@ def sua_phong(request, id):
             tien_coc_mac_dinh
         )
 
-        phong.trang_thai = (
-            trang_thai_luu
-        )
+        if not maintenance_transition:
+            phong.trang_thai = trang_thai_luu
 
         phong.mo_ta = mo_ta
 
@@ -2007,7 +1589,7 @@ def sua_phong(request, id):
         # ĐỒNG BỘ TRẠNG THÁI LẦN CUỐI
         # =================================================
 
-        if phong.trang_thai != "bao_tri":
+        if not maintenance_transition and phong.trang_thai != "bao_tri":
 
             phong.dong_bo_trang_thai(
                 giu_bao_tri=False

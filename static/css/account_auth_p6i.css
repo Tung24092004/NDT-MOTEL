@@ -1,0 +1,319 @@
+.ndt-f5.ndt-account-auth {
+    color: var(--ndt-f5-text);
+    min-width: 0;
+}
+
+.ndt-f5.ndt-account-auth :is(.ndt-f5-button, .ndt-f5-control) {
+    min-height: 46px;
+}
+
+.ndt-f5.ndt-account-auth .p6i-auth-card {
+    margin-inline: auto;
+    max-width: 760px;
+}
+
+.ndt-f5.ndt-account-auth .ndt-f5-page-header h1 {
+    color: var(--ndt-f5-navy);
+    font-size: var(--ndt-f5-text-2xl);
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+    margin: 0;
+}
+
+.ndt-f5.ndt-account-auth .p6i-auth-heading {
+    align-items: center;
+    text-align: center;
+}
+
+.ndt-f5.ndt-account-auth .p6i-auth-mark {
+    align-items: center;
+    background: var(--ndt-f5-navy);
+    border-radius: 12px;
+    color: var(--ndt-f5-surface);
+    display: inline-flex;
+    font-size: 1.5rem;
+    font-weight: 800;
+    height: 48px;
+    justify-content: center;
+    width: 48px;
+}
+
+.ndt-f5.ndt-account-auth .p6i-form {
+    display: grid;
+    gap: 24px;
+}
+
+.ndt-f5.ndt-account-auth .p6i-password-control {
+    align-items: stretch;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.ndt-f5.ndt-account-auth .p6i-password-toggle {
+    min-width: 72px;
+}
+
+.ndt-f5.ndt-account-auth .ndt-f5-button--small {
+    min-height: 44px;
+}
+
+.ndt-f5.ndt-account-auth .p6i-auth-alternative .ndt-f5-link {
+    align-items: center;
+    display: inline-flex;
+    min-height: 44px;
+    padding-inline: 4px;
+}
+
+.ndt-f5.ndt-account-auth .p6i-submit-wide,
+.ndt-f5.ndt-account-auth .p6i-home-link {
+    justify-self: stretch;
+    width: 100%;
+}
+
+.ndt-f5.ndt-account-auth .p6i-auth-alternative {
+    margin: 24px 0 12px;
+    text-align: center;
+}
+
+.ndt-f5.ndt-account-auth .p6i-form-note,
+.ndt-f5.ndt-account-auth .p6i-validation-summary {
+    margin-bottom: 20px;
+}
+
+.ndt-f5.ndt-account-auth .account-hero,
+.ndt-f5.ndt-account-auth .account-next-step {
+    align-items: center;
+    background: var(--ndt-f5-surface);
+    border: 1px solid var(--ndt-f5-line);
+    border-radius: 16px;
+    display: flex;
+    gap: 24px;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding: 24px;
+}
+
+.ndt-f5.ndt-account-auth .account-hero {
+    background: linear-gradient(135deg, var(--ndt-f5-navy), #263b58);
+    color: #fffefb;
+}
+
+.ndt-f5.ndt-account-auth .account-hero h2,
+.ndt-f5.ndt-account-auth .account-hero p {
+    color: inherit;
+}
+
+.ndt-f5.ndt-account-auth .account-hero__actions,
+.ndt-f5.ndt-account-auth .current-room__actions,
+.ndt-f5.ndt-account-auth .booking-card__actions,
+.ndt-f5.ndt-account-auth .account-inline-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.ndt-f5.ndt-account-auth .account-next-step--warning {
+    border-left: 5px solid var(--ndt-f5-warning);
+}
+
+.ndt-f5.ndt-account-auth .account-next-step--danger {
+    border-left: 5px solid var(--ndt-f5-danger);
+}
+
+.ndt-f5.ndt-account-auth .account-next-step--info,
+.ndt-f5.ndt-account-auth .account-next-step--success {
+    border-left: 5px solid var(--ndt-f5-success);
+}
+
+.ndt-f5.ndt-account-auth .account-next-step__content > span,
+.ndt-f5.ndt-account-auth .account-eyebrow {
+    color: var(--ndt-f5-text-muted);
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ndt-f5.ndt-account-auth .account-stats {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: 24px;
+}
+
+.ndt-f5.ndt-account-auth .account-stat {
+    min-width: 0;
+}
+
+.ndt-f5.ndt-account-auth .account-stat strong {
+    color: var(--ndt-f5-navy);
+    display: block;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    margin-block: 8px;
+}
+
+.ndt-f5.ndt-account-auth .account-layout {
+    align-items: start;
+    display: grid;
+    gap: 24px;
+    grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr);
+}
+
+.ndt-f5.ndt-account-auth .account-main,
+.ndt-f5.ndt-account-auth .account-sidebar,
+.ndt-f5.ndt-account-auth .booking-list,
+.ndt-f5.ndt-account-auth .notice-list,
+.ndt-f5.ndt-account-auth .quick-links {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+}
+
+.ndt-f5.ndt-account-auth .account-section__header,
+.ndt-f5.ndt-account-auth .booking-card__top,
+.ndt-f5.ndt-account-auth .current-room {
+    align-items: flex-start;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.ndt-f5.ndt-account-auth .booking-card {
+    border: 1px solid var(--ndt-f5-line);
+    border-radius: 12px;
+    display: grid;
+    gap: 16px;
+    padding: 20px;
+}
+
+.ndt-f5.ndt-account-auth .booking-facts,
+.ndt-f5.ndt-account-auth .profile-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+}
+
+.ndt-f5.ndt-account-auth .booking-facts div,
+.ndt-f5.ndt-account-auth .profile-grid div {
+    min-width: 0;
+}
+
+.ndt-f5.ndt-account-auth .booking-facts dt,
+.ndt-f5.ndt-account-auth .profile-grid dt {
+    color: var(--ndt-f5-text-muted);
+    font-size: 0.875rem;
+}
+
+.ndt-f5.ndt-account-auth .booking-facts dd,
+.ndt-f5.ndt-account-auth .profile-grid dd {
+    font-weight: 700;
+    margin: 4px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.ndt-f5.ndt-account-auth .quick-link,
+.ndt-f5.ndt-account-auth .notice-item {
+    border: 1px solid var(--ndt-f5-line);
+    border-radius: 10px;
+    color: var(--ndt-f5-text);
+    display: grid;
+    gap: 4px;
+    min-height: 52px;
+    padding: 12px 16px;
+    text-decoration: none;
+}
+
+.ndt-f5.ndt-account-auth .quick-link:hover,
+.ndt-f5.ndt-account-auth .notice-item:hover {
+    border-color: var(--ndt-f5-orange);
+}
+
+.ndt-f5.ndt-account-auth .quick-link:focus-visible,
+.ndt-f5.ndt-account-auth .notice-item:focus-visible,
+.ndt-f5.ndt-account-auth .p6i-password-toggle:focus-visible {
+    outline: 3px solid var(--ndt-f5-focus);
+    outline-offset: 3px;
+}
+
+.ndt-f5.ndt-account-auth .quick-link span,
+.ndt-f5.ndt-account-auth .notice-item span {
+    color: var(--ndt-f5-text-muted);
+}
+
+.ndt-f5.ndt-account-auth .notice-item.is-unread {
+    border-left: 5px solid var(--ndt-f5-orange);
+}
+
+.ndt-f5.ndt-account-auth .account-alert {
+    border-radius: 10px;
+    margin: 0;
+    padding: 12px 16px;
+}
+
+.ndt-f5.ndt-account-auth .account-alert--danger {
+    background: var(--ndt-f5-danger-bg);
+    color: var(--ndt-f5-danger);
+}
+
+.ndt-f5.ndt-account-auth .account-alert--info {
+    background: var(--ndt-f5-info-bg);
+    color: var(--ndt-f5-info);
+}
+
+@media (max-width: 1100px) {
+    .ndt-f5.ndt-account-auth .account-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ndt-f5.ndt-account-auth .account-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 720px) {
+    .ndt-f5.ndt-account-auth .account-hero,
+    .ndt-f5.ndt-account-auth .account-next-step,
+    .ndt-f5.ndt-account-auth .account-section__header,
+    .ndt-f5.ndt-account-auth .booking-card__top,
+    .ndt-f5.ndt-account-auth .current-room {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .ndt-f5.ndt-account-auth .account-stats,
+    .ndt-f5.ndt-account-auth .booking-facts,
+    .ndt-f5.ndt-account-auth .profile-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ndt-f5.ndt-account-auth .account-hero__actions,
+    .ndt-f5.ndt-account-auth .current-room__actions,
+    .ndt-f5.ndt-account-auth .booking-card__actions,
+    .ndt-f5.ndt-account-auth .account-inline-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .ndt-f5.ndt-account-auth .account-hero__actions > *,
+    .ndt-f5.ndt-account-auth .current-room__actions > *,
+    .ndt-f5.ndt-account-auth .booking-card__actions > *,
+    .ndt-f5.ndt-account-auth .booking-card__actions form,
+    .ndt-f5.ndt-account-auth .booking-card__actions button,
+    .ndt-f5.ndt-account-auth .account-inline-actions > * {
+        width: 100%;
+    }
+}
+
+@media (max-width: 460px) {
+    .ndt-f5.ndt-account-auth .p6i-password-control {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ndt-f5.ndt-account-auth .p6i-password-toggle {
+        width: 100%;
+    }
+}

@@ -13,8 +13,15 @@ from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
 from .models import DatPhong, NguoiThue, NhatKyThaoTac, Phong, ThongBao
-from .bieu_mau_dat_phong import BookingForm, CompanionFormSet
+from .bieu_mau_dat_phong import BookingForm, CompanionFormSet, RentalQuoteForm
 from .dich_vu import dat_phong as dich_vu_dat_phong, tien_coc
+from .dich_vu import chung_tu_thanh_toan
+from .dich_vu.dieu_kien_o_ghep import dieu_kien_o_ghep
+from .dich_vu.phong_cong_khai import (
+    gan_trang_thai_cong_khai,
+    queryset_phong_cong_khai,
+    them_giu_cho_cong_khai,
+)
 from .dich_vu.thong_bao_dat_phong import notify_admins
 
 
@@ -65,7 +72,10 @@ def payment_state(booking):
 @tenant_only
 @require_http_methods(['GET', 'POST'])
 def dat_phong(request, id):
-    room = get_object_or_404(Phong.objects.select_related('co_so'), pk=id)
+    room = get_object_or_404(
+        them_giu_cho_cong_khai(queryset_phong_cong_khai()),
+        pk=id,
+    )
     tenant = request.booking_tenant
     # Match existing mandatory identity rules; optional profile fields are displayed, not cloned.
     identity_valid = bool(tenant.ho_ten.strip() and len(tenant.cccd) == 12 and tenant.cccd.isascii()
@@ -74,18 +84,68 @@ def dat_phong(request, id):
     if not identity_valid:
         messages.error(request, 'Hồ sơ cần họ tên, CCCD 12 số và số điện thoại hợp lệ trước khi đặt phòng.')
         return redirect('cap_nhat_thong_tin')
-    if room.so_nguoi_toi_da < 1 or room.co_so.trang_thai != 'hoat_dong' or room.trang_thai == 'bao_tri' or room.trang_thai_nghiep_vu() != 'trong' or dich_vu_dat_phong.room_has_hold(room):
-        messages.warning(request, 'Phòng không còn khả dụng hoặc chưa được cấu hình sức chứa.')
+    dieu_kien = dieu_kien_o_ghep(room)
+    gan_trang_thai_cong_khai(
+        room,
+        hop_dong_hien_tai=dieu_kien['hop_dong'],
+        co_giu_cho_hop_le=room.co_giu_cho_hop_le,
+    )
+    selected_period = None
+    if request.method == 'GET' and ('ngay_nhan_phong' in request.GET or 'so_thang_thue' in request.GET):
+        selected_period_form = RentalQuoteForm(request.GET)
+        if selected_period_form.is_valid():
+            selected_period = selected_period_form.cleaned_data
+            if not dich_vu_dat_phong.room_is_bookable_for_rental(
+                room,
+                selected_period['ngay_nhan_phong'],
+                selected_period['so_thang_thue'],
+            ):
+                messages.warning(request, 'Phòng không còn phù hợp với thời gian đã chọn. Vui lòng tìm lại.')
+                return redirect('danh_sach_phong')
+
+    if (
+        room.co_so.trang_thai != 'hoat_dong'
+        or room.trang_thai == 'bao_tri'
+        or not room.so_nguoi_toi_da
+    ):
+        messages.warning(
+            request,
+            f'Phòng hiện không thể thuê. {room.ly_do_trang_thai_cong_khai}',
+        )
         return redirect('chi_tiet_phong', id=room.pk)
-    form = BookingForm(request.POST if request.method == 'POST' else None, capacity=room.so_nguoi_toi_da)
+
+    if request.method == 'GET' and selected_period is None and not room.co_the_thue_cong_khai:
+        messages.warning(
+            request,
+            f'Phòng hiện không thể thuê. {room.ly_do_trang_thai_cong_khai}',
+        )
+        return redirect('chi_tiet_phong', id=room.pk)
+    booking_initial = selected_period or None
+    form = BookingForm(
+        request.POST if request.method == 'POST' else None,
+        initial=booking_initial,
+        capacity=room.so_nguoi_toi_da,
+    )
+    quote_form = RentalQuoteForm(
+        request.POST if request.method == 'POST' else None,
+        initial=selected_period,
+    )
     companions = CompanionFormSet(request.POST if request.method == 'POST' else None, prefix='companions')
+    quote = None
     terms, refund, deadline, configuration_error = '', None, None, ''
     try:
         terms, refund = dich_vu_dat_phong.terms_policy()
         deadline = dich_vu_dat_phong.hold_deadline()
     except ValidationError:
         configuration_error = 'Chưa có chính sách đặt phòng được cấu hình. Vui lòng liên hệ quản lý.'
-    if request.method == 'POST' and request.POST.get('action') == 'prepare_occupants':
+    if request.method == 'POST' and request.POST.get('action') == 'preview_quote':
+        if quote_form.is_valid():
+            quote = dich_vu_dat_phong.rental_quote(
+                room=room,
+                checkin=quote_form.cleaned_data['ngay_nhan_phong'],
+                months=quote_form.cleaned_data['so_thang_thue'],
+            )
+    elif request.method == 'POST' and request.POST.get('action') == 'prepare_occupants':
         try:
             count = int(request.POST.get('so_nguoi_o', '1')) - 1
             if not 0 <= count < min(room.so_nguoi_toi_da, 101):
@@ -112,7 +172,12 @@ def dat_phong(request, id):
                             checkin=data['ngay_nhan_phong'], months=data['so_thang_thue'],
                             people=data['so_nguoi_o'], companions=occupants,
                             accept_terms=data['da_dong_y_dieu_khoan'],
-                            allow_sharing=data['dong_y_nhan_yeu_cau_ghep'], note=data['ghi_chu'])
+                            allow_sharing=data['dong_y_nhan_yeu_cau_ghep'], note=data['ghi_chu'],
+                            reviewed_quote=({key: request.POST.get(key, '') for key in (
+                                'quote_monthly_rent', 'quote_deposit', 'quote_checkout',
+                            )} if any(key in request.POST for key in (
+                                'quote_monthly_rent', 'quote_deposit', 'quote_checkout',
+                            )) else None))
                         tien_coc.get_or_create_deposit(actor=request.user, booking_id=booking.pk)
                         NhatKyThaoTac.objects.create(nguoi_thuc_hien=request.user, hanh_dong='tao',
                             module='Dat phong', doi_tuong='DatPhong', doi_tuong_id=booking.pk,
@@ -125,6 +190,7 @@ def dat_phong(request, id):
     return render(request, 'core/tenant/booking/create.html', {'phong': room, 'nguoi_thue': tenant,
         'form': form, 'companions': companions, 'terms': terms, 'refund': refund,
         'deadline': deadline, 'configuration_error': configuration_error,
+        'quote_form': quote_form, 'quote': quote,
         'expected_refund': room.tien_coc_mac_dinh * refund / 100 if refund is not None else None})
 
 
@@ -163,7 +229,14 @@ def thanh_toan_coc_cua_toi(request, id):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                if request.POST.get('action') == 'retry':
+                action = request.POST.get('action')
+                if action == 'start':
+                    # Re-fetch and lock inside the service.  This is deliberately
+                    # idempotent so two submits retain one server-authoritative
+                    # pending transfer attempt.
+                    tien_coc.get_or_create_deposit(actor=request.user, booking_id=booking.pk)
+                    return redirect('thanh_toan_coc_cua_toi', id=booking.pk)
+                if action == 'retry':
                     if not state['can_pay'] or not payment or payment.trang_thai != 'tu_choi':
                         raise ValidationError('Không thể tạo lại giao dịch ở trạng thái này.')
                     tien_coc.get_or_create_deposit(actor=request.user, booking_id=booking.pk)
@@ -175,6 +248,13 @@ def thanh_toan_coc_cua_toi(request, id):
                 locked = tien_coc.locked_booking(booking.pk)
                 current = locked.giao_dich_coc.select_for_update().get(pk=payment.pk)
                 first_report = current.trang_thai == 'chua_thanh_toan'
+                if not first_report:
+                    raise ValidationError('Yêu cầu đối soát cọc đã được gửi trước đó.')
+                chung_tu_thanh_toan.create_for_deposit(
+                    actor=request.user,
+                    payment=current,
+                    uploaded=request.FILES.get('anh_chung_tu'),
+                )
                 tien_coc.report_paid(actor=request.user, payment_id=current.pk,
                                            bank_transaction=request.POST.get('ma_giao_dich', '').strip())
                 if first_report:

@@ -1,4 +1,4 @@
-{% load static bo_loc %}
+﻿{% load static bo_loc %}
 <article class="room-overview">
     {% with image=phong.anh_dai_dien_hien_thi %}
         {% if image %}
@@ -13,7 +13,7 @@
                 <p class="booking-kicker">Thông tin phòng</p>
                 <h2>Phòng {{ phong.so_phong }}</h2>
             </div>
-            <span class="booking-status-badge booking-status-available">{{ phong.get_trang_thai_display }}</span>
+            <span class="ndt-f5-badge ndt-f5-badge--success">{{ phong.get_trang_thai_display }}</span>
         </div>
         <p class="booking-room-address">{{ phong.co_so.ten_co_so }} · {{ phong.co_so.dia_chi }}</p>
         <dl class="booking-facts booking-room-facts">

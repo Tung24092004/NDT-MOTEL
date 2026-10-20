@@ -1,0 +1,148 @@
+{% extends "core/base.html" %}
+{% load static bo_loc %}
+
+{% block title %}Chốt chỉ số hàng loạt - NDT MOTEL{% endblock %}
+{% block page_title %}Chốt chỉ số hàng loạt{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+  <link rel="stylesheet" href="{% static 'css/invoice_management_p6d.css' %}">
+  <link rel="stylesheet" href="{% static 'css/bulk_meter_close_post_p6.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="ndt-f5 ndt-invoice-management ndt-bulk-meter-close ndt-f5-page" data-invoice-screen="bulk-meter-close">
+  <div class="ndt-f5-container ndt-f5-container--full bulk-meter-stack">
+    <header class="ndt-f5-page-header invoice-page-header">
+      <div class="ndt-f5-page-header__content">
+        <p class="ndt-breadcrumb">Quản trị / Hóa đơn / Chốt chỉ số</p>
+        <h1 class="ndt-f5-page-header__title">Chốt chỉ số điện hàng loạt</h1>
+        <p class="ndt-f5-page-header__description">Nhập chỉ số mới cho nhiều hợp đồng trong cùng kỳ. Backend tính tiền điện và tạo toàn bộ hóa đơn trong một transaction.</p>
+      </div>
+      <div class="ndt-f5-actions ndt-f5-page-header__actions">
+        <a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'quan_ly_hoa_don' %}">Danh sách hóa đơn</a>
+      </div>
+    </header>
+
+    <section class="ndt-f5-filter bulk-meter-period" aria-labelledby="bulk-period-title">
+      <h2 class="ndt-filter-bar__title" id="bulk-period-title">Kỳ cần chốt</h2>
+      <form class="ndt-filter-bar__form bulk-meter-period__form" method="get" action="{% url 'chot_chi_so_dien_hang_loat' %}">
+        <div class="ndt-f5-field">
+          <label class="ndt-f5-label" for="bulk-month">Tháng</label>
+          <input class="ndt-f5-control" id="bulk-month" name="thang" type="number" min="1" max="12" value="{{ thang }}" required>
+        </div>
+        <div class="ndt-f5-field">
+          <label class="ndt-f5-label" for="bulk-year">Năm</label>
+          <input class="ndt-f5-control" id="bulk-year" name="nam" type="number" min="2000" max="2100" value="{{ nam }}" required>
+        </div>
+        <button class="ndt-f5-button ndt-f5-button--secondary" type="submit">Tải danh sách</button>
+      </form>
+    </section>
+
+    <section class="bulk-meter-summary" aria-label="Tổng hợp trạng thái kỳ chốt">
+      <article class="ndt-f5-card"><span>Có thể chốt</span><strong>{{ so_co_the_chot }}</strong><small>hợp đồng đủ điều kiện</small></article>
+      <article class="ndt-f5-card"><span>Đã có hóa đơn</span><strong>{{ so_da_co_hoa_don }}</strong><small>không tạo trùng kỳ</small></article>
+      <article class="ndt-f5-card"><span>Cần xử lý riêng</span><strong>{{ so_bi_chan }}</strong><small>cấu hình hoặc thứ tự kỳ</small></article>
+    </section>
+
+    <section class="ndt-f5-alert ndt-f5-alert--info bulk-meter-policy" aria-label="Quy tắc chốt chỉ số">
+      <strong>Quy tắc an toàn</strong>
+      <p>Chỉ số cũ phải nối tiếp kỳ hóa đơn gần nhất. Hợp đồng đã có hóa đơn kỳ này hoặc kỳ mới hơn sẽ bị khóa. Nếu một dòng không hợp lệ, toàn bộ lượt tạo được rollback.</p>
+    </section>
+
+    {% if hop_dongs %}
+      <form method="post" action="{% url 'chot_chi_so_dien_hang_loat' %}" class="bulk-meter-form" data-bulk-meter-form>
+        {% csrf_token %}
+        <input type="hidden" name="thang" value="{{ thang }}">
+        <input type="hidden" name="nam" value="{{ nam }}">
+
+        <div class="bulk-meter-toolbar">
+          <div class="ndt-f5-field">
+            <label class="ndt-f5-label" for="bulk-due-date">Hạn thanh toán chung <span class="ndt-f5-required">*</span></label>
+            <input class="ndt-f5-control" id="bulk-due-date" type="date" name="han_thanh_toan" value="{{ han_thanh_toan }}" required>
+          </div>
+          <label class="bulk-meter-select-all" for="bulk-select-all">
+            <input id="bulk-select-all" type="checkbox" data-select-all>
+            <span>Chọn tất cả dòng đủ điều kiện</span>
+          </label>
+          <p><strong data-selected-count>0</strong> hợp đồng được chọn</p>
+        </div>
+
+        <div class="ndt-f5-table-wrap bulk-meter-table-wrap">
+          <table class="ndt-f5-table bulk-meter-table">
+            <thead>
+              <tr>
+                <th scope="col">Chọn</th>
+                <th scope="col">Hợp đồng / phòng</th>
+                <th scope="col">Phí cố định</th>
+                <th scope="col">Chỉ số cũ</th>
+                <th scope="col">Chỉ số mới</th>
+                <th scope="col">Đơn giá điện</th>
+                <th scope="col">Tạm tính</th>
+                <th scope="col">Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in hop_dongs %}
+                <tr data-meter-row data-fixed-total="{{ item.tong_phi_co_dinh }}" data-unit-price="{{ item.dat_phong.phong.tien_dien_moi_so }}">
+                  <td data-label="Chọn">
+                    {% if item.co_the_chot %}
+                      <input class="bulk-meter-check" id="chon-{{ item.id }}" type="checkbox" name="hop_dong_ids" value="{{ item.id }}" data-row-check {% if item.da_chon %}checked{% endif %} aria-label="Chọn hợp đồng {{ item.so_hop_dong }}">
+                    {% else %}
+                      <span aria-hidden="true">—</span>
+                    {% endif %}
+                  </td>
+                  <td data-label="Hợp đồng / phòng">
+                    <strong>{{ item.so_hop_dong }}</strong>
+                    <span>{{ item.dat_phong.nguoi_thue.ho_ten }}</span>
+                    <span>{{ item.dat_phong.phong.co_so.ten_co_so }} · Phòng {{ item.dat_phong.phong.so_phong }}</span>
+                  </td>
+                  <td data-label="Phí cố định">
+                    <strong>{{ item.tong_phi_co_dinh|vnd }} VNĐ</strong>
+                    <span>Phòng {{ item.tien_thue_thang|vnd }}</span>
+                    <span>Nước {{ item.tien_nuoc_du_kien|vnd }} · Dịch vụ {{ item.tien_dich_vu_du_kien|vnd }}</span>
+                  </td>
+                  <td data-label="Chỉ số cũ">
+                    <label class="ndt-f5-sr-only" for="old-{{ item.id }}">Chỉ số điện cũ của {{ item.so_hop_dong }}</label>
+                    <input class="ndt-f5-control bulk-meter-reading" id="old-{{ item.id }}" type="number" min="0" step="1" name="chi_so_cu_{{ item.id }}" value="{{ item.gia_tri_chi_so_cu }}" data-old-reading {% if item.chi_so_dien_cu_goi_y != None %}readonly{% endif %} {% if not item.da_chon or not item.co_the_chot %}disabled{% endif %} required>
+                    {% if item.chi_so_dien_cu_goi_y != None %}<small>Nối tiếp kỳ gần nhất</small>{% else %}<small>Kỳ đầu: nhập thủ công</small>{% endif %}
+                  </td>
+                  <td data-label="Chỉ số mới">
+                    <label class="ndt-f5-sr-only" for="new-{{ item.id }}">Chỉ số điện mới của {{ item.so_hop_dong }}</label>
+                    <input class="ndt-f5-control bulk-meter-reading" id="new-{{ item.id }}" type="number" min="0" step="1" name="chi_so_moi_{{ item.id }}" value="{{ item.gia_tri_chi_so_moi }}" data-new-reading {% if not item.da_chon or not item.co_the_chot %}disabled{% endif %} required>
+                  </td>
+                  <td data-label="Đơn giá điện"><strong>{{ item.dat_phong.phong.tien_dien_moi_so|vnd }} VNĐ/kWh</strong></td>
+                  <td data-label="Tạm tính"><strong data-row-total>{{ item.tong_phi_co_dinh|vnd }} VNĐ</strong><span data-electricity-total>Điện: 0 VNĐ</span></td>
+                  <td data-label="Trạng thái">
+                    {% if item.da_co_hoa_don %}
+                      <span class="ndt-f5-badge ndt-f5-badge--success">Đã có hóa đơn</span>
+                    {% elif item.co_hoa_don_sau %}
+                      <span class="ndt-f5-badge ndt-f5-badge--danger">Có kỳ mới hơn</span>
+                    {% elif item.dat_phong.phong.tien_dien_moi_so <= 0 %}
+                      <span class="ndt-f5-badge ndt-f5-badge--warning">Thiếu đơn giá điện</span>
+                    {% else %}
+                      <span class="ndt-f5-badge ndt-f5-badge--pending">Sẵn sàng</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="bulk-meter-actions">
+          <a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'quan_ly_hoa_don' %}">Hủy</a>
+          <button class="ndt-f5-button ndt-f5-button--primary" type="submit" data-submit-bulk disabled>Chốt chỉ số và tạo hóa đơn</button>
+        </div>
+      </form>
+    {% else %}
+      <section class="ndt-f5-empty" role="status">
+        <div class="ndt-empty-state__icon" aria-hidden="true">CS</div>
+        <h2 class="ndt-f5-empty__title">Không có hợp đồng trong kỳ đã chọn</h2>
+        <p class="ndt-f5-empty__description">Hãy chọn kỳ khác hoặc kiểm tra thời hạn hợp đồng.</p>
+      </section>
+    {% endif %}
+  </div>
+</main>
+<script src="{% static 'js/bulk_meter_close_post_p6.js' %}" defer></script>
+{% endblock %}

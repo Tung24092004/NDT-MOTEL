@@ -1,0 +1,112 @@
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-stack {
+    display: grid;
+    gap: var(--ndt-f5-space-6);
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-period,
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-form {
+    display: grid;
+    gap: var(--ndt-f5-space-4);
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-period__form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(140px, 220px)) auto;
+    gap: var(--ndt-f5-space-4);
+    align-items: end;
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ndt-f5-space-4);
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-summary article {
+    display: grid;
+    gap: var(--ndt-f5-space-2);
+    border-top: 4px solid var(--ndt-f5-navy);
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-summary span,
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-summary small,
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-table td span,
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-table td small {
+    display: block;
+    color: var(--ndt-f5-text-muted);
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-summary strong {
+    color: var(--ndt-f5-navy);
+    font-size: var(--ndt-f5-text-xl);
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-policy p {
+    margin: var(--ndt-f5-space-2) 0 0;
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ndt-f5-space-5);
+    align-items: end;
+    justify-content: space-between;
+    padding: var(--ndt-f5-space-4);
+    border: 1px solid var(--ndt-f5-line);
+    border-radius: var(--ndt-f5-radius-lg);
+    background: var(--ndt-f5-surface);
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-toolbar p {
+    margin: 0 0 var(--ndt-f5-space-3);
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-select-all {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: var(--ndt-f5-space-2);
+    cursor: pointer;
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-check,
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-select-all input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--ndt-f5-orange);
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-reading {
+    min-width: 112px;
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-reading:disabled {
+    opacity: .55;
+}
+
+.ndt-f5.ndt-bulk-meter-close .bulk-meter-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--ndt-f5-space-3);
+}
+
+@media (max-width: 900px) {
+    .ndt-f5.ndt-bulk-meter-close .bulk-meter-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 680px) {
+    .ndt-f5.ndt-bulk-meter-close .bulk-meter-period__form {
+        grid-template-columns: 1fr;
+    }
+
+    .ndt-f5.ndt-bulk-meter-close .bulk-meter-period__form .ndt-f5-button,
+    .ndt-f5.ndt-bulk-meter-close .bulk-meter-actions .ndt-f5-button {
+        width: 100%;
+    }
+
+    .ndt-f5.ndt-bulk-meter-close .bulk-meter-actions {
+        display: grid;
+    }
+}

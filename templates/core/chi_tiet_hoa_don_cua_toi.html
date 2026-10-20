@@ -6,43 +6,47 @@
 
 {% block tenant_styles %}
     <link rel="stylesheet" href="{% static 'css/tenant/chi_tiet_hoa_don_cua_toi.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bill_smart_full_refresh.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+    <link rel="stylesheet" href="{% static 'css/invoice_management_p6d.css' %}">
 {% endblock %}
 
 {% block tenant_content %}
-<main class="invoice-page">
+<main class="ndt-f5 ndt-invoice-management ndt-f5-page invoice-page" data-invoice-screen="tenant-detail">
+  <div class="ndt-f5-container ndt-f5-container--full invoice-p6d-stack">
     <nav class="invoice-breadcrumb" aria-label="Điều hướng">
         <a href="{% url 'hoa_don_cua_toi' %}">Hóa đơn của tôi</a>
         <span>/</span>
         <span>HĐ-{{ hoa_don.id }}</span>
     </nav>
 
-    <header class="invoice-header">
+    <header class="ndt-f5-page-header invoice-header">
         <div class="invoice-header__identity">
             <p class="invoice-kicker">Hóa đơn HĐ-{{ hoa_don.id }}</p>
             <h1>Tháng {{ hoa_don.thang }}/{{ hoa_don.nam }}</h1>
             <p>{{ hoa_don.hop_dong.dat_phong.phong.co_so.ten_co_so }} · Phòng {{ hoa_don.hop_dong.dat_phong.phong.so_phong }}</p>
         </div>
         <div class="invoice-header-total">
-            <span>Tổng tiền</span>
-            <strong>{{ tong_tien|vnd }} VNĐ</strong>
+            <span>Cần thanh toán</span>
+            <strong>{{ hoa_don.con_no|vnd }} VNĐ</strong>
             {% if hoa_don.trang_thai == "da_thanh_toan" %}
-                <em class="status status--paid">Đã thanh toán</em>
+                <em class="ndt-f5-badge ndt-f5-badge--success status status--paid">Đã thanh toán</em>
             {% elif hoa_don.trang_thai == "cho_xac_nhan" %}
-                <em class="status status--pending">Chờ Admin xác nhận</em>
+                <em class="ndt-f5-badge ndt-f5-badge--pending status status--pending">Chờ Admin xác nhận</em>
             {% elif hoa_don.trang_thai == "qua_han" %}
-                <em class="status status--overdue">Quá hạn</em>
+                <em class="ndt-f5-badge ndt-f5-badge--danger status status--overdue">Quá hạn</em>
             {% elif hoa_don.trang_thai == "chua_thanh_toan" %}
-                <em class="status status--unpaid">Chưa thanh toán</em>
+                <em class="ndt-f5-badge ndt-f5-badge--warning status status--unpaid">Chưa thanh toán</em>
             {% elif hoa_don.trang_thai == "huy" %}
-                <em class="status status--cancelled">Đã hủy</em>
+                <em class="ndt-f5-badge status status--cancelled">Đã hủy</em>
+            {% else %}
+                <em class="ndt-f5-badge status">{{ hoa_don.get_trang_thai_display }}</em>
             {% endif %}
         </div>
     </header>
 
     <dl class="invoice-dates">
         <div><dt>Mã hóa đơn</dt><dd>HĐ-{{ hoa_don.id }}</dd></div>
-        <div><dt>Kỳ thu</dt><dd>{{ hoa_don.thang }}/{{ hoa_don.nam }}</dd></div>
+        <div><dt>Kỳ hóa đơn</dt><dd>{{ hoa_don.thang }}/{{ hoa_don.nam }}</dd></div>
         <div><dt>Ngày lập</dt><dd>{{ hoa_don.ngay_tao|date:"d/m/Y" }}</dd></div>
         <div><dt>Hạn thanh toán</dt><dd>{{ hoa_don.han_thanh_toan|date:"d/m/Y" }}</dd></div>
     </dl>
@@ -52,13 +56,13 @@
             <p class="section-eyebrow">Bước tiếp theo</p>
             {% if hoa_don.trang_thai == "chua_thanh_toan" %}
                 <h2 id="invoice-next-step-title">Thanh toán trước ngày {{ hoa_don.han_thanh_toan|date:"d/m/Y" }}</h2>
-                <p>Mở hướng dẫn chuyển khoản hoặc VietQR, kiểm tra đúng số tiền và nội dung trước khi báo đã chuyển.</p>
+                <p>Mở hướng dẫn chuyển khoản hoặc VietQR, kiểm tra đúng số tiền và nội dung trước khi báo đã thanh toán.</p>
             {% elif hoa_don.trang_thai == "qua_han" %}
                 <h2 id="invoice-next-step-title">Hóa đơn đang quá hạn</h2>
                 <p>Vui lòng mở hướng dẫn thanh toán và hoàn tất chuyển khoản sớm.</p>
             {% elif hoa_don.trang_thai == "cho_xac_nhan" %}
                 <h2 id="invoice-next-step-title">Chờ Admin đối soát</h2>
-                <p>Bạn đã báo chuyển khoản. Không cần gửi lại; hóa đơn chưa được ghi nhận là đã thanh toán cho tới khi Admin xác nhận tiền về.</p>
+                <p>Yêu cầu đã được gửi — chờ Admin xác nhận. Không cần gửi lại hoặc thanh toán thêm; hóa đơn chỉ được ghi nhận đã thanh toán khi Admin xác nhận tiền về.</p>
             {% elif hoa_don.trang_thai == "da_thanh_toan" %}
                 <h2 id="invoice-next-step-title">Thanh toán đã được xác nhận</h2>
                 <p>Admin đã đối soát hóa đơn. Bạn không cần thực hiện thêm thao tác.</p>
@@ -73,32 +77,32 @@
 
         <div class="invoice-action-summary">
             <dl>
+                <div><dt>Tổng tiền</dt><dd>{{ tong_tien|vnd }} VNĐ</dd></div>
                 <div><dt>Còn phải trả</dt><dd>{{ hoa_don.con_no|vnd }} VNĐ</dd></div>
-                <div><dt>Hạn thanh toán</dt><dd>{{ hoa_don.han_thanh_toan|date:"d/m/Y" }}</dd></div>
             </dl>
             <div class="invoice-primary-actions">
                 {% if co_the_thanh_toan %}
-                    <a class="ndt-button ndt-button--primary" href="{% url 'thanh_toan_hoa_don_cua_toi' hoa_don.id %}">Thanh toán / Xem QR</a>
+                    <a class="ndt-f5-button ndt-f5-button--primary" href="{% url 'thanh_toan_hoa_don_cua_toi' hoa_don.id %}">Thanh toán / QR</a>
                 {% endif %}
-                <a class="ndt-button ndt-button--secondary" href="{% url 'hoa_don_cua_toi' %}">Quay lại danh sách</a>
+                <a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'hoa_don_cua_toi' %}">Danh sách</a>
             </div>
         </div>
     </section>
 
     <div class="invoice-layout">
         <div class="invoice-main">
-            <section class="document-section" aria-labelledby="invoice-cost-title">
+            <section class="ndt-f5-panel document-section" aria-labelledby="invoice-cost-title">
                 <div class="section-heading">
                     <div>
-                        <p class="section-eyebrow">Các khoản phí</p>
+                        <p class="section-eyebrow">Các khoản thu</p>
                         <h2 id="invoice-cost-title">Chi tiết hóa đơn</h2>
                     </div>
                     <span>Đơn vị: VNĐ</span>
                 </div>
-                <div class="cost-table" role="table" aria-label="Chi tiết các khoản phí">
+                <div class="cost-table" role="table" aria-label="Chi tiết các khoản thu">
                     <div class="cost-row cost-head" role="row"><span>Khoản thu</span><span>Thành tiền</span></div>
                     <div class="cost-row" role="row"><span>Tiền thuê phòng</span><strong>{{ hoa_don.tien_phong|vnd }} VNĐ</strong></div>
-                    <div class="cost-row" role="row"><span>Tiền điện</span><strong>{{ hoa_don.tien_dien|vnd }} VNĐ</strong></div>
+                    <div class="cost-row" role="row"><span>Tiền điện{% if hoa_don.chi_so_dien_cu is not None and hoa_don.chi_so_dien_moi is not None and hoa_don.don_gia_dien is not None %}<small>{{ hoa_don.chi_so_dien_moi|vnd }} − {{ hoa_don.chi_so_dien_cu|vnd }} kWh × {{ hoa_don.don_gia_dien|vnd }} VNĐ/kWh</small>{% endif %}</span><strong>{{ hoa_don.tien_dien|vnd }} VNĐ</strong></div>
                     <div class="cost-row" role="row"><span>Tiền nước</span><strong>{{ hoa_don.tien_nuoc|vnd }} VNĐ</strong></div>
                     <div class="cost-row" role="row"><span>Phí dịch vụ</span><strong>{{ hoa_don.tien_dich_vu|vnd }} VNĐ</strong></div>
                     <div class="cost-row" role="row"><span>Khoản khác</span><strong>{{ hoa_don.phi_khac|vnd }} VNĐ</strong></div>
@@ -112,7 +116,7 @@
                 {% endif %}
             </section>
 
-            <section class="document-section" aria-labelledby="payment-history-title">
+            <section class="ndt-f5-panel document-section" aria-labelledby="payment-history-title">
                 <div class="section-heading">
                     <div>
                         <p class="section-eyebrow">Đối soát</p>
@@ -135,8 +139,19 @@
                 {% endif %}
             </section>
 
+            <section class="ndt-f5-panel document-section" aria-labelledby="payment-attempt-title" data-invoice-payment-attempts>
+                <div class="section-heading"><div><p class="section-eyebrow">Chứng từ</p><h2 id="payment-attempt-title">Lần gửi thanh toán</h2></div></div>
+                {% if payment_attempts %}
+                    <div class="payment-history">
+                    {% for attempt in payment_attempts %}
+                        <article><time>Lần {{ attempt.so_lan }} · {{ attempt.ngay_tao|date:"d/m/Y H:i" }}</time><strong>{{ attempt.get_trang_thai_display }}</strong><span>{{ attempt.ma_doi_chieu }}</span><p><a href="{% url 'anh_chung_tu_thanh_toan' attempt.id %}" target="_blank" rel="noopener">Xem chứng từ riêng tư</a>{% if attempt.ghi_chu_doi_soat %}<br>Lý do đối soát: {{ attempt.ghi_chu_doi_soat }}{% endif %}</p></article>
+                    {% endfor %}
+                    </div>
+                {% else %}<p class="empty-history">Chưa có chứng từ chuyển khoản.</p>{% endif %}
+            </section>
+
             {% if hoa_don.ghi_chu %}
-                <section class="document-section invoice-note invoice-note--standalone">
+                <section class="ndt-f5-panel document-section invoice-note invoice-note--standalone">
                     <strong>Ghi chú hóa đơn</strong>
                     <p>{{ hoa_don.ghi_chu|linebreaksbr }}</p>
                 </section>
@@ -158,17 +173,15 @@
                 <p class="side-label">Đối chiếu thanh toán</p>
                 <dl>
                     <div><dt>Tổng tiền</dt><dd>{{ tong_tien|vnd }} VNĐ</dd></div>
-                    <div>
-                        <dt>Đã xác nhận</dt>
-                        <dd>{% if hoa_don.trang_thai == "da_thanh_toan" %}{{ tong_tien|vnd }}{% else %}0{% endif %} VNĐ</dd>
-                    </div>
+                    <div><dt>Đã xác nhận</dt><dd>{% if hoa_don.trang_thai == "da_thanh_toan" %}{{ tong_tien|vnd }}{% else %}0{% endif %} VNĐ</dd></div>
                     <div><dt>Còn phải trả</dt><dd>{{ hoa_don.con_no|vnd }} VNĐ</dd></div>
                 </dl>
                 {% if hoa_don.trang_thai == "cho_xac_nhan" %}
-                    <p class="pending-message">Đã nhận báo chuyển khoản. Không cần gửi lại; số tiền chỉ được ghi nhận sau khi Admin xác nhận.</p>
+                    <p class="pending-message">Yêu cầu đã được gửi — chờ Admin xác nhận. Không cần gửi lại hoặc thanh toán thêm; số tiền chỉ được ghi nhận sau khi Admin xác nhận.</p>
                 {% endif %}
             </section>
         </aside>
     </div>
+  </div>
 </main>
 {% endblock %}

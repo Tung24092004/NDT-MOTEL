@@ -1,12 +1,20 @@
 <header class="ndt-page-header">
     <div class="ndt-page-header__content">
-        {% if breadcrumb %}<div class="ndt-breadcrumb">{{ breadcrumb }}</div>{% endif %}
+        {% if breadcrumb_root_label or breadcrumb_parent_label or breadcrumb_current %}
+            {% include "core/foundation/breadcrumb.html" %}
+        {% elif breadcrumb %}<p class="ndt-breadcrumb">{{ breadcrumb }}</p>{% endif %}
+        {% include "core/foundation/contextual_back.html" %}
         <h1 class="ndt-page-header__title">{{ title }}</h1>
         {% if subtitle %}<p class="ndt-page-header__subtitle">{{ subtitle }}</p>{% endif %}
+        {% if metadata %}<p class="ndt-page-header__metadata">{{ metadata }}</p>{% endif %}
     </div>
-    {% if action_url and action_label %}
+    {% if status_label or action_url and action_label or secondary_action_url and secondary_action_label %}
     <div class="ndt-page-header__actions">
+        {% if status_label %}<span class="ndt-badge{% if status_variant %} ndt-badge--{{ status_variant }}{% endif %}">{{ status_label }}</span>{% endif %}
+        {% if secondary_action_url and secondary_action_label %}<a class="ndt-button ndt-button--secondary" href="{{ secondary_action_url }}">{{ secondary_action_label }}</a>{% endif %}
+        {% if action_url and action_label %}
         <a class="ndt-button ndt-button--primary" href="{{ action_url }}">{{ action_label }}</a>
+        {% endif %}
     </div>
     {% endif %}
 </header>

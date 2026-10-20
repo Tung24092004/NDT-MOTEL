@@ -3,10 +3,12 @@
 
 {% block title %}Chính sách hỗ trợ - NDT Motel{% endblock %}
 {% block page_title %}Chính sách hỗ trợ{% endblock %}
-{% block tenant_styles %}<link rel="stylesheet" href="{% static 'css/tenant/chinh_sach_ho_tro.css' %}">{% endblock %}
+{% block tenant_styles %}<link rel="stylesheet" href="{% static 'css/tenant/chinh_sach_ho_tro.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/public_discovery_support_post_p6.css' %}?v=post-p6-public-1">{% endblock %}
 
 {% block tenant_content %}
-<main class="policy-page">
+<main class="policy-page ndt-f5 ndt-public-discovery ndt-public-policy" data-public-context="support-policy">
     <nav class="policy-breadcrumb" aria-label="Breadcrumb">
         <a href="{% url 'home' %}">Trang chủ</a><span aria-hidden="true">/</span><span>Chính sách hỗ trợ</span>
     </nav>

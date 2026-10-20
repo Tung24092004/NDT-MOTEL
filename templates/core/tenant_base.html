@@ -5,11 +5,11 @@
 <link rel="stylesheet" href="{% static 'css/tenant/components.css' %}">
 {% endblock %}
 {% block content %}
-<div class="tenant-ui">
+<div class="tenant-ui ndt-foundation">
     <nav class="tenant-breadcrumb" aria-label="Đường dẫn">
         <a href="{% url 'home' %}">Trang chủ</a><span aria-hidden="true">/</span>
-        {% if request.user.is_staff or request.user.is_superuser %}<a href="{% url 'dashboard_admin' %}">Khu quản trị</a>{% elif request.user.is_authenticated %}<a href="{% url 'tai_khoan' %}">Tài khoản &amp; đặt phòng</a>{% else %}<span>Tài khoản &amp; đặt phòng</span>{% endif %}
-        {% if request.user.is_authenticated and not request.user.is_staff and not request.user.is_superuser and request.resolver_match.url_name != "tai_khoan" %}<span aria-hidden="true">/</span><span aria-current="page">{% block page_title %}Tài khoản &amp; đặt phòng{% endblock %}</span>{% endif %}
+        {% if request.user.is_staff or request.user.is_superuser %}<a href="{% url 'dashboard_admin' %}">Khu quản trị</a>{% elif request.user.is_authenticated %}<a href="{% url 'tai_khoan' %}">Tổng quan</a>{% else %}<span>Tổng quan</span>{% endif %}
+        {% if request.user.is_authenticated and not request.user.is_staff and not request.user.is_superuser and request.resolver_match.url_name != "tai_khoan" %}<span aria-hidden="true">/</span><span aria-current="page">{% block page_title %}Tổng quan{% endblock %}</span>{% endif %}
     </nav>
     {% if not request.user.is_authenticated %}<p><a href="{% url 'chinh_sach_ho_tro' %}">Chính sách hỗ trợ</a></p>{% endif %}
     {% if request.user.is_authenticated and not request.user.is_staff and not request.user.is_superuser %}
@@ -23,28 +23,39 @@
         </summary>
         <nav class="tenant-navigation" aria-label="Dịch vụ người thuê">
         <div class="tenant-navigation__group" data-tenant-section="overview">
-            <span class="tenant-navigation__label">Tổng quan tài khoản</span>
-            <a href="{% url 'tai_khoan' %}" data-match="exact">Tài khoản & đặt phòng</a>
+            <a href="{% url 'tai_khoan' %}" data-match="exact">Tổng quan</a>
         </div>
-        <div class="tenant-navigation__group" data-tenant-section="stay">
-            <span class="tenant-navigation__label">Đặt phòng &amp; lưu trú</span>
-            <a href="{% url 'dat_phong_cua_toi' %}" data-match="prefix">Đặt phòng của tôi</a>
-            <a href="{% url 'hop_dong_cua_toi' %}" data-match="prefix">Hợp đồng của tôi</a>
+        <div class="tenant-navigation__group" data-tenant-section="booking">
+            <a href="{% url 'dat_phong_cua_toi' %}" data-match="prefix">Đặt phòng</a>
+        </div>
+        <div class="tenant-navigation__group" data-tenant-section="contract">
+            <a href="{% url 'hop_dong_cua_toi' %}" data-match="prefix">Hợp đồng thuê</a>
         </div>
         <div class="tenant-navigation__group" data-tenant-section="payments">
-            <span class="tenant-navigation__label">Thanh toán</span>
             <a href="{% url 'hoa_don_cua_toi' %}" data-match="prefix">Hóa đơn &amp; thanh toán</a>
         </div>
-        <div class="tenant-navigation__group" data-tenant-section="support">
-            <span class="tenant-navigation__label">Hỗ trợ dịch vụ</span>
-            <a href="{% url 'yeu_cau_sua_chua_cua_toi' %}" data-match="prefix">Sửa chữa của tôi</a>
-            <a href="{% url 'yeu_cau_ghep_cua_toi' %}" data-match="prefix">Ở ghép của tôi</a>
-            <a href="{% url 'chinh_sach_ho_tro' %}" data-match="prefix">Chính sách hỗ trợ</a>
+        <div class="tenant-navigation__group" data-tenant-section="residency">
+            <a href="{% url 'yeu_cau_sua_chua_cua_toi' %}" data-match="prefix">Lưu trú</a>
+            <a href="{% url 'yeu_cau_sua_chua_cua_toi' %}" data-match="prefix">Yêu cầu sửa chữa</a>
+            <a href="{% url 'yeu_cau_ghep_cua_toi' %}" data-match="prefix">Yêu cầu ở ghép</a>
         </div>
-        <div class="tenant-navigation__group" data-tenant-section="utilities">
-            <span class="tenant-navigation__label">Tiện ích tài khoản</span>
-            <a href="{% url 'thong_bao_cua_toi' %}" data-match="prefix">Thông báo của tôi</a>
-            <a href="{% url 'nhan_dien_su_dung_phong' %}" data-match="exact">Đăng ký Face ID</a>
+        <div class="tenant-navigation__group" data-tenant-section="access">
+            <a href="{% url 'quyen_va_lich_su_ra_vao_cua_toi' %}" data-match="exact">Ra vào &amp; Face ID</a>
+            <a href="{% url 'quyen_va_lich_su_ra_vao_cua_toi' %}" data-match="exact">Quyền &amp; lịch sử ra vào</a>
+            {% if hien_thi_lien_ket_face_id %}<a href="{% url 'nhan_dien_su_dung_phong' %}" data-match="exact">Đăng ký Face ID</a>{% endif %}
+        </div>
+        <div class="tenant-navigation__group" data-tenant-section="notifications">
+            <a href="{% url 'thong_bao_cua_toi' %}" data-match="prefix">Thông báo</a>
+        </div>
+        <div class="tenant-navigation__group" data-tenant-section="account">
+            <a href="{% url 'cap_nhat_thong_tin' %}" data-match="exact">Tài khoản</a>
+            <a href="{% url 'cap_nhat_thong_tin' %}" data-match="exact">Hồ sơ cá nhân</a>
+            <a href="{% url 'doi_mat_khau_user' %}" data-match="exact">Mật khẩu &amp; bảo mật</a>
+        </div>
+        <div class="tenant-navigation__group" data-tenant-section="help">
+            <a href="{% url 'trung_tam_tro_giup' %}" data-match="exact">Trung tâm trợ giúp</a>
+            <a href="{% url 'huong_dan_thue_phong' %}" data-match="exact">Hướng dẫn thuê phòng</a>
+            <a href="{% url 'chinh_sach_ho_tro' %}" data-match="prefix">Chính sách hỗ trợ</a>
         </div>
         </nav>
     </details>

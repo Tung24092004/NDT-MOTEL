@@ -48,6 +48,14 @@
     .smart-module-nav a:nth-child(4) { border-top: 1px solid var(--ndt-border); }
     .smart-dashboard-grid { grid-template-columns: 1fr; }
     .smart-side-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .smart-history-wrap { overflow: visible; border: 0; background: transparent; }
+    .smart-history-table { min-width: 0; display: block; }
+    .smart-history-table thead { display: none; }
+    .smart-history-table tbody { display: grid; gap: var(--ndt-space-3); }
+    .smart-history-table tr { display: grid; border: 1px solid var(--ndt-border); border-left: 3px solid var(--ndt-primary); border-radius: var(--ndt-radius-lg); background: var(--ndt-surface); overflow: hidden; }
+    .smart-history-table td { min-width: 0; padding: var(--ndt-space-3) var(--ndt-space-4); display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: var(--ndt-space-3); border-top: 1px solid var(--ndt-border); white-space: normal; overflow-wrap: anywhere; }
+    .smart-history-table td:first-child { border-top: 0; }
+    .smart-history-table td::before { color: var(--ndt-text-muted); content: attr(data-label); font-size: var(--ndt-text-xs); font-weight: 700; }
 }
 
 @media (max-width: 767px) {
@@ -59,12 +67,4 @@
     .smart-summary-badges { justify-content: flex-start; }
     .smart-room-row { grid-template-columns: 1fr; }
     .smart-room-state { justify-self: start; }
-    .smart-history-wrap { overflow: visible; border: 0; background: transparent; }
-    .smart-history-table { min-width: 0; display: block; }
-    .smart-history-table thead { display: none; }
-    .smart-history-table tbody { display: grid; gap: var(--ndt-space-3); }
-    .smart-history-table tr { display: grid; border: 1px solid var(--ndt-border); border-left: 3px solid var(--ndt-primary); border-radius: var(--ndt-radius-lg); background: var(--ndt-surface); overflow: hidden; }
-    .smart-history-table td { padding: var(--ndt-space-3) var(--ndt-space-4); display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: var(--ndt-space-3); border-top: 1px solid var(--ndt-border); }
-    .smart-history-table td:first-child { border-top: 0; }
-    .smart-history-table td::before { color: var(--ndt-text-muted); content: attr(data-label); font-size: var(--ndt-text-xs); font-weight: 700; }
 }

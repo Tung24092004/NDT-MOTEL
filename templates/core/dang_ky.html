@@ -1,263 +1,96 @@
 {% extends "core/tenant_base.html" %}
-{% load static bo_loc %}
+{% load static %}
 {% block title %}Đăng ký - NDT MOTEL{% endblock %}
-{% block tenant_styles %}<link rel="stylesheet" href="{% static 'css/tenant/dang_ky.css' %}">{% endblock %}
+{% block tenant_styles %}
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/account_auth_p6i.css' %}">
+{% endblock %}
 {% block tenant_content %}
-
-
-<section class="auth-page">
-
-    <div class="auth-card">
-
-        <div class="auth-brand">
-            <div class="auth-logo">N</div>
-
-            <h1>Tạo tài khoản</h1>
-
-            <p>
-                Đăng ký tài khoản để sử dụng NDT MOTEL
-            </p>
-        </div>
-
-        {% if next %}
-            <div class="auth-return-notice">
-                Sau khi đăng ký thành công, hệ thống sẽ đưa bạn tiếp tục chức năng đang sử dụng.
+<main class="ndt-f5 ndt-account-auth ndt-f5-page p6i-auth-page">
+    <div class="ndt-f5-container ndt-f5-container--form">
+        <section class="ndt-f5-card p6i-auth-card" aria-labelledby="register-title">
+            <div class="ndt-f5-card__header p6i-auth-heading">
+                <span class="p6i-auth-mark" aria-hidden="true">N</span>
+                <p class="ndt-f5-eyebrow">NDT MOTEL</p>
+                <h1 class="ndt-f5-card__title" id="register-title">Tạo tài khoản</h1>
+                <p>Đăng ký tài khoản để sử dụng các dịch vụ của NDT MOTEL.</p>
             </div>
-        {% endif %}
-
-        
-
-        <form
-            method="POST"
-            action="{% url 'dang_ky' %}"
-            autocomplete="off"
-        >
-
-            {% csrf_token %}
-
-            {% if next %}
-                <input
-                    type="hidden"
-                    name="next"
-                    value="{{ next }}"
-                >
-            {% endif %}
-
-            <div class="form-section-title">
-                 Thông tin tài khoản
+            <div class="ndt-f5-card__body">
+                {% if next %}
+                <div class="ndt-f5-alert ndt-f5-alert--info" role="status">
+                    <span class="ndt-f5-alert__mark" aria-hidden="true">i</span>
+                    <p>Sau khi đăng ký thành công, hệ thống sẽ đưa bạn tiếp tục chức năng đang sử dụng.</p>
+                </div>
+                {% endif %}
+                {% if messages %}
+                <div class="ndt-f5-alert ndt-f5-alert--error" role="alert">
+                    {% for message in messages %}
+                    <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <form method="POST" action="{% url 'dang_ky' %}" autocomplete="off" class="p6i-form" data-p6i-form>
+                    {% csrf_token %}
+                    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+                    <section class="ndt-f5-form-section" aria-labelledby="account-fields-title">
+                        <h2 class="ndt-f5-form-section__title" id="account-fields-title">Thông tin tài khoản</h2>
+                        <div class="ndt-f5-form-grid">
+                            <div class="ndt-f5-field">
+                                <label class="ndt-f5-label" for="username">Tên đăng nhập <span class="ndt-f5-required">*</span></label>
+                                <input id="username" class="ndt-f5-control{% if field_errors.username %} is-invalid{% endif %}" type="text" name="username" value="{{ form_data.username|default:'' }}" placeholder="Nhập tên đăng nhập" autocomplete="username" required autofocus {% if field_errors.username %}aria-invalid="true" aria-describedby="username-error"{% endif %}>
+                                {% if field_errors.username %}<p class="ndt-f5-error" id="username-error">{{ field_errors.username }}</p>{% endif %}
+                            </div>
+                            <div class="ndt-f5-field">
+                                <label class="ndt-f5-label" for="register-password">Mật khẩu <span class="ndt-f5-required">*</span></label>
+                                <div class="p6i-password-control">
+                                    <input id="register-password" class="ndt-f5-control{% if field_errors.password %} is-invalid{% endif %}" type="password" name="password" placeholder="Nhập mật khẩu" autocomplete="new-password" required {% if field_errors.password %}aria-invalid="true" aria-describedby="password-error"{% endif %}>
+                                    <button type="button" class="ndt-f5-button ndt-f5-button--neutral p6i-password-toggle" data-password-toggle="register-password" aria-label="Hiện mật khẩu">Hiện</button>
+                                </div>
+                                {% if field_errors.password %}<p class="ndt-f5-error" id="password-error">{{ field_errors.password }}</p>{% endif %}
+                            </div>
+                            <div class="ndt-f5-field ndt-f5-field--full">
+                                <label class="ndt-f5-label" for="register-password-confirm">Xác nhận mật khẩu <span class="ndt-f5-required">*</span></label>
+                                <div class="p6i-password-control">
+                                    <input id="register-password-confirm" class="ndt-f5-control{% if field_errors.password_confirm %} is-invalid{% endif %}" type="password" name="password_confirm" placeholder="Nhập lại mật khẩu" autocomplete="new-password" required {% if field_errors.password_confirm %}aria-invalid="true" aria-describedby="password-confirm-error"{% endif %}>
+                                    <button type="button" class="ndt-f5-button ndt-f5-button--neutral p6i-password-toggle" data-password-toggle="register-password-confirm" aria-label="Hiện mật khẩu">Hiện</button>
+                                </div>
+                                {% if field_errors.password_confirm %}<p class="ndt-f5-error" id="password-confirm-error">{{ field_errors.password_confirm }}</p>{% endif %}
+                            </div>
+                        </div>
+                    </section>
+                    <section class="ndt-f5-form-section" aria-labelledby="personal-fields-title">
+                        <h2 class="ndt-f5-form-section__title" id="personal-fields-title">Thông tin cá nhân</h2>
+                        <div class="ndt-f5-form-grid">
+                            <div class="ndt-f5-field ndt-f5-field--full">
+                                <label class="ndt-f5-label" for="ho_ten">Họ và tên <span class="ndt-f5-required">*</span></label>
+                                <input id="ho_ten" class="ndt-f5-control{% if field_errors.ho_ten %} is-invalid{% endif %}" type="text" name="ho_ten" value="{{ form_data.ho_ten|default:'' }}" placeholder="Nhập họ và tên đầy đủ" autocomplete="name" required {% if field_errors.ho_ten %}aria-invalid="true" aria-describedby="ho_ten-error"{% endif %}>
+                                {% if field_errors.ho_ten %}<p class="ndt-f5-error" id="ho_ten-error">{{ field_errors.ho_ten }}</p>{% endif %}
+                            </div>
+                            <div class="ndt-f5-field">
+                                <label class="ndt-f5-label" for="so_dien_thoai">Số điện thoại <span class="ndt-f5-required">*</span></label>
+                                <input id="so_dien_thoai" class="ndt-f5-control{% if field_errors.so_dien_thoai %} is-invalid{% endif %}" type="tel" name="so_dien_thoai" value="{{ form_data.so_dien_thoai|default:'' }}" placeholder="Nhập số điện thoại" autocomplete="tel" inputmode="tel" required {% if field_errors.so_dien_thoai %}aria-invalid="true" aria-describedby="so_dien_thoai-error"{% endif %}>
+                                {% if field_errors.so_dien_thoai %}<p class="ndt-f5-error" id="so_dien_thoai-error">{{ field_errors.so_dien_thoai }}</p>{% endif %}
+                            </div>
+                            <div class="ndt-f5-field">
+                                <label class="ndt-f5-label" for="email">Email</label>
+                                <input id="email" class="ndt-f5-control{% if field_errors.email %} is-invalid{% endif %}" type="email" name="email" value="{{ form_data.email|default:'' }}" placeholder="Nhập email" autocomplete="email" {% if field_errors.email %}aria-invalid="true" aria-describedby="email-error"{% endif %}>
+                                {% if field_errors.email %}<p class="ndt-f5-error" id="email-error">{{ field_errors.email }}</p>{% endif %}
+                            </div>
+                            <div class="ndt-f5-field ndt-f5-field--full">
+                                <label class="ndt-f5-label" for="cccd">CCCD <span class="ndt-f5-required">*</span></label>
+                                <input id="cccd" class="ndt-f5-control{% if field_errors.cccd %} is-invalid{% endif %}" type="text" name="cccd" value="{{ form_data.cccd|default:'' }}" placeholder="Nhập số CCCD" inputmode="numeric" autocomplete="off" required aria-describedby="cccd-help{% if field_errors.cccd %} cccd-error{% endif %}" {% if field_errors.cccd %}aria-invalid="true"{% endif %}>
+                                {% if field_errors.cccd %}<p class="ndt-f5-error" id="cccd-error">{{ field_errors.cccd }}</p>{% endif %}
+                                <p class="ndt-f5-help" id="cccd-help">CCCD được sử dụng để quản lý thông tin người thuê.</p>
+                            </div>
+                        </div>
+                    </section>
+                    <button type="submit" class="ndt-f5-button ndt-f5-button--primary p6i-submit-wide">Tạo tài khoản</button>
+                </form>
+                <p class="p6i-auth-alternative">Đã có tài khoản? <a class="ndt-f5-link" href="{% url 'dang_nhap' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Đăng nhập ngay</a></p>
+                <a href="{% url 'home' %}" class="ndt-f5-button ndt-f5-button--ghost p6i-home-link">← Quay lại trang chủ</a>
             </div>
-
-            <div class="form-grid">
-
-                <div class="auth-field">
-                    <label for="username">
-                        Tên đăng nhập
-                        <span class="required">*</span>
-                    </label>
-
-                    <div class="auth-input-wrap">
-                        <span class="auth-icon"></span>
-
-                        <input
-                            id="username"
-                            class="auth-input"
-                            type="text"
-                            name="username"
-                            value="{{ form_data.username|default:'' }}"
-                            placeholder="Nhập tên đăng nhập"
-                            autocomplete="username"
-                            required
-                            autofocus
-                        >
-                    </div>
-                </div>
-
-                <div class="auth-field">
-                    <label for="register-password">
-                        Mật khẩu
-                        <span class="required">*</span>
-                    </label>
-
-                    <div class="auth-input-wrap">
-                        <span class="auth-icon"></span>
-
-                        <input
-                            id="register-password"
-                            class="tenant-inline-1 auth-input"
-                            type="password"
-                            name="password"
-                            placeholder="Nhập mật khẩu"
-                            autocomplete="new-password"
-                            required
-                           
-                        >
-
-                        <button
-                            type="button"
-                            class="password-toggle"
-                            onclick="togglePassword('register-password', this)"
-                            aria-label="Hiện mật khẩu"
-                        >Hiện</button>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="form-section-title">
-                 Thông tin cá nhân
-            </div>
-
-            <div class="form-grid">
-
-                <div class="auth-field full">
-                    <label for="ho_ten">
-                        Họ và tên
-                        <span class="required">*</span>
-                    </label>
-
-                    <div class="auth-input-wrap">
-                        <span class="auth-icon"></span>
-
-                        <input
-                            id="ho_ten"
-                            class="auth-input"
-                            type="text"
-                            name="ho_ten"
-                            value="{{ form_data.ho_ten|default:'' }}"
-                            placeholder="Nhập họ và tên đầy đủ"
-                            autocomplete="name"
-                            required
-                        >
-                    </div>
-                </div>
-
-                <div class="auth-field">
-                    <label for="so_dien_thoai">
-                        Số điện thoại
-                        <span class="required">*</span>
-                    </label>
-
-                    <div class="auth-input-wrap">
-                        <span class="auth-icon"></span>
-
-                        <input
-                            id="so_dien_thoai"
-                            class="auth-input"
-                            type="tel"
-                            name="so_dien_thoai"
-                            value="{{ form_data.so_dien_thoai|default:'' }}"
-                            placeholder="Nhập số điện thoại"
-                            autocomplete="tel"
-                            required
-                        >
-                    </div>
-                </div>
-
-                <div class="auth-field">
-                    <label for="email">
-                        Email
-                    </label>
-
-                    <div class="auth-input-wrap">
-                        <span class="auth-icon"></span>
-
-                        <input
-                            id="email"
-                            class="auth-input"
-                            type="email"
-                            name="email"
-                            value="{{ form_data.email|default:'' }}"
-                            placeholder="Nhập email"
-                            autocomplete="email"
-                        >
-                    </div>
-                </div>
-
-                <div class="auth-field full">
-                    <label for="cccd">
-                        CCCD
-                        <span class="required">*</span>
-                    </label>
-
-                    <div class="auth-input-wrap">
-                        <span class="auth-icon"></span>
-
-                        <input
-                            id="cccd"
-                            class="auth-input"
-                            type="text"
-                            name="cccd"
-                            value="{{ form_data.cccd|default:'' }}"
-                            placeholder="Nhập số CCCD"
-                            inputmode="numeric"
-                            autocomplete="off"
-                            required
-                        >
-                    </div>
-
-                    <div class="auth-help">
-                        CCCD được sử dụng để quản lý thông tin người thuê.
-                    </div>
-                </div>
-
-            </div>
-
-            <button
-                type="submit"
-                class="auth-submit"
-            >
-                Tạo tài khoản
-            </button>
-
-        </form>
-
-        <div class="auth-divider">
-            hoặc
-        </div>
-
-        <div class="auth-login">
-            Đã có tài khoản?
-            <a href="{% url 'dang_nhap' %}{% if next %}?next={{ next|urlencode }}{% endif %}">
-                Đăng nhập ngay
-            </a>
-        </div>
-
-        <a
-            href="{% url 'home' %}"
-            class="auth-home"
-        >
-            ← Quay lại trang chủ
-        </a>
-
+        </section>
     </div>
-
-</section>
-
-<script>
-    function togglePassword(inputId, button) {
-        const input = document.getElementById(inputId);
-
-        if (!input) {
-            return;
-        }
-
-        if (input.type === "password") {
-            input.type = "text";
-            button.textContent = input.type === "password" ? "Hiện" : "Ẩn";
-            button.setAttribute(
-                "aria-label",
-                "Ẩn mật khẩu"
-            );
-        } else {
-            input.type = "password";
-            button.textContent = input.type === "password" ? "Hiện" : "Ẩn";
-            button.setAttribute(
-                "aria-label",
-                "Hiện mật khẩu"
-            );
-        }
-    }
-</script>
-
-
+</main>
+<script src="{% static 'js/account_auth_p6i.js' %}" defer></script>
 {% endblock %}

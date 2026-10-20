@@ -2,14 +2,20 @@
 from django.urls import path
 from django.views.generic import RedirectView
 from core.views_chinh_sach import chinh_sach_ho_tro
+from core.views_huong_dan import huong_dan_thue_phong, trung_tam_tro_giup
 from core.views_dat_phong import dat_phong_cua_toi, chi_tiet_dat_phong_cua_toi, thanh_toan_coc_cua_toi
 from core.views_quan_tri_dat_phong import (
     quan_ly_dat_phong as admin_quan_ly_dat_phong,
     chi_tiet_dat_phong as admin_chi_tiet_dat_phong,
-    xac_nhan_dat_phong_va_tao_hop_dong,
-    tu_choi_thanh_toan_coc,
     tu_choi_yeu_cau_dat_phong,
 )
+from core.views_xac_nhan_coc import xac_nhan_dat_phong_va_tao_hop_dong, tu_choi_thanh_toan_coc
+from core.views_yeu_cau_nguoi_o_cung import (
+    quan_ly_yeu_cau_nguoi_o_cung, chi_tiet_yeu_cau_nguoi_o_cung,
+    yeu_cau_nguoi_o_cung_bo_sung, duyet_yeu_cau_nguoi_o_cung,
+    tu_choi_yeu_cau_nguoi_o_cung,
+)
+from core.views_chung_tu_danh_tinh_nguoi_o_cung import xem_chung_tu_danh_tinh_nguoi_o_cung
 from core.views_thong_bao import (
     thong_bao_admin,
     chi_tiet_thong_bao_admin,
@@ -36,13 +42,13 @@ from core.views_quan_tri import (
 
 # Nghiep vu: phong
 from core.views_phong import (
-    danh_sach_phong,
-    chi_tiet_phong,
     quan_ly_phong,
     tao_phong,
     sua_phong,
     xoa_phong,
 )
+from core.views_danh_sach_phong import danh_sach_phong
+from core.views_chi_tiet_phong import chi_tiet_phong
 
 # Nghiep vu: dat phong
 from core.views_dat_phong import (
@@ -68,8 +74,8 @@ from core.views_tai_khoan import (
 )
 
 # Nghiep vu: dang nhap
+from core.views_dang_ky import dang_ky
 from core.views_dang_nhap import (
-    dang_ky,
     dang_nhap,
     dang_xuat,
 )
@@ -81,15 +87,23 @@ from core.views_nhat_ky import (
 )
 
 # Nghiep vu: hop dong
+from core.views_tao_hop_dong import tao_hop_dong
+from core.views_gui_hop_dong import gui_hop_dong_xac_nhan
+from core.views_phan_hoi_hop_dong import chap_thuan_hop_dong, yeu_cau_chinh_sua_hop_dong, mo_lai_hop_dong_de_sua
+from core.views_kich_hoat_hop_dong import kich_hoat_hop_dong
 from core.views_hop_dong import (
-    tao_hop_dong,
     quan_ly_hop_dong,
     chi_tiet_hop_dong,
     xu_ly_hop_dong,
     sua_hop_dong,
     hop_dong_cua_toi,
     chi_tiet_hop_dong_cua_toi,
+    tao_yeu_cau_nguoi_o_cung_cua_toi,
+    tai_chung_tu_danh_tinh_nguoi_o_cung_cua_toi,
+    huy_yeu_cau_nguoi_o_cung_cua_toi,
+    gui_lai_yeu_cau_nguoi_o_cung_cua_toi,
     xuat_hop_dong_pdf,
+    xuat_phu_luc_hop_dong_pdf,
 )
 
 # Nghiep vu: gia han
@@ -104,6 +118,8 @@ from core.views_hoa_don import (
     hoa_don_cua_toi,
     chi_tiet_hoa_don_cua_toi,
     quan_ly_hoa_don,
+    bao_cao_cong_no,
+    chot_chi_so_dien_hang_loat,
     chi_tiet_hoa_don,
     tao_hoa_don,
 )
@@ -113,6 +129,9 @@ from core.views_thanh_toan import (
     thanh_toan_hoa_don_cua_toi,
     xu_ly_hoa_don,
 )
+from core.views_chung_tu_thanh_toan import xem_anh_chung_tu_thanh_toan
+from core.views_doi_soat_thanh_toan import doi_soat_ngoai_le_thanh_toan
+from core.views_phat_hanh_hoa_don import phat_hanh_hoa_don
 
 # Nghiep vu: nguoi thue
 from core.views_nguoi_thue import (
@@ -160,11 +179,14 @@ from core.views_smart_room import (
     quan_ly_face_profile,
     tao_face_profile,
     chi_tiet_face_profile,
+    face_profile_image,
+    face_profile_media,
     xu_ly_face_profile,
     nhan_dien_su_dung_phong,
     face_id_dang_ky,
     trang_xac_thuc_face_id,
     face_id_xac_thuc,
+    quyen_va_lich_su_ra_vao_cua_toi,
     quan_ly_quyen_ra_vao,
     tao_quyen_ra_vao,
     chi_tiet_quyen_ra_vao,
@@ -177,6 +199,7 @@ from core.views_smart_room import (
 
 
 urlpatterns = [
+    path('thanh-toan/chung-tu/<int:id>/anh/', xem_anh_chung_tu_thanh_toan, name='anh_chung_tu_thanh_toan'),
     path('dat-phong-cua-toi/', dat_phong_cua_toi, name='dat_phong_cua_toi'),
     path('dat-phong-cua-toi/<int:id>/', chi_tiet_dat_phong_cua_toi, name='chi_tiet_dat_phong_cua_toi'),
     path('dat-phong-cua-toi/<int:id>/thanh-toan-coc/', thanh_toan_coc_cua_toi, name='thanh_toan_coc_cua_toi'),
@@ -200,6 +223,18 @@ urlpatterns = [
         "",
         home,
         name="home"
+    ),
+
+    path(
+        "huong-dan-thue-phong/",
+        huong_dan_thue_phong,
+        name="huong_dan_thue_phong"
+    ),
+
+    path(
+        "trung-tam-tro-giup/",
+        trung_tam_tro_giup,
+        name="trung_tam_tro_giup"
     ),
 
     # =====================================================
@@ -299,6 +334,12 @@ urlpatterns = [
     ),
 
     path(
+        "tai-khoan/quyen-va-lich-su-ra-vao/",
+        quyen_va_lich_su_ra_vao_cua_toi,
+        name="quyen_va_lich_su_ra_vao_cua_toi"
+    ),
+
+    path(
         "tai-khoan/dat-phong/<int:id>/huy/",
         huy_dat_phong_cua_toi,
         name="huy_dat_phong_cua_toi_legacy"
@@ -343,6 +384,18 @@ urlpatterns = [
         chi_tiet_hop_dong_cua_toi,
         name="chi_tiet_hop_dong_cua_toi"
     ),
+    path("hop-dong-cua-toi/<int:id>/nguoi-o-cung/", tao_yeu_cau_nguoi_o_cung_cua_toi, name="tao_yeu_cau_nguoi_o_cung_cua_toi"),
+    path("yeu-cau-nguoi-o-cung/<int:request_id>/chung-tu/", tai_chung_tu_danh_tinh_nguoi_o_cung_cua_toi, name="tai_chung_tu_danh_tinh_nguoi_o_cung_cua_toi"),
+    path("chung-tu-danh-tinh-nguoi-o-cung/<int:evidence_id>/", xem_chung_tu_danh_tinh_nguoi_o_cung, name="xem_chung_tu_danh_tinh_nguoi_o_cung"),
+    path("yeu-cau-nguoi-o-cung/<int:request_id>/huy/", huy_yeu_cau_nguoi_o_cung_cua_toi, name="huy_yeu_cau_nguoi_o_cung_cua_toi"),
+    path("yeu-cau-nguoi-o-cung/<int:request_id>/gui-lai/", gui_lai_yeu_cau_nguoi_o_cung_cua_toi, name="gui_lai_yeu_cau_nguoi_o_cung_cua_toi"),
+    path("quan-tri/yeu-cau-nguoi-o-cung/", quan_ly_yeu_cau_nguoi_o_cung, name="quan_ly_yeu_cau_nguoi_o_cung"),
+    path("quan-tri/yeu-cau-nguoi-o-cung/<int:request_id>/", chi_tiet_yeu_cau_nguoi_o_cung, name="chi_tiet_yeu_cau_nguoi_o_cung"),
+    path("quan-tri/yeu-cau-nguoi-o-cung/<int:request_id>/bo-sung/", yeu_cau_nguoi_o_cung_bo_sung, name="yeu_cau_nguoi_o_cung_bo_sung"),
+    path("quan-tri/yeu-cau-nguoi-o-cung/<int:request_id>/duyet/", duyet_yeu_cau_nguoi_o_cung, name="duyet_yeu_cau_nguoi_o_cung"),
+    path("quan-tri/yeu-cau-nguoi-o-cung/<int:request_id>/tu-choi/", tu_choi_yeu_cau_nguoi_o_cung, name="tu_choi_yeu_cau_nguoi_o_cung"),
+    path("hop-dong-cua-toi/<int:id>/chap-thuan/", chap_thuan_hop_dong, name="chap_thuan_hop_dong"),
+    path("hop-dong-cua-toi/<int:id>/yeu-cau-chinh-sua/", yeu_cau_chinh_sua_hop_dong, name="yeu_cau_chinh_sua_hop_dong"),
 
     # -----------------------------------------------------
     # GIA HẠN HỢP ĐỒNG - NGƯỜI THUÊ
@@ -368,6 +421,11 @@ urlpatterns = [
         "hop-dong/<int:id>/xuat-pdf/",
         xuat_hop_dong_pdf,
         name="xuat_hop_dong_pdf"
+    ),
+    path(
+        "hop-dong/phu-luc/<int:id>/xuat-pdf/",
+        xuat_phu_luc_hop_dong_pdf,
+        name="xuat_phu_luc_hop_dong_pdf"
     ),
 
     # =====================================================
@@ -567,6 +625,14 @@ urlpatterns = [
     ),
 
     path(
+        "quan-ly-hop-dong/<int:id>/gui-xac-nhan/",
+        gui_hop_dong_xac_nhan,
+        name="gui_hop_dong_xac_nhan"
+    ),
+    path("quan-ly-hop-dong/<int:id>/mo-lai-de-sua/", mo_lai_hop_dong_de_sua, name="mo_lai_hop_dong_de_sua"),
+    path("quan-ly-hop-dong/<int:id>/kich-hoat/", kich_hoat_hop_dong, name="kich_hoat_hop_dong"),
+
+    path(
         "quan-ly-hop-dong/<int:id>/xu-ly/",
         xu_ly_hop_dong,
         name="xu_ly_hop_dong"
@@ -608,10 +674,29 @@ urlpatterns = [
     ),
 
     path(
+        "quan-ly-hoa-don/bao-cao-cong-no/",
+        bao_cao_cong_no,
+        name="bao_cao_cong_no"
+    ),
+
+    path(
+        "quan-ly-thanh-toan/doi-soat-ngoai-le/",
+        doi_soat_ngoai_le_thanh_toan,
+        name="doi_soat_ngoai_le_thanh_toan",
+    ),
+
+    path(
+        "quan-ly-hoa-don/chot-chi-so-hang-loat/",
+        chot_chi_so_dien_hang_loat,
+        name="chot_chi_so_dien_hang_loat"
+    ),
+
+    path(
         "quan-ly-hoa-don/<int:id>/",
         chi_tiet_hoa_don,
         name="chi_tiet_hoa_don"
     ),
+    path("quan-ly-hoa-don/<int:id>/phat-hanh/", phat_hanh_hoa_don, name="phat_hanh_hoa_don"),
 
     path(
         "quan-ly-hoa-don/<int:id>/xu-ly/",
@@ -825,6 +910,12 @@ urlpatterns = [
         name="xu_ly_face_profile"
     ),
 
+    path(
+        "smart-room/face-profile/<int:id>/anh/",
+        face_profile_image,
+        name="face_profile_image"
+    ),
+
     # =====================================================
     # SMART ROOM - FACE ID ĐĂNG KÝ WEBCAM
     # =====================================================
@@ -833,6 +924,12 @@ urlpatterns = [
         "smart-room/face-profile/<int:id>/dang-ky/",
         face_id_dang_ky,
         name="face_id_dang_ky"
+    ),
+
+    path(
+        "media/face_profiles/<path:path>",
+        face_profile_media,
+        name="face_profile_media"
     ),
 
     path(

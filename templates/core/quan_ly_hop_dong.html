@@ -1,241 +1,87 @@
-﻿{% extends "core/base.html" %}
+{% extends "core/base.html" %}
 {% load static bo_loc %}
-
 {% block title %}Quản lý hợp đồng - NDT MOTEL{% endblock %}
 {% block page_title %}Quản lý hợp đồng{% endblock %}
-
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
-    <link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
-    <link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
-    <link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
-    <link rel="stylesheet" href="{% static 'css/contract_management.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/contract_management.css' %}">
 {% endblock %}
-
 {% block content %}
-<div class="contract-management ndt-foundation" data-contract-screen="list">
-
-    {% url 'dashboard_admin' as dashboard_url %}
-
-    {% include 'core/foundation/page_header.html' with breadcrumb='Quản trị / Hợp đồng' title='Quản lý hợp đồng' subtitle='Theo dõi trạng thái, thời hạn, phòng thuê và các thao tác quản trị của hợp đồng.' action_url=dashboard_url action_label='Về dashboard' %}
-
-    {# Bốn chỉ số tổng quan, lấy trực tiếp từ context của view. #}
-    <section class="contract-stats" aria-label="Thống kê hợp đồng">
-        <article class="ndt-surface contract-stat">
-            <span>Tổng hợp đồng</span>
-            <strong>{{ tong_hop_dong }}</strong>
-        </article>
-
-        <article class="ndt-surface contract-stat">
-            <span>Đang hiệu lực</span>
-            <strong>{{ dang_hieu_luc }}</strong>
-        </article>
-
-        <article class="ndt-surface contract-stat">
-            <span>Sắp hết hạn</span>
-            <strong>{{ sap_het_han }}</strong>
-        </article>
-
-        <article class="ndt-surface contract-stat">
-            <span>Đã hủy / hết hạn</span>
-            <strong>{{ da_huy|add:da_het_han }}</strong>
-        </article>
-    </section>
-
-    {# Bộ lọc GET: giữ nguyên tên q và trang_thai mà view đang nhận. #}
-    <section class="ndt-filter-bar contract-filter" aria-labelledby="contract-filter-title">
-        <h2 class="ndt-filter-bar__title" id="contract-filter-title">
-            Tìm kiếm và lọc
-        </h2>
-
-        <form
-            class="ndt-filter-bar__form contract-filter__form"
-            method="get"
-            action="{% url 'quan_ly_hop_dong' %}"
-        >
-            <div class="ndt-field contract-filter__search">
-                <label class="ndt-label" for="contract-query">Từ khóa</label>
-                <input
-                    class="ndt-control"
-                    id="contract-query"
-                    type="search"
-                    name="q"
-                    value="{{ tu_khoa }}"
-                    placeholder="Số hợp đồng, người thuê, CCCD, phòng hoặc cơ sở"
-                >
-            </div>
-
-            <div class="ndt-field">
-                <label class="ndt-label" for="contract-status">Trạng thái</label>
-                <select class="ndt-control" id="contract-status" name="trang_thai">
-                    <option value="">Tất cả</option>
-                    <option value="cho_hieu_luc" {% if trang_thai == 'cho_hieu_luc' %}selected{% endif %}>
-                        Chờ hiệu lực
-                    </option>
-                    <option value="dang_hieu_luc" {% if trang_thai == 'dang_hieu_luc' %}selected{% endif %}>
-                        Đang hiệu lực
-                    </option>
-                    <option value="sap_het_han" {% if trang_thai == 'sap_het_han' %}selected{% endif %}>
-                        Sắp hết hạn
-                    </option>
-                    <option value="da_het_han" {% if trang_thai == 'da_het_han' %}selected{% endif %}>
-                        Đã hết hạn
-                    </option>
-                    <option value="da_huy" {% if trang_thai == 'da_huy' %}selected{% endif %}>
-                        Đã hủy
-                    </option>
-                </select>
-            </div>
-
-            <div class="contract-filter__actions">
-                <button class="ndt-button ndt-button--primary" type="submit">
-                    Áp dụng
-                </button>
-
-                {% if tu_khoa or trang_thai %}
-                    <a
-                        class="ndt-button ndt-button--ghost"
-                        href="{% url 'quan_ly_hop_dong' %}"
-                    >
-                        Đặt lại
-                    </a>
-                {% endif %}
-            </div>
-        </form>
-    </section>
-
-    {# Các booking đã duyệt nhưng chưa có hợp đồng, cho phép tạo thủ công. #}
-    {% if don_chua_co_hop_dong %}
-        <section class="ndt-surface contract-manual" aria-labelledby="manual-contract-title">
-            <div>
-                <span class="contract-eyebrow">Hỗ trợ legacy</span>
-                <h2 id="manual-contract-title">Đơn đã duyệt chưa có hợp đồng</h2>
-                <p>
-                    Route tạo hợp đồng thủ công vẫn tồn tại cho các đơn đã duyệt chưa có hợp đồng.
-                    Backend vẫn kiểm tra lại điều kiện trước khi tạo.
-                </p>
-            </div>
-
-            <div class="contract-manual__list">
-                {% for don in don_chua_co_hop_dong|slice:":4" %}
-                    <div class="contract-manual__item">
-                        <div>
-                            <strong>{{ don.ma_yeu_cau|default:don.id }}</strong>
-                            <span>
-                                {{ don.nguoi_thue.ho_ten }} - Phòng {{ don.phong.so_phong }}
-                            </span>
-                        </div>
-
-                        <a
-                            class="ndt-button ndt-button--secondary ndt-button--compact"
-                            href="{% url 'tao_hop_dong' don.id %}"
-                        >
-                            Tạo thủ công
-                        </a>
-                    </div>
-                {% endfor %}
-            </div>
-        </section>
-    {% endif %}
-
-    <div class="contract-result">
-        <div>
-            <h2>Danh sách hợp đồng</h2>
-            <p>{{ hop_dongs|length }} bản ghi theo bộ lọc hiện tại</p>
-        </div>
+<main class="ndt-f5 ndt-contract-management ndt-f5-page" data-contract-screen="admin-list">
+<div class="ndt-f5-container ndt-f5-container--full contract-stack">
+  <header class="ndt-f5-page-header">
+    <div class="ndt-f5-page-header__content">
+      <h1 class="ndt-f5-page-header__title">Quản lý hợp đồng</h1>
+      <p class="ndt-f5-page-header__description">Theo dõi thời hạn, trạng thái, phòng thuê và xử lý hợp đồng trong một danh sách thống nhất.</p>
     </div>
+    <div class="ndt-f5-actions"><a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'dashboard_admin' %}">Về dashboard</a></div>
+  </header>
 
-    {% if hop_dongs %}
-        <div class="ndt-table-wrap">
-            <table class="ndt-table contract-table">
-                <thead>
-                    <tr>
-                        <th>Hợp đồng</th>
-                        <th>Người thuê</th>
-                        <th>Phòng</th>
-                        <th>Thời hạn</th>
-                        <th>Tài chính</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
+  <section class="contract-stats" aria-label="Thống kê hợp đồng">
+    <article class="ndt-f5-panel contract-stat"><span>Tổng hợp đồng</span><strong>{{ tong_hop_dong }}</strong></article>
+    <article class="ndt-f5-panel contract-stat"><span>Chờ người thuê xác nhận</span><strong>{{ cho_nguoi_thue_xac_nhan }}</strong></article>
+    <article class="ndt-f5-panel contract-stat"><span>Đang hiệu lực</span><strong>{{ dang_hieu_luc }}</strong></article>
+    <article class="ndt-f5-panel contract-stat"><span>Sắp hết hạn</span><strong>{{ sap_het_han }}</strong></article>
+    <article class="ndt-f5-panel contract-stat"><span>Đã hủy / hết hạn</span><strong>{{ da_huy|add:da_het_han }}</strong></article>
+  </section>
 
-                <tbody>
-                    {% for hd in hop_dongs %}
-                        <tr>
-                            <td>
-                                <a
-                                    class="contract-code"
-                                    href="{% url 'chi_tiet_hop_dong' hd.id %}"
-                                >
-                                    {{ hd.so_hop_dong }}
-                                </a>
-                                <span class="contract-note">
-                                    Tạo {{ hd.ngay_tao|date:'d/m/Y' }}
-                                </span>
-                            </td>
+  <form class="ndt-f5-filter" method="get" action="{% url 'quan_ly_hop_dong' %}" aria-label="Tìm kiếm và lọc hợp đồng">
+    <div class="ndt-f5-field">
+      <label class="ndt-f5-label" for="contract-query">Từ khóa</label>
+      <input class="ndt-f5-control" id="contract-query" type="search" name="q" value="{{ tu_khoa }}" placeholder="Số hợp đồng, người thuê, CCCD, phòng hoặc cơ sở">
+    </div>
+    <div class="ndt-f5-field">
+      <label class="ndt-f5-label" for="contract-status">Trạng thái</label>
+      <select class="ndt-f5-control" id="contract-status" name="trang_thai">
+        <option value="">Tất cả</option>
+        <option value="cho_nguoi_thue_xac_nhan" {% if trang_thai == 'cho_nguoi_thue_xac_nhan' %}selected{% endif %}>Chờ người thuê xác nhận</option>
+        <option value="cho_hieu_luc" {% if trang_thai == 'cho_hieu_luc' %}selected{% endif %}>Chờ hiệu lực</option>
+        <option value="dang_hieu_luc" {% if trang_thai == 'dang_hieu_luc' %}selected{% endif %}>Đang hiệu lực</option>
+        <option value="sap_het_han" {% if trang_thai == 'sap_het_han' %}selected{% endif %}>Sắp hết hạn</option>
+        <option value="da_het_han" {% if trang_thai == 'da_het_han' %}selected{% endif %}>Đã hết hạn</option>
+        <option value="da_huy" {% if trang_thai == 'da_huy' %}selected{% endif %}>Đã hủy</option>
+      </select>
+    </div>
+    <div class="ndt-f5-filter__actions">
+      <button class="ndt-f5-button ndt-f5-button--primary" type="submit">Áp dụng</button>
+      {% if tu_khoa or trang_thai %}<a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'quan_ly_hop_dong' %}">Đặt lại</a>{% endif %}
+    </div>
+  </form>
 
-                            <td>
-                                <strong>{{ hd.dat_phong.nguoi_thue.ho_ten }}</strong>
-                                <span class="contract-note">
-                                    {{ hd.dat_phong.nguoi_thue.so_dien_thoai|default:'Chưa có số điện thoại' }}
-                                </span>
-                            </td>
+  {% if don_chua_co_hop_dong %}
+  <section class="ndt-f5-panel contract-manual" aria-labelledby="manual-title">
+    <div><h2 class="contract-section-title" id="manual-title">Đơn đã duyệt chưa có hợp đồng</h2><p class="contract-muted">Route tạo thủ công được giữ cho dữ liệu legacy; backend vẫn khóa và kiểm tra lại booking trước khi tạo.</p></div>
+    <div class="contract-manual-list">
+      {% for don in don_chua_co_hop_dong|slice:":4" %}
+      <div class="contract-manual-item"><div><strong>{{ don.ma_yeu_cau|default:don.id }}</strong><span class="contract-subline">{{ don.nguoi_thue.ho_ten }} · Phòng {{ don.phong.so_phong }}</span></div><a class="ndt-f5-button ndt-f5-button--secondary ndt-f5-button--small" href="{% url 'tao_hop_dong' don.id %}">Tạo thủ công</a></div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
 
-                            <td>
-                                <strong>Phòng {{ hd.dat_phong.phong.so_phong }}</strong>
-                                <span class="contract-note">
-                                    {{ hd.dat_phong.phong.co_so.ten_co_so|default:'NDT MOTEL' }}
-                                </span>
-                            </td>
-
-                            <td>
-                                {{ hd.ngay_bat_dau|date:'d/m/Y' }}
-                                <span class="contract-note">
-                                    đến {{ hd.ngay_ket_thuc|date:'d/m/Y' }}
-                                </span>
-                            </td>
-
-                            <td>
-                                <strong>{{ hd.tien_thue_thang|vnd }} VNĐ</strong>
-                                <span class="contract-note">
-                                    Cọc {{ hd.tien_coc|vnd }} VNĐ
-                                </span>
-                            </td>
-
-                            <td>
-                                {% include 'core/partials/contract_status_badge.html' with contract=hd %}
-                            </td>
-
-                            <td>
-                                <div class="ndt-table__actions contract-actions">
-                                    <a
-                                        class="ndt-button ndt-button--secondary ndt-button--compact"
-                                        href="{% url 'chi_tiet_hop_dong' hd.id %}"
-                                    >
-                                        Chi tiết
-                                    </a>
-                                    <a
-                                        class="ndt-button ndt-button--ghost ndt-button--compact"
-                                        href="{% url 'xuat_hop_dong_pdf' hd.id %}"
-                                    >
-                                        PDF
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        {% url 'quan_ly_hop_dong' as reset_url %}
-
-        {% if tu_khoa or trang_thai %}
-            {% include 'core/foundation/empty_state.html' with title='Không có hợp đồng phù hợp' description='Hãy điều chỉnh bộ lọc để xem các hợp đồng khác.' action_url=reset_url action_label='Xóa bộ lọc' %}
-        {% else %}
-            {% include 'core/foundation/empty_state.html' with title='Chưa có hợp đồng' description='Hợp đồng sẽ xuất hiện sau khi Admin xác nhận cọc và tạo hợp đồng hoặc tạo thủ công từ đơn đã duyệt.' %}
-        {% endif %}
-    {% endif %}
+  <div class="contract-result"><div><h2 class="contract-section-title">Danh sách hợp đồng</h2><p>{{ hop_dongs|length }} bản ghi theo bộ lọc hiện tại</p></div></div>
+  {% if hop_dongs %}
+  <div class="ndt-f5-table-wrap">
+    <table class="ndt-f5-table contract-table">
+      <thead><tr><th>Hợp đồng</th><th>Người thuê</th><th>Phòng</th><th>Thời hạn</th><th>Tài chính</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+      <tbody>
+      {% for hd in hop_dongs %}
+      <tr>
+        <td data-label="Hợp đồng"><a class="contract-code" href="{% url 'chi_tiet_hop_dong' hd.id %}">{{ hd.so_hop_dong }}</a><span class="contract-subline">Tạo {{ hd.ngay_tao|date:'d/m/Y' }}</span>{% if hd.trang_thai == 'cho_nguoi_thue_xac_nhan' %}<span class="contract-subline">{% if hd.phien_ban_hien_tai and hd.phien_ban_hien_tai.thoi_diem_gui %}Gửi review {{ hd.phien_ban_hien_tai.thoi_diem_gui|date:'d/m/Y H:i' }}{% else %}Chưa có thời điểm gửi review{% endif %}</span>{% endif %}</td>
+        <td data-label="Người thuê"><strong>{{ hd.dat_phong.nguoi_thue.ho_ten }}</strong><span class="contract-subline">{{ hd.dat_phong.nguoi_thue.so_dien_thoai|default:'Chưa có số điện thoại' }}</span></td>
+        <td data-label="Phòng"><strong>Phòng {{ hd.dat_phong.phong.so_phong }}</strong><span class="contract-subline">{{ hd.dat_phong.phong.co_so.ten_co_so|default:'NDT MOTEL' }}</span></td>
+        <td data-label="Thời hạn">{{ hd.ngay_bat_dau|date:'d/m/Y' }}<span class="contract-subline">đến {{ hd.ngay_ket_thuc|date:'d/m/Y' }}</span></td>
+        <td data-label="Tài chính"><strong>{{ hd.tien_thue_thang|vnd }} VNĐ</strong><span class="contract-subline">Cọc {{ hd.tien_coc|vnd }} VNĐ</span></td>
+        <td data-label="Trạng thái">{% include 'core/partials/contract_status_badge.html' with contract=hd %}</td>
+        <td data-label="Thao tác"><div class="ndt-f5-table__actions"><a class="ndt-f5-button ndt-f5-button--secondary ndt-f5-button--small" href="{% url 'chi_tiet_hop_dong' hd.id %}">Chi tiết</a><a class="ndt-f5-button ndt-f5-button--neutral ndt-f5-button--small" href="{% url 'xuat_hop_dong_pdf' hd.id %}">PDF</a></div></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <section class="ndt-f5-empty"><div class="ndt-f5-empty__icon" aria-hidden="true">HD</div><h2 class="ndt-f5-empty__title">{% if tu_khoa or trang_thai %}Không có hợp đồng phù hợp{% else %}Chưa có hợp đồng{% endif %}</h2><p class="ndt-f5-empty__description">{% if tu_khoa or trang_thai %}Hãy điều chỉnh bộ lọc để xem các hợp đồng khác.{% else %}Hợp đồng sẽ xuất hiện sau khi được tạo từ booking hợp lệ.{% endif %}</p>{% if tu_khoa or trang_thai %}<div class="ndt-f5-empty__action"><a class="ndt-f5-button ndt-f5-button--neutral" href="{% url 'quan_ly_hop_dong' %}">Xóa bộ lọc</a></div>{% endif %}</section>
+  {% endif %}
 </div>
+</main>
 {% endblock %}

@@ -507,8 +507,9 @@ class AdminDashboardUIRegressionTests(BusinessFixture):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "core/dashboard_admin.html")
-        self.assertContains(response, 'class="admin-dashboard ndt-foundation"', html=False)
-        self.assertContains(response, "css/admin_dashboard.css")
+        self.assertContains(response, 'class="ndt-f5 ndt-f5-page ndt-admin-dashboard"', html=False)
+        self.assertContains(response, "css/foundation/p5.css")
+        self.assertContains(response, "css/admin_dashboard_p6g.css")
         self.assertNotContains(response, "data-room-count")
         dashboard_source = (
             Path(settings.BASE_DIR) / "templates/core/dashboard_admin.html"

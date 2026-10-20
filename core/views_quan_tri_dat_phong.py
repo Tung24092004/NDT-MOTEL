@@ -36,12 +36,12 @@ def _decorate_booking(booking):
     latest = active or max(payments, key=lambda payment: payment.pk, default=None)
     booking.coc_hien_tai = latest
     booking.trang_thai_coc_hien_thi = _payment_label(latest)
-    booking.co_the_xac_nhan_coc_va_tao_hop_dong = bool(
+    booking.co_the_xac_nhan_coc = bool(
         latest
         and latest.trang_thai == "cho_xac_nhan"
         and booking.trang_thai in ("cho_duyet", "da_duyet")
-        and not getattr(booking, "co_hop_dong", False)
     )
+    booking.co_the_tao_hop_dong = hop_dong.co_the_tao_hop_dong_nhap(booking, latest)
     return booking
 
 
@@ -53,7 +53,7 @@ def quan_ly_dat_phong(request):
 
     bookings = (
         DatPhong.objects.select_related("nguoi_thue", "nguoi_thue__tai_khoan", "nguoi_xu_ly", "phong", "phong__co_so")
-        .prefetch_related(Prefetch("giao_dich_coc", queryset=ThanhToanCocDatPhong.objects.order_by("-ngay_tao")))
+        .prefetch_related(Prefetch("giao_dich_coc", queryset=ThanhToanCocDatPhong.objects.select_related("chung_tu").order_by("-ngay_tao")))
         .annotate(co_hop_dong=Exists(HopDong.objects.filter(dat_phong_id=OuterRef("pk"))))
         .annotate(
             doi_soat_priority=Case(
@@ -129,7 +129,7 @@ def chi_tiet_dat_phong(request, id):
 
     booking = get_object_or_404(
         DatPhong.objects.select_related("nguoi_thue", "nguoi_thue__tai_khoan", "nguoi_xu_ly", "phong", "phong__co_so")
-        .prefetch_related("giao_dich_coc", "nguoi_di_cung_khai_bao"),
+        .prefetch_related(Prefetch("giao_dich_coc", queryset=ThanhToanCocDatPhong.objects.select_related("chung_tu").order_by("-ngay_tao")), "nguoi_di_cung_khai_bao"),
         id=id,
     )
     contract = HopDong.objects.filter(dat_phong=booking).first()
@@ -149,7 +149,7 @@ def chi_tiet_dat_phong(request, id):
             "dat_phong": booking,
             "hop_dong": contract,
             "da_co_hop_dong": bool(contract),
-            "co_the_tao_hop_dong": booking.co_the_xac_nhan_coc_va_tao_hop_dong,
+            "co_the_xac_nhan_coc": booking.co_the_xac_nhan_coc,
             "so_nguoi_dang_o": booking.phong.so_nguoi_dang_o,
             "so_cho_con_lai": booking.phong.so_cho_con_lai,
             "tien_trinh": progress,
@@ -166,35 +166,6 @@ def _service_error(request, exc):
         messages.error(request, " ".join(exc.messages))
     else:
         messages.error(request, str(exc))
-
-
-@require_POST
-@login_required(login_url="dang_nhap")
-def xac_nhan_dat_phong_va_tao_hop_dong(request, id):
-    guard = _admin_required(request)
-    if guard:
-        return guard
-    try:
-        contract = hop_dong.confirm_deposit_and_create_contract(actor=request.user, booking_id=id)
-        messages.success(request, "Đã xác nhận tiền cọc và tạo hợp đồng thành công.")
-        return redirect("chi_tiet_hop_dong", id=contract.pk)
-    except (PermissionDenied, ValidationError) as exc:
-        _service_error(request, exc)
-    return redirect("chi_tiet_dat_phong", id=id)
-
-
-@require_POST
-@login_required(login_url="dang_nhap")
-def tu_choi_thanh_toan_coc(request, id):
-    guard = _admin_required(request)
-    if guard:
-        return guard
-    try:
-        hop_dong.reject_deposit(actor=request.user, booking_id=id, reason=request.POST.get("ly_do", ""))
-        messages.warning(request, "Giao dịch cọc đã bị từ chối. Người thuê có thể kiểm tra và gửi lại.")
-    except (PermissionDenied, ValidationError) as exc:
-        _service_error(request, exc)
-    return redirect("chi_tiet_dat_phong", id=id)
 
 
 @require_POST

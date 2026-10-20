@@ -88,11 +88,13 @@ Tìm phòng
 <link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
 <link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
 <link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/public_discovery_support_post_p6.css' %}?v=post-p6-public-1">
 {% endblock %}
 
 {% block content %}
 
-<div class="ndt-room-page ndt-foundation" data-foundation-pilot="rooms-public">
+<div class="ndt-room-page ndt-foundation ndt-f5 ndt-public-discovery ndt-public-room-list" data-foundation-pilot="rooms-public" data-public-context="room-list">
 
 
     <!-- =====================================================
@@ -100,7 +102,8 @@ Tìm phòng
     ====================================================== -->
 
     <section class="ndt-room-hero">
-        {% include "core/foundation/page_header.html" with breadcrumb="NDT MOTEL / Tìm phòng" title="Tìm phòng phù hợp với bạn" subtitle="So sánh giá thuê, cơ sở và sức chứa. Xem chi tiết để chọn phòng phù hợp." %}
+        {% url 'home' as breadcrumb_home_url %}
+        {% include "core/foundation/page_header.html" with breadcrumb_root_url=breadcrumb_home_url breadcrumb_root_label="Trang chủ" breadcrumb_current="Tìm phòng" title="Tìm phòng phù hợp với bạn" subtitle="So sánh giá thuê, cơ sở và sức chứa. Xem chi tiết để chọn phòng phù hợp." %}
     </section>
 
 
@@ -136,6 +139,28 @@ Tìm phòng
                     placeholder="Số phòng, cơ sở hoặc quận..."
                     class="ndt-control"
                 >
+
+            </div>
+
+            <div class="ndt-filter-group ndt-field">
+
+                <label class="ndt-label" for="id_ngay_nhan_phong">
+                    Ngày nhận phòng
+                </label>
+
+                {{ availability_form.ngay_nhan_phong }}
+                {{ availability_form.ngay_nhan_phong.errors }}
+
+            </div>
+
+            <div class="ndt-filter-group ndt-field">
+
+                <label class="ndt-label" for="id_so_thang_thue">
+                    Thời hạn thuê (tháng)
+                </label>
+
+                {{ availability_form.so_thang_thue }}
+                {{ availability_form.so_thang_thue.errors }}
 
             </div>
 
@@ -189,13 +214,17 @@ Tìm phòng
 
                 <p>
                     {% if tu_khoa %}Từ khóa: “{{ tu_khoa }}”. {% endif %}
-                    Kết quả bao gồm các trạng thái phòng; xem trạng thái trước khi lựa chọn.
+                    {% if availability_period %}
+                        Phòng có thể gửi yêu cầu đặt cho thời gian đã chọn: nhận phòng {{ availability_period.ngay_nhan_phong|date:'d/m/Y' }} · thuê {{ availability_period.so_thang_thue }} tháng. Kết quả chỉ là ảnh chụp tại thời điểm tìm kiếm.
+                    {% else %}
+                        Kết quả bao gồm các trạng thái phòng; xem trạng thái trước khi lựa chọn.
+                    {% endif %}
                 </p>
 
             </div>
 
 
-            {% if tu_khoa or gia_max %}
+            {% if tu_khoa or gia_max or availability_period or availability_errors %}
                 <a class="ndt-filter-reset ndt-button ndt-button--secondary" href="{% url 'danh_sach_phong' %}">Xóa bộ lọc</a>
             {% endif %}
 
@@ -212,7 +241,7 @@ Tìm phòng
 
             {% for p in phong %}
 
-            <article class="ndt-room-card ndt-card">
+            <article class="ndt-room-card ndt-card" data-room="{{ p.so_phong }}">
 
                 <div class="ndt-room-card-image">
                     {% with cover=p.anh_dai_dien_hien_thi %}
@@ -227,16 +256,18 @@ Tìm phòng
                     {% endif %}
 
                     {% endwith %}
-                    {% if p.trang_thai == "trong" %}
+                    {% if availability_period %}
+                        {% if p.available_for_period %}<span class="ndt-room-status ndt-status-empty ndt-badge ndt-badge--success">Có thể đặt cho thời gian đã chọn</span>{% else %}<span class="ndt-room-status ndt-status-default ndt-badge">Không phù hợp với thời gian đã chọn</span>{% endif %}
+                    {% elif p.trang_thai_cong_khai == "trong" %}
                         <span class="ndt-room-status ndt-status-empty ndt-badge ndt-badge--success">Phòng trống</span>
-                    {% elif p.trang_thai == "da_dat" %}
+                    {% elif p.trang_thai_cong_khai == "da_dat" %}
                         <span class="ndt-room-status ndt-status-booked ndt-badge ndt-badge--warning">Đã đặt</span>
-                    {% elif p.trang_thai == "dang_thue" %}
+                    {% elif p.trang_thai_cong_khai == "dang_thue" %}
                         <span class="ndt-room-status ndt-status-rented ndt-badge ndt-badge--info">Đang thuê</span>
-                    {% elif p.trang_thai == "bao_tri" %}
+                    {% elif p.trang_thai_cong_khai == "bao_tri" %}
                         <span class="ndt-room-status ndt-status-maintenance ndt-badge ndt-badge--danger">Bảo trì</span>
                     {% else %}
-                        <span class="ndt-room-status ndt-status-default ndt-badge">{{ p.get_trang_thai_display }}</span>
+                        <span class="ndt-room-status ndt-status-default ndt-badge">{{ p.trang_thai_hien_thi }}</span>
                     {% endif %}
                 </div>
 
@@ -385,7 +416,7 @@ Tìm phòng
                          BUSINESS STATUS
                     ====================================== -->
 
-                    {% if p.trang_thai == "trong" %}
+                    {% if p.trang_thai_cong_khai == "trong" %}
 
                         <div class="ndt-room-notice available">
                              {% if p.suc_chua_da_cau_hinh %}
@@ -395,13 +426,13 @@ Tìm phòng
                             {% endif %}
                         </div>
 
-                    {% elif p.trang_thai == "da_dat" %}
+                    {% elif p.trang_thai_cong_khai == "da_dat" %}
 
                         <div class="ndt-room-notice booked">
                              Phòng đã có lượt đặt được duyệt và đang chờ hoàn tất thuê.
                         </div>
 
-                    {% elif p.trang_thai == "dang_thue" %}
+                    {% elif p.trang_thai_cong_khai == "dang_thue" %}
 
                         {% if not p.suc_chua_da_cau_hinh %}
 
@@ -432,10 +463,16 @@ Tìm phòng
 
                         {% endif %}
 
-                    {% elif p.trang_thai == "bao_tri" %}
+                    {% elif p.trang_thai_cong_khai == "bao_tri" %}
 
                         <div class="ndt-room-notice maintenance">
                              Phòng đang bảo trì và tạm thời không tiếp nhận người thuê.
+                        </div>
+
+                    {% elif p.trang_thai_cong_khai == "chua_san_sang" %}
+
+                        <div class="ndt-room-notice maintenance">
+                             Phòng chưa thể cho thuê do cơ sở hoặc sức chứa chưa sẵn sàng.
                         </div>
 
                     {% endif %}
@@ -467,10 +504,10 @@ Tìm phòng
 
 
                         <a
-                            href="{% url 'chi_tiet_phong' p.id %}"
+                            href="{% url 'chi_tiet_phong' p.id %}{% if availability_period %}?ngay_nhan_phong={{ availability_period.ngay_nhan_phong|date:'Y-m-d' }}&amp;so_thang_thue={{ availability_period.so_thang_thue }}{% endif %}"
                             class="ndt-room-button ndt-button ndt-button--primary"
                         >
-                            Xem chi tiết <svg class="room-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"></path></svg>
+                            {% if availability_period %}Xem phòng phù hợp{% else %}Xem chi tiết phòng{% endif %} <svg class="room-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"></path></svg>
                         </a>
 
                     </div>
@@ -526,11 +563,10 @@ Tìm phòng
             </h3>
 
             <p class="ndt-empty-state__description">
-                Không có phòng nào phù hợp với từ khóa hoặc mức giá
-                mà bạn đang tìm kiếm. Hãy thử thay đổi điều kiện lọc.
+                {% if availability_period %}Hiện chưa có phòng nào có thể đặt cho thời gian đã chọn. Hãy điều chỉnh ngày nhận phòng, thời hạn thuê hoặc bộ lọc.{% else %}Không có phòng nào phù hợp với từ khóa hoặc mức giá mà bạn đang tìm kiếm. Hãy thử thay đổi điều kiện lọc.{% endif %}
             </p>
 
-            {% if tu_khoa or gia_max %}
+            {% if tu_khoa or gia_max or availability_period %}
             <a
                 href="{% url 'danh_sach_phong' %}"
                 class="ndt-room-empty-button ndt-button ndt-button--secondary"

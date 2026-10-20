@@ -1,0 +1,2 @@
+{% extends "admin/change_form.html" %}
+{% block object-tools-items %}{{ block.super }}{% if can_legacy_review %}<li><a href="{{ legacy_review_url }}">Rà soát thanh toán cũ</a></li>{% endif %}{% endblock %}

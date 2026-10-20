@@ -1,0 +1,174 @@
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-summary article {
+  background: var(--ndt-f5-surface, #fff);
+  border: 1px solid var(--ndt-f5-border, #dfe4ea);
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-summary span,
+.ndt-f5.ndt-payment-reconciliation .ndt-f5-table small,
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-results__heading p {
+  color: #5c6675;
+  display: block;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-summary strong {
+  display: block;
+  font-size: 1.75rem;
+  margin-top: .25rem;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-filter {
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-filter form {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(5, minmax(0, 1fr));
+  gap: .75rem;
+  align-items: end;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-filter .ndt-f5-field,
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-filter .ndt-f5-control {
+  min-width: 0;
+  width: 100%;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-filter__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  grid-column: 1 / -1;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-results {
+  padding: 1rem;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-results__heading {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ndt-f5.ndt-payment-reconciliation .ndt-f5-table td:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-badge {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: .35rem .65rem;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-badge--cho_doi_soat,
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-badge--tien_mat_cho_doi_soat {
+  background: #fff3cd;
+  color: #6b4c00;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-badge--thieu_chung_tu,
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-badge--bat_nhat,
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-badge--tu_choi {
+  background: #fde7e7;
+  color: #8a1c1c;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-badge--da_chap_nhan {
+  background: #dff4e7;
+  color: #17633a;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-reason {
+  color: #6b2737;
+  margin: .4rem 0 0;
+  max-width: 24rem;
+  overflow-wrap: anywhere;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-empty {
+  padding: 2rem;
+  text-align: center;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-pagination {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ndt-f5.ndt-payment-reconciliation .payment-reconciliation-pagination div {
+  display: flex;
+  gap: .5rem;
+}
+
+@media (max-width: 1100px) {
+  .ndt-f5.ndt-payment-reconciliation .payment-reconciliation-filter form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .ndt-f5.ndt-payment-reconciliation .payment-reconciliation-summary,
+  .ndt-f5.ndt-payment-reconciliation .payment-reconciliation-filter form {
+    grid-template-columns: 1fr;
+  }
+
+  .ndt-f5.ndt-payment-reconciliation .payment-reconciliation-results__heading,
+  .ndt-f5.ndt-payment-reconciliation .payment-reconciliation-pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ndt-f5.ndt-payment-reconciliation .ndt-f5-table thead {
+    display: none;
+  }
+
+  .ndt-f5.ndt-payment-reconciliation .ndt-f5-table,
+  .ndt-f5.ndt-payment-reconciliation .ndt-f5-table tbody,
+  .ndt-f5.ndt-payment-reconciliation .ndt-f5-table tr,
+  .ndt-f5.ndt-payment-reconciliation .ndt-f5-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .ndt-f5.ndt-payment-reconciliation .ndt-f5-table tr {
+    border: 1px solid #dfe4ea;
+    border-radius: .8rem;
+    margin-bottom: .75rem;
+    padding: .25rem .75rem;
+  }
+
+  .ndt-f5.ndt-payment-reconciliation .ndt-f5-table td {
+    border: 0;
+    padding: .65rem 0;
+  }
+
+  .ndt-f5.ndt-payment-reconciliation .ndt-f5-table td::before {
+    color: #5c6675;
+    content: attr(data-label);
+    display: block;
+    font-size: .75rem;
+    font-weight: 700;
+    margin-bottom: .2rem;
+    text-transform: uppercase;
+  }
+}

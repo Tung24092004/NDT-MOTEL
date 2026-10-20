@@ -1,5 +1,4 @@
 """Booking foundation without contract, resident or access side effects."""
-import calendar
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
@@ -9,7 +8,8 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from core.models import DatPhong, KhaiBaoNguoiOCungDatPhong, NguoiThue, Phong
+from core.models import DatPhong, HopDong, KhaiBaoNguoiOCungDatPhong, NguoiThue, Phong
+from core.dich_vu.ngay_thue import tinh_ngay_ket_thuc_theo_thang
 
 
 def require_tenant(actor, tenant):
@@ -22,14 +22,44 @@ def require_tenant(actor, tenant):
 def calculate_checkout(checkin, months):
     if type(months) is not int or not 1 <= months <= 36:
         raise ValidationError('So thang thue phai tu 1 den 36.')
-    total = checkin.year * 12 + checkin.month - 1 + months
-    year, month = total // 12, total % 12 + 1
-    last = calendar.monthrange(year, month)[1]
-    target = checkin.replace(year=year, month=month, day=min(checkin.day, last))
-    return target - timedelta(days=1) if checkin.day <= last else target
+    return tinh_ngay_ket_thuc_theo_thang(checkin, months)
 
 
-def room_has_hold(room, now=None):
+def rental_quote(*, room, checkin, months):
+    """Return a current, non-binding quote without writing business data."""
+    if checkin < timezone.localdate():
+        raise ValidationError('Ngay nhan phong khong o qua khu.')
+    checkout = calculate_checkout(checkin, months)
+    return {
+        'checkin': checkin,
+        'months': months,
+        'checkout': checkout,
+        'monthly_rent': room.gia_thue,
+        'estimated_rent': room.gia_thue * months,
+        'deposit': room.tien_coc_mac_dinh,
+        'estimated_term_total': room.gia_thue * months + room.tien_coc_mac_dinh,
+    }
+
+
+def validate_reviewed_quote(*, quote, reviewed_quote):
+    """Reject a confirmation when the quote the user reviewed is now stale.
+
+    Browser values are only a comparison token; every amount and date in
+    ``quote`` was recalculated from the locked room row.
+    """
+    if reviewed_quote is None:
+        return
+    expected = {
+        'quote_monthly_rent': str(quote['monthly_rent']),
+        'quote_deposit': str(quote['deposit']),
+        'quote_checkout': quote['checkout'].isoformat(),
+    }
+    if any(str(reviewed_quote.get(key, '')) != value for key, value in expected.items()):
+        raise ValidationError('Chi phí hoặc thời hạn thuê đã thay đổi. Vui lòng xem lại dự tính trước khi xác nhận.')
+
+
+def valid_booking_hold_filter(now=None):
+    """Return the one booking-state predicate that temporarily reserves a room."""
     now = now or timezone.now()
     pending = Q(trang_thai='cho_duyet') & (
         Q(han_thanh_toan_coc__isnull=True) | Q(han_thanh_toan_coc__gt=now)
@@ -39,7 +69,72 @@ def room_has_hold(room, now=None):
         Q(hop_dong__isnull=True)
         | Q(hop_dong__trang_thai__in=('cho_hieu_luc', 'dang_hieu_luc', 'sap_het_han'))
     )
-    return DatPhong.objects.filter(phong=room).filter(pending | approved).exists()
+    return pending | approved
+
+
+def room_has_hold(room, now=None):
+    return DatPhong.objects.filter(phong=room).filter(valid_booking_hold_filter(now)).exists()
+
+
+def room_has_rental_period_conflict(
+    room,
+    checkin,
+    checkout,
+    now=None,
+    *,
+    exclude_booking_id=None,
+    exclude_contract_id=None,
+    lock=False,
+):
+    """Check inclusive booking and contract conflicts for one requested rental period.
+
+    This intentionally uses the same valid-hold states as ``room_has_hold``.
+    A hold or contract outside the requested period does not make that period
+    unavailable.
+    """
+    bookings = DatPhong.objects.filter(phong=room).filter(
+        valid_booking_hold_filter(now)
+    ).filter(
+        ngay_nhan_phong__lte=checkout,
+    ).filter(
+        Q(ngay_tra_du_kien__gte=checkin)
+        # A contractless valid hold without a recorded checkout is unbounded,
+        # not expired. A booking with a contract defers to that contract's
+        # separately checked bounded range below.
+        | Q(ngay_tra_du_kien__isnull=True, hop_dong__isnull=True),
+    )
+    if exclude_booking_id is not None:
+        bookings = bookings.exclude(pk=exclude_booking_id)
+    if lock:
+        bookings = bookings.select_for_update()
+    booking_conflict = bookings.exists()
+    if booking_conflict:
+        return True
+
+    contracts = HopDong.objects.filter(
+        dat_phong__phong=room,
+        ngay_bat_dau__lte=checkout,
+        ngay_ket_thuc__gte=checkin,
+    ).exclude(trang_thai__in=('da_huy', 'da_het_han'))
+    if exclude_contract_id is not None:
+        contracts = contracts.exclude(pk=exclude_contract_id)
+    if exclude_booking_id is not None:
+        contracts = contracts.exclude(dat_phong_id=exclude_booking_id)
+    if lock:
+        contracts = contracts.select_for_update()
+    return contracts.exists()
+
+
+def room_is_bookable_for_rental(room, checkin, months, now=None):
+    """Return whether a room can enter the canonical booking flow for a period."""
+    rental_quote(room=room, checkin=checkin, months=months)
+    if room.co_so.trang_thai != 'hoat_dong' or room.trang_thai == 'bao_tri':
+        return False
+    if not room.so_nguoi_toi_da or room.so_nguoi_toi_da < 1:
+        return False
+
+    checkout = calculate_checkout(checkin, months)
+    return not room_has_rental_period_conflict(room, checkin, checkout, now)
 
 
 def hold_deadline(now=None):
@@ -65,7 +160,7 @@ def terms_policy():
 
 @transaction.atomic
 def create_booking(*, actor, room_id, checkin, months, people=1,
-                   companions=(), accept_terms=False, allow_sharing=False, note=''):
+                   companions=(), accept_terms=False, allow_sharing=False, note='', reviewed_quote=None):
     if not actor or not actor.is_authenticated or not actor.is_active or actor.is_staff or actor.is_superuser:
         raise PermissionDenied('Chi User thue phong duoc dat phong.')
     # The room lock serializes holds created through this service and existing writers.
@@ -76,7 +171,8 @@ def create_booking(*, actor, room_id, checkin, months, people=1,
     require_tenant(actor, tenant)
     if checkin < timezone.localdate():
         raise ValidationError('Ngay nhan phong khong o qua khu.')
-    checkout = calculate_checkout(checkin, months)
+    quote = rental_quote(room=room, checkin=checkin, months=months)
+    checkout = quote['checkout']
     if type(people) is not int or not 1 <= people <= room.so_nguoi_toi_da:
         raise ValidationError('So nguoi vuot suc chua hoac khong duong.')
     if len(companions) + 1 != people:
@@ -84,8 +180,9 @@ def create_booking(*, actor, room_id, checkin, months, people=1,
     if accept_terms is not True or type(allow_sharing) is not bool:
         raise ValidationError('Can dong y dieu khoan va nhu cau ghep hop le.')
     text, rate = terms_policy()
-    if room.co_so.trang_thai != 'hoat_dong' or room.trang_thai == 'bao_tri' or room.trang_thai_nghiep_vu() != 'trong' or room_has_hold(room):
+    if not room_is_bookable_for_rental(room, checkin, months):
         raise ValidationError('Phong khong kha dung hoac da co don giu cho.')
+    validate_reviewed_quote(quote=quote, reviewed_quote=reviewed_quote)
     booking = DatPhong(
         nguoi_thue=tenant, phong=room, ngay_nhan_phong=checkin,
         so_thang_thue=months, ngay_tra_du_kien=checkout, so_nguoi_o=people,

@@ -48,6 +48,9 @@
 }
 
 .tenant-ui .billing-breadcrumb a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
     color: #087f8c;
     font-weight: 700;
     text-decoration: none;

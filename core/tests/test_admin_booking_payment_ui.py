@@ -11,13 +11,7 @@ from core.du_lieu_test.du_lieu_test_dat_phong import Phase5BookingFixture
 
 
 class AdminBookingPaymentUITests(Phase5BookingFixture):
-    foundation_assets = (
-        "css/foundation/tokens.css",
-        "css/foundation/typography.css",
-        "css/foundation/components.css",
-        "css/foundation/utilities.css",
-        "css/foundation/v2.css",
-    )
+    foundation_assets = ("css/foundation/p5.css", "css/booking_management_p6b.css")
 
     def setUp(self):
         super().setUp()
@@ -26,8 +20,7 @@ class AdminBookingPaymentUITests(Phase5BookingFixture):
     def assert_foundation(self, response):
         for asset in self.foundation_assets:
             self.assertContains(response, asset)
-        self.assertContains(response, "css/admin_booking.css")
-        self.assertContains(response, "js/admin_booking.js")
+        self.assertContains(response, "ndt-booking-management")
 
     def pending_report(self):
         self.client.force_login(self.user)
@@ -42,7 +35,7 @@ class AdminBookingPaymentUITests(Phase5BookingFixture):
         self.assert_foundation(response)
         for field in ("q", "trang_thai", "coc", "hop_dong"):
             self.assertContains(response, f'name="{field}"')
-        self.assertContains(response, "ndt-empty-state")
+        self.assertContains(response, "ndt-f5-empty")
         self.assertContains(response, "Chưa có yêu cầu đặt phòng")
 
     def test_list_separates_booking_and_payment_labels_without_raw_enum(self):
@@ -53,7 +46,6 @@ class AdminBookingPaymentUITests(Phase5BookingFixture):
         self.assertContains(response, "Chờ duyệt")
         self.assertNotContains(response, ">cho_xac_nhan<")
         self.assertNotContains(response, ">cho_duyet<")
-        self.assertContains(response, "Xem xét và xác nhận")
 
     def test_detail_payment_review_and_confirm_form_keep_endpoint_csrf(self):
         booking, payment = self.pending_report()
@@ -62,7 +54,8 @@ class AdminBookingPaymentUITests(Phase5BookingFixture):
         self.assertContains(response, payment.ma_tham_chieu)
         self.assertContains(response, payment.noi_dung_chuyen_khoan)
         self.assertContains(response, "BANK-UI-001")
-        self.assertContains(response, "Xác nhận cọc và tạo hợp đồng")
+        self.assertContains(response, "Xác nhận đã nhận cọc")
+        self.assertContains(response, 'name="so_tien_thuc_nhan"')
         self.assertContains(response, reverse("xac_nhan_dat_phong_va_tao_hop_dong", args=[booking.pk]))
         self.assertContains(response, "csrfmiddlewaretoken")
         self.assertContains(response, "data-admin-booking-confirm")
@@ -82,10 +75,10 @@ class AdminBookingPaymentUITests(Phase5BookingFixture):
         contract = confirm_deposit_and_create_contract(actor=self.admin, booking_id=booking.pk)
         response = self.client.get(reverse("chi_tiet_dat_phong", args=[booking.pk]))
         self.assertContains(response, reverse("chi_tiet_hop_dong", args=[contract.pk]))
-        self.assertNotContains(response, "Xác nhận cọc và tạo hợp đồng")
+        self.assertNotContains(response, "Xác nhận đã nhận cọc")
 
     def test_module_assets_have_no_important_raw_enum_or_browser_confirm(self):
-        css = Path(settings.BASE_DIR, "static/css/admin_booking.css").read_text(encoding="utf-8")
+        css = Path(settings.BASE_DIR, "static/css/booking_management_p6b.css").read_text(encoding="utf-8")
         js = Path(settings.BASE_DIR, "static/js/admin_booking.js").read_text(encoding="utf-8")
         templates = "\n".join(
             Path(settings.BASE_DIR, name).read_text(encoding="utf-8")
@@ -93,5 +86,5 @@ class AdminBookingPaymentUITests(Phase5BookingFixture):
         )
         self.assertNotIn("!important", css)
         self.assertNotIn("return confirm(", templates)
-        self.assertIn("window.NDTDialog.confirm", js)
+        self.assertIn("window.NDTFoundationDialog.confirm", js)
         self.assertIn("requestSubmit", js)

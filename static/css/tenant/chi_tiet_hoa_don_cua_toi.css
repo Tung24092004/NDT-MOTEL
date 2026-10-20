@@ -48,6 +48,9 @@
 }
 
 .tenant-ui .invoice-breadcrumb a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
     color: #087f8c;
     font-weight: 800;
     text-decoration: none;

@@ -17,10 +17,11 @@
     {% load static %}
 
     <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="stylesheet" href="{% static 'css/support-panel.css' %}">
 
     <link
         rel="stylesheet"
-        href="{% static 'css/style.css' %}"
+        href="{% static 'css/style.css' %}{% if not user.is_authenticated %}?v=ndt-public-shell-v13-clean-connector{% endif %}"
     >
 
     <link
@@ -35,6 +36,11 @@
         rel="stylesheet"
         href="{% static 'css/ui-system.css' %}"
     >
+
+    <link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
 
     <style>
 
@@ -516,10 +522,13 @@
     margin-left:auto;
 }
 </style>
+    <link rel="stylesheet" href="{% static 'css/sidebar-shell.css' %}?v=phase1-sidebar-final">
 </head>
 
 
-<body class="ndt-premium-ui{% if request.user.is_staff or request.user.is_superuser %} ndt-role-admin{% elif request.user.is_authenticated %} ndt-role-tenant{% else %} ndt-role-public{% endif %}">
+<body class="ndt-premium-ui ndt-foundation{% if request.user.is_staff or request.user.is_superuser %} ndt-role-admin{% elif request.user.is_authenticated %} ndt-role-tenant{% else %} ndt-role-public{% endif %}">
+
+    <a class="ndt-skip-link" href="#ndtMainContent">Bỏ qua điều hướng</a>
 
     {% include "core/components/toast_container.html" %}
 
@@ -533,77 +542,100 @@
         <div class="ndt-sidebar-brand">
             <a href="{% url 'home' %}" class="ndt-shell-brand" aria-label="NDT MOTEL - Trang chủ">
                 <span class="ndt-shell-brand-mark ndt-brand-emblem" aria-hidden="true">
-                    <svg viewBox="0 0 92 70" role="img">
-                        <path class="ndt-logo-petal ndt-logo-petal-center" d="M46 6c9 10 12 20 0 31C34 26 37 16 46 6Z"/>
-                        <path class="ndt-logo-petal" d="M29 12c11 5 17 13 13 25-13-4-18-12-13-25Z"/>
-                        <path class="ndt-logo-petal" d="M63 12c-11 5-17 13-13 25 13-4 18-12 13-25Z"/>
-                        <path class="ndt-logo-wing" d="M15 25c12 0 21 4 27 14-14 3-23-1-27-14Z"/>
-                        <path class="ndt-logo-wing" d="M77 25c-12 0-21 4-27 14 14 3 23-1 27-14Z"/>
-                        <path class="ndt-logo-home" d="M30 48 46 37l16 11v15H30Z"/>
-                        <path class="ndt-logo-door" d="M42 63V51h8v12"/>
+                    <svg viewBox="0 0 112 58" role="img">
+                        <path class="ndt-logo-peak ndt-logo-peak-left" d="M9 43 31 9l18 34H37l-7-14-8 14Z"/>
+                        <path class="ndt-logo-peak ndt-logo-peak-right" d="M44 43 66 9l24 34H77L66 27 57 43Z"/>
+                        <path class="ndt-logo-sun" d="M91 13a7 7 0 1 1 0 14 7 7 0 0 1 0-14Z"/>
+                        <path class="ndt-logo-wave" d="M14 49c18-7 34 7 51 0s28-4 36 0"/>
                     </svg>
                 </span>
                 <span class="ndt-shell-brand-copy"><strong>NDT MOTEL</strong><small>SMART LIVING</small></span>
             </a>
-            <button id="ndtSidebarCollapse" class="ndt-sidebar-collapse" type="button" aria-label="Thu gọn thanh điều hướng" title="Thu gọn / mở rộng">
+            <button id="ndtSidebarCollapse" class="ndt-sidebar-collapse" type="button" aria-label="Thu gọn thanh điều hướng" aria-controls="ndtSidebar" aria-expanded="true" title="Thu gọn thanh điều hướng">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
             </button>
+            <button id="ndtSidebarMobileClose" class="ndt-sidebar-mobile-close" type="button" aria-label="Đóng thanh điều hướng">&times;</button>
         </div>
 
         <nav class="ndt-sidebar-nav">
-            <a href="{% url 'home' %}" class="ndt-side-link{% if request.resolver_match.url_name == 'home' %} is-active{% endif %}">
-                <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span class="ndt-side-label">Trang chủ</span>
-            </a>
-
-            <a href="{% url 'danh_sach_phong' %}" class="ndt-side-link{% if request.resolver_match.url_name == 'danh_sach_phong' or request.resolver_match.url_name == 'chi_tiet_phong' or request.resolver_match.url_name == 'dat_phong' %} is-active{% endif %}">
-                <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 20V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13M2 20h20M8 9h3M8 13h3M15 9h1M15 13h1"/></svg></span><span class="ndt-side-label">Tìm phòng</span>
-            </a>
+            {% if request.user.is_staff or request.user.is_superuser %}
+                <a href="{% url 'dashboard_admin' %}" class="ndt-side-link{% if request.resolver_match.url_name == 'dashboard_admin' %} is-active{% endif %}">
+                    <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-3H4zM14 7h6V4h-6z"/></svg></span><span class="ndt-side-label">Tổng quan vận hành</span>
+                </a>
+            {% elif request.user.is_authenticated %}
+                <a href="{% url 'tai_khoan' %}" class="ndt-side-link{% if request.resolver_match.url_name == 'tai_khoan' %} is-active{% endif %}">
+                    <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-3H4zM14 7h6V4h-6z"/></svg></span><span class="ndt-side-label">Tổng quan</span>
+                </a>
+            {% else %}
+                <a href="{% url 'home' %}" class="ndt-side-link{% if request.resolver_match.url_name == 'home' %} is-active{% endif %}">
+                    <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span class="ndt-side-label">Trang chủ</span>
+                </a>
+            {% endif %}
 
             {% if request.user.is_authenticated %}
                 {% if request.user.is_staff or request.user.is_superuser %}
-                    <a href="{% url 'dashboard_admin' %}" class="ndt-side-link{% if request.resolver_match.url_name == 'dashboard_admin' %} is-active{% endif %}">
-                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-3H4zM14 7h6V4h-6z"/></svg></span><span class="ndt-side-label">Tổng quan</span>
-                    </a>
-
-                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="admin-operations" aria-expanded="false">
+                    <button type="button" class="ndt-side-link ndt-panel-trigger{% if request.resolver_match.url_name == 'quan_ly_co_so' or request.resolver_match.url_name == 'tao_co_so' or request.resolver_match.url_name == 'chi_tiet_co_so' or request.resolver_match.url_name == 'quan_ly_phong' or request.resolver_match.url_name == 'tao_phong' or request.resolver_match.url_name == 'sua_phong' or request.resolver_match.url_name == 'quan_ly_dat_phong' or request.resolver_match.url_name == 'chi_tiet_dat_phong' or request.resolver_match.url_name == 'quan_ly_hop_dong' or request.resolver_match.url_name == 'chi_tiet_hop_dong' or request.resolver_match.url_name == 'tao_hop_dong' or request.resolver_match.url_name == 'sua_hop_dong' or request.resolver_match.url_name == 'quan_ly_nguoi_thue' or request.resolver_match.url_name == 'chi_tiet_nguoi_thue' %} is-active{% endif %}" data-panel="admin-operations" aria-expanded="false">
                         <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 12h2M9 16h2M15 12h1M15 16h1"/></svg></span><span class="ndt-side-label">Vận hành</span>
                     </button>
-                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="admin-finance" aria-expanded="false">
+                    <button type="button" class="ndt-side-link ndt-panel-trigger{% if request.resolver_match.url_name == 'quan_ly_hoa_don' or request.resolver_match.url_name == 'chi_tiet_hoa_don' or request.resolver_match.url_name == 'tao_hoa_don' %} is-active{% endif %}" data-panel="admin-finance" aria-expanded="false">
                         <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 10h16M8 15h3"/></svg></span><span class="ndt-side-label">Tài chính</span>
                     </button>
-                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="admin-service" aria-expanded="false">
+                    <button type="button" class="ndt-side-link ndt-panel-trigger{% if request.resolver_match.url_name == 'quan_ly_sua_chua' or request.resolver_match.url_name == 'chi_tiet_sua_chua' or request.resolver_match.url_name == 'tao_sua_chua' or request.resolver_match.url_name == 'quan_ly_yeu_cau_ghep' or request.resolver_match.url_name == 'chi_tiet_yeu_cau_ghep' or request.resolver_match.url_name == 'quan_ly_yeu_cau_nguoi_o_cung' or request.resolver_match.url_name == 'chi_tiet_yeu_cau_nguoi_o_cung' or request.resolver_match.url_name == 'quan_ly_nguoi_o_cung' or request.resolver_match.url_name == 'chi_tiet_nguoi_o_cung' or request.resolver_match.url_name == 'tao_nguoi_o_cung' %} is-active{% endif %}" data-panel="admin-service" aria-expanded="false">
                         <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5 5L4 17l3 3 5.7-5.7a4 4 0 0 0 5-5l-2.4 2.4-3-3z"/></svg></span><span class="ndt-side-label">Dịch vụ</span>
                     </button>
-                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="admin-smart" aria-expanded="false">
-                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M5 11a7 7 0 0 1 14 0v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3zM9 14h.01M15 14h.01M9 7l-2-2M15 7l2-2"/></svg></span><span class="ndt-side-label">Smart Room</span>
+                    <button type="button" class="ndt-side-link ndt-panel-trigger{% if request.resolver_match.url_name == 'smart_room_dashboard' or request.resolver_match.url_name == 'smart_access_control' or request.resolver_match.url_name == 'quan_ly_nguoi_o_cung' or request.resolver_match.url_name == 'chi_tiet_nguoi_o_cung' or request.resolver_match.url_name == 'tao_nguoi_o_cung' or request.resolver_match.url_name == 'quan_ly_face_profile' or request.resolver_match.url_name == 'chi_tiet_face_profile' or request.resolver_match.url_name == 'tao_face_profile' or request.resolver_match.url_name == 'quan_ly_quyen_ra_vao' or request.resolver_match.url_name == 'chi_tiet_quyen_ra_vao' or request.resolver_match.url_name == 'tao_quyen_ra_vao' or request.resolver_match.url_name == 'quan_ly_lich_su_ra_vao' or request.resolver_match.url_name == 'chi_tiet_lich_su_ra_vao' or request.resolver_match.url_name == 'tao_lich_su_ra_vao' %} is-active{% endif %}" data-panel="admin-smart" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M5 11a7 7 0 0 1 14 0v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3zM9 14h.01M15 14h.01M9 7l-2-2M15 7l2-2"/></svg></span><span class="ndt-side-label">Ra vào &amp; Face ID</span>
                     </button>
-                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="admin-system" aria-expanded="false">
+                    <button type="button" class="ndt-side-link ndt-panel-trigger{% if request.resolver_match.url_name == 'doi_mat_khau' or request.resolver_match.url_name == 'quan_ly_chinh_sach' or request.resolver_match.url_name == 'tao_chinh_sach' or request.resolver_match.url_name == 'chi_tiet_chinh_sach' or request.resolver_match.url_name == 'quan_ly_thong_bao' or request.resolver_match.url_name == 'chi_tiet_thong_bao' or request.resolver_match.url_name == 'tao_thong_bao' or request.resolver_match.url_name == 'thong_bao_admin' or request.resolver_match.url_name == 'chi_tiet_thong_bao_admin' or request.resolver_match.url_name == 'nhat_ky_thao_tac' or request.resolver_match.url_name == 'chi_tiet_nhat_ky_thao_tac' %} is-active{% endif %}" data-panel="admin-system" aria-expanded="false">
                         <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="4"/></svg></span><span class="ndt-side-label">Hệ thống</span>
                     </button>
                 {% else %}
-                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="tenant-stay" aria-expanded="false">
-                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11M8 20v-6h8v6"/></svg></span><span class="ndt-side-label">Lưu trú</span>
+                    <button type="button" class="ndt-side-link ndt-panel-trigger{% if request.resolver_match.url_name == 'dat_phong_cua_toi' or request.resolver_match.url_name == 'chi_tiet_dat_phong_cua_toi' or request.resolver_match.url_name == 'thanh_toan_coc_cua_toi' or request.resolver_match.url_name == 'hop_dong_cua_toi' or request.resolver_match.url_name == 'chi_tiet_hop_dong_cua_toi' or request.resolver_match.url_name == 'huong_dan_thue_phong' %} is-active{% endif %}" data-panel="tenant-booking" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11M8 20v-6h8v6"/></svg></span><span class="ndt-side-label">Hành trình thuê phòng</span>
                     </button>
-                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="tenant-payment" aria-expanded="false">
-                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 10h16M8 15h4"/></svg></span><span class="ndt-side-label">Thanh toán</span>
+                    <button type="button" class="ndt-side-link ndt-panel-trigger{% if request.resolver_match.url_name == 'hoa_don_cua_toi' or request.resolver_match.url_name == 'chi_tiet_hoa_don_cua_toi' or request.resolver_match.url_name == 'thanh_toan_hoa_don_cua_toi' %} is-active{% endif %}" data-panel="tenant-payment" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 10h16M8 15h4"/></svg></span><span class="ndt-side-label">Tài chính</span>
                     </button>
-                    <button type="button" class="ndt-side-link ndt-panel-trigger" data-panel="tenant-support" aria-expanded="false">
-                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0-9-9M8 12h8M12 8v8"/></svg></span><span class="ndt-side-label">Hỗ trợ</span>
+                    <button type="button" class="ndt-side-link ndt-panel-trigger{% if request.resolver_match.url_name == 'yeu_cau_sua_chua_cua_toi' or request.resolver_match.url_name == 'chi_tiet_yeu_cau_sua_chua_cua_toi' or request.resolver_match.url_name == 'tao_yeu_cau_sua_chua' or request.resolver_match.url_name == 'yeu_cau_ghep_cua_toi' or request.resolver_match.url_name == 'chi_tiet_yeu_cau_ghep' %} is-active{% endif %}" data-panel="tenant-stay" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6zM14 3v4h4M9 11h6M9 15h6"/></svg></span><span class="ndt-side-label">Lưu trú</span>
+                    </button>
+                    <button type="button" class="ndt-side-link ndt-panel-trigger{% if request.resolver_match.url_name == 'nhan_dien_su_dung_phong' or request.resolver_match.url_name == 'face_id_dang_ky' or request.resolver_match.url_name == 'trang_xac_thuc_face_id' or request.resolver_match.url_name == 'quyen_va_lich_su_ra_vao_cua_toi' %} is-active{% endif %}" data-panel="tenant-smart" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M5 11a7 7 0 0 1 14 0v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3zM9 14h.01M15 14h.01M9 7l-2-2M15 7l2-2"/></svg></span><span class="ndt-side-label">Smart Room</span>
+                    </button>
+                    <button type="button" class="ndt-side-link ndt-panel-trigger{% if request.resolver_match.url_name == 'cap_nhat_thong_tin' or request.resolver_match.url_name == 'doi_mat_khau' or request.resolver_match.url_name == 'thong_bao_cua_toi' or request.resolver_match.url_name == 'chi_tiet_thong_bao_cua_toi' %} is-active{% endif %}" data-panel="tenant-account" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 21a7.5 7.5 0 0 1 15 0"/></svg></span><span class="ndt-side-label">Tài khoản</span>
+                    </button>
+                    <button type="button" class="ndt-side-link ndt-panel-trigger{% if request.resolver_match.url_name == 'chinh_sach_ho_tro' or request.resolver_match.url_name == 'trung_tam_tro_giup' %} is-active{% endif %}" data-panel="tenant-support" aria-expanded="false">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0-9-9M8 12h8M12 8v8"/></svg></span><span class="ndt-side-label">Trung tâm trợ giúp</span>
                     </button>
                 {% endif %}
             {% else %}
-                <a href="/#features" class="ndt-side-link"><span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="m12 3 2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.3-4.5 2.3.9-5L4.8 8.2l5-.7z"/></svg></span><span class="ndt-side-label">Tiện ích</span></a>
-                <a href="/#contact" class="ndt-side-link"><span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 7l8 6 8-6"/></svg></span><span class="ndt-side-label">Liên hệ</span></a>
+                <div class="ndt-public-discovery-wrap">
+                    <button type="button" class="ndt-side-link ndt-panel-trigger ndt-public-discovery-trigger" data-panel="public-discovery" aria-expanded="false" aria-controls="ndtPublicDiscoveryFlyout">
+                        <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 20V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13M2 20h20M8 9h3M8 13h3M15 9h1M15 13h1"/></svg></span><span class="ndt-side-label">Khám phá</span>
+                    </button>
+                </div>
+                <a href="{% url 'huong_dan_thue_phong' %}" class="ndt-side-link{% if request.resolver_match.url_name == 'huong_dan_thue_phong' %} is-active{% endif %}">
+                    <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM8 17h11M9 8h6M9 12h6"/></svg></span><span class="ndt-side-label">Hướng dẫn thuê phòng</span>
+                </a>
+                <a href="{% url 'trung_tam_tro_giup' %}" class="ndt-side-link{% if request.resolver_match.url_name == 'trung_tam_tro_giup' %} is-active{% endif %}">
+                    <span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0-9-9M9.5 9a2.5 2.5 0 0 1 4.8 1c0 2-2.3 2.1-2.3 4M12 17h.01"/></svg></span><span class="ndt-side-label">Trung tâm trợ giúp</span>
+                </a>
+                <a href="{% url 'home' %}#contact" class="ndt-side-link"><span class="ndt-side-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 7l8 6 8-6"/></svg></span><span class="ndt-side-label">Liên hệ</span></a>
             {% endif %}
+            {% if request.user.is_authenticated %}<noscript><a class="ndt-side-link" href="{% url 'trung_tam_tro_giup' %}">Trung tâm trợ giúp</a></noscript>{% endif %}
         </nav>
 
         <div class="ndt-sidebar-bottom">
             {% if request.user.is_authenticated %}
                 <div class="ndt-member-card ndt-member-card-auth">
                     <button type="button" class="ndt-member-identity ndt-panel-trigger" data-panel="account-panel" aria-expanded="false">
-                        <span class="ndt-member-wordmark">NDT MEMBER</span>
-                        <span class="ndt-member-name">{{ request.user.username }}</span>
-                        <span class="ndt-member-role">{% if request.user.is_staff or request.user.is_superuser %}Quản trị viên{% else %}Khách thuê NDT MOTEL{% endif %}</span>
+                        <span class="ndt-member-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 21a7.5 7.5 0 0 1 15 0"/></svg></span>
+                        <span class="ndt-member-details">
+                            <span class="ndt-member-wordmark">NDT MEMBER</span>
+                            <span class="ndt-member-name">{{ request.user.username }}</span>
+                            <span class="ndt-member-role">{% if request.user.is_staff or request.user.is_superuser %}Quản trị viên{% else %}Khách thuê NDT MOTEL{% endif %}</span>
+                        </span>
                     </button>
                     <div class="ndt-member-actions">
                         {% if request.user.is_staff or request.user.is_superuser %}
@@ -611,12 +643,12 @@
                         {% else %}
                         <a href="{% url 'tai_khoan' %}" class="ndt-sidebar-account">Tài khoản</a>
                         {% endif %}
-                        <a href="{% url 'dang_xuat' %}" class="ndt-sidebar-logout">Đăng xuất</a>
+                        <form method="post" action="{% url 'dang_xuat' %}" style="display: contents">{% csrf_token %}<button type="submit" class="ndt-sidebar-logout" style="font: inherit; cursor: pointer">Đăng xuất</button></form>
                     </div>
                 </div>
             {% else %}
-                <div class="ndt-member-card ndt-member-card-guest">
-                    <div class="ndt-guest-title"><strong>NDT MEMBER</strong><span>SMART LIVING</span></div>
+                <div class="ndt-member-card ndt-member-card-guest ndt-guest-auth-actions">
+                    <button type="button" class="ndt-guest-account-icon ndt-auth-open" data-auth-mode="login" aria-label="Đăng nhập" title="Đăng nhập"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 21a7.5 7.5 0 0 1 15 0"/></svg></button>
                     <button type="button" class="ndt-sidebar-login ndt-auth-open" data-auth-mode="login">Đăng nhập</button>
                     <button type="button" class="ndt-sidebar-register ndt-auth-open" data-auth-mode="register">Đăng ký</button>
                 </div>
@@ -624,8 +656,31 @@
         </div>
     </aside>
 
+    {% if not request.user.is_authenticated %}
+    <section id="ndtPublicDiscoveryFlyout" class="ndt-flyout ndt-public-discovery-flyout" data-panel-id="public-discovery" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="ndtPublicDiscoveryTitle">
+        <div class="ndt-flyout-head">
+            <div class="ndt-public-flyout-title"><span class="ndt-side-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13M2 20h20M8 9h3M8 13h3M15 9h1M15 13h1"/></svg></span><h2 id="ndtPublicDiscoveryTitle">Khám phá</h2></div>
+            <button class="ndt-flyout-close" type="button" aria-label="Đóng Khám phá">×</button>
+        </div>
+        <nav class="ndt-public-flyout-links" aria-label="Liên kết Khám phá">
+            <a href="{% url 'danh_sach_phong' %}" class="ndt-public-flyout-link{% if request.resolver_match.url_name == 'danh_sach_phong' or request.resolver_match.url_name == 'chi_tiet_phong' or request.resolver_match.url_name == 'dat_phong' %} is-active{% endif %}">
+                <strong>Tìm phòng</strong>
+                <span>So sánh giá thuê, vị trí, tiện ích và tình trạng phòng.</span>
+            </a>
+            <a href="{% url 'home' %}#features" class="ndt-public-flyout-link">
+                <strong>Tiện ích &amp; dịch vụ</strong>
+                <span>Khám phá các tiện ích dành cho khách thuê.</span>
+            </a>
+            <a href="{% url 'trung_tam_tro_giup' %}" class="ndt-public-flyout-link{% if request.resolver_match.url_name == 'trung_tam_tro_giup' %} is-active{% endif %}">
+                <strong>Trung tâm trợ giúp</strong>
+                <span>Tìm hướng dẫn và câu hỏi thường gặp.</span>
+            </a>
+        </nav>
+    </section>
+    {% endif %}
+
     <header class="ndt-shell-topbar">
-        <button id="ndtMobileMenu" type="button" class="ndt-mobile-menu" aria-label="Mở menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <button id="ndtMobileMenu" type="button" class="ndt-mobile-menu" aria-label="Mở thanh điều hướng" aria-controls="ndtSidebar" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
         <div class="ndt-topbar-actions">
             {% if request.user.is_authenticated %}
                 {% if request.user.is_staff or request.user.is_superuser %}<a href="{% url 'thong_bao_admin' %}" class="ndt-topbar-action ndt-topbar-icon" title="Thông báo" aria-label="Thông báo"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>{% if so_thong_bao_admin_chua_doc|default:0 > 0 %}<span class="ndt-topbar-badge" data-notification-badge>{% if so_thong_bao_admin_chua_doc > 99 %}99+{% else %}{{ so_thong_bao_admin_chua_doc }}{% endif %}</span>{% else %}<span class="ndt-topbar-badge" data-notification-badge hidden></span>{% endif %}</a>{% else %}<a href="{% url 'thong_bao_cua_toi' %}" class="ndt-topbar-action ndt-topbar-icon" title="Thông báo" aria-label="Thông báo"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>{% if so_thong_bao_chua_doc|default:0 > 0 %}<span class="ndt-topbar-badge" data-notification-badge>{% if so_thong_bao_chua_doc > 99 %}99+{% else %}{{ so_thong_bao_chua_doc }}{% endif %}</span>{% else %}<span class="ndt-topbar-badge" data-notification-badge hidden></span>{% endif %}</a>{% endif %}
@@ -646,26 +701,29 @@
         <div class="ndt-account-summary"><span class="ndt-account-emblem">NDT</span><div><strong>{{ request.user.username }}</strong><span>{% if request.user.is_staff or request.user.is_superuser %}Quản trị viên NDT MOTEL{% else %}Khách thuê NDT MOTEL{% endif %}</span></div></div>
         <div class="ndt-flyout-links">
             {% if request.user.is_staff or request.user.is_superuser %}<a href="{% url 'dashboard_admin' %}"><strong>Dashboard quản trị</strong><span>Quay về trung tâm vận hành.</span></a><a href="{% url 'doi_mat_khau' %}"><strong>Đổi mật khẩu</strong><span>Cập nhật bảo mật tài khoản quản trị.</span></a>{% else %}<a href="{% url 'tai_khoan' %}"><strong>Trung tâm tài khoản</strong><span>Hồ sơ và tổng hợp hoạt động.</span></a><a href="{% url 'hop_dong_cua_toi' %}"><strong>Hợp đồng của tôi</strong><span>Theo dõi thông tin lưu trú.</span></a><a href="{% url 'hoa_don_cua_toi' %}"><strong>Hóa đơn của tôi</strong><span>Kiểm tra phí và thanh toán.</span></a>{% endif %}
-            <a href="{% url 'dang_xuat' %}"><strong>Đăng xuất</strong><span>Kết thúc phiên đăng nhập hiện tại.</span></a>
+            <form method="post" action="{% url 'dang_xuat' %}" style="display: contents">{% csrf_token %}<button type="submit" style="display: block; width: 100%; padding: 13px 7px; border: 0; border-bottom: 1px solid rgba(86,139,149,.18); background: transparent; text-align: left; font: inherit; cursor: pointer"><strong>Đăng xuất</strong><span>Kết thúc phiên đăng nhập hiện tại.</span></button></form>
         </div>
     </section>
     {% endif %}
 
     {% if request.user.is_authenticated and not request.user.is_staff and not request.user.is_superuser %}
     <!-- FLYOUT: TENANT -->
-<section class="ndt-flyout" data-panel-id="tenant-stay" aria-hidden="true"><div class="ndt-flyout-head"><div><small>NDT MOTEL</small><h2>Lưu trú</h2><p>Đặt phòng, hợp đồng và nhu cầu ở ghép của bạn.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'dat_phong_cua_toi' %}"><strong>Đặt phòng của tôi</strong><span>Theo dõi yêu cầu và trạng thái tiền cọc.</span></a><a href="{% url 'hop_dong_cua_toi' %}"><strong>Hợp đồng của tôi</strong><span>Xem thông tin, thời hạn và các thao tác liên quan.</span></a>{% if not an_menu_ghep_phong %}<a href="{% url 'yeu_cau_ghep_cua_toi' %}"><strong>Yêu cầu ở ghép</strong><span>Theo dõi và quản lý nhu cầu ở ghép.</span></a>{% endif %}<a href="{% url 'danh_sach_phong' %}"><strong>Khám phá phòng</strong><span>Xem phòng và thông tin lưu trú đang có.</span></a></div></section>
-    <section class="ndt-flyout" data-panel-id="tenant-payment" aria-hidden="true"><div class="ndt-flyout-head"><div><small>NDT MOTEL</small><h2>Thanh toán</h2><p>Theo dõi hóa đơn và trạng thái thanh toán.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'hoa_don_cua_toi' %}"><strong>Hóa đơn của tôi</strong><span>Xem chi tiết hóa đơn, hạn thanh toán và lịch sử.</span></a></div></section>
-    <section class="ndt-flyout" data-panel-id="tenant-support" aria-hidden="true"><div class="ndt-flyout-head"><div><small>NDT MOTEL</small><h2>Hỗ trợ</h2><p>Các dịch vụ hỗ trợ trong quá trình lưu trú.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'yeu_cau_sua_chua_cua_toi' %}"><strong>Yêu cầu sửa chữa</strong><span>Gửi và theo dõi tình trạng xử lý sự cố.</span></a><a href="{% url 'nhan_dien_su_dung_phong' %}"><strong>FaceProfile của tôi</strong><span>Đăng ký nhận diện theo hợp đồng hiện có.</span></a><a href="{% url 'thong_bao_cua_toi' %}"><strong>Thông báo</strong><span>Cập nhật thông tin từ hệ thống và quản lý.</span></a><a href="{% url 'tai_khoan' %}"><strong>Trung tâm tài khoản</strong><span>Xem hồ sơ và tổng hợp hoạt động của bạn.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="tenant-booking" aria-hidden="true"><div class="ndt-flyout-head"><div><small>NGƯỜI THUÊ</small><h2>Hành trình thuê phòng</h2><p>Đặt phòng, hợp đồng và các bước chuyển sang lưu trú.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'dat_phong_cua_toi' %}" class="{% if request.resolver_match.url_name == 'dat_phong_cua_toi' or request.resolver_match.url_name == 'chi_tiet_dat_phong_cua_toi' or request.resolver_match.url_name == 'thanh_toan_coc_cua_toi' %}is-active{% endif %}"><strong>Đặt phòng của tôi</strong><span>Theo dõi yêu cầu và trạng thái tiền cọc.</span></a><a href="{% url 'hop_dong_cua_toi' %}" class="{% if request.resolver_match.url_name == 'hop_dong_cua_toi' or request.resolver_match.url_name == 'chi_tiet_hop_dong_cua_toi' %}is-active{% endif %}"><strong>Hợp đồng của tôi</strong><span>Xem thời hạn, hiệu lực và thao tác liên quan.</span></a><a href="{% url 'huong_dan_thue_phong' %}" class="{% if request.resolver_match.url_name == 'huong_dan_thue_phong' %}is-active{% endif %}"><strong>Hướng dẫn thuê phòng</strong><span>Xem toàn bộ quy trình từ chọn phòng đến ký hợp đồng.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="tenant-payment" aria-hidden="true"><div class="ndt-flyout-head"><div><small>NGƯỜI THUÊ</small><h2>Tài chính</h2><p>Theo dõi hóa đơn, hạn thanh toán và trạng thái xác nhận.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'hoa_don_cua_toi' %}" class="{% if request.resolver_match.url_name == 'hoa_don_cua_toi' or request.resolver_match.url_name == 'chi_tiet_hoa_don_cua_toi' or request.resolver_match.url_name == 'thanh_toan_hoa_don_cua_toi' %}is-active{% endif %}"><strong>Hóa đơn của tôi</strong><span>Xem chi tiết hóa đơn, hạn thanh toán và lịch sử.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="tenant-stay" aria-hidden="true"><div class="ndt-flyout-head"><div><small>NGƯỜI THUÊ</small><h2>Lưu trú</h2><p>Yêu cầu sửa chữa và nhu cầu ở cùng trong quá trình lưu trú.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'yeu_cau_sua_chua_cua_toi' %}" class="{% if request.resolver_match.url_name == 'yeu_cau_sua_chua_cua_toi' or request.resolver_match.url_name == 'chi_tiet_yeu_cau_sua_chua_cua_toi' or request.resolver_match.url_name == 'tao_yeu_cau_sua_chua' %}is-active{% endif %}"><strong>Yêu cầu sửa chữa</strong><span>Gửi và theo dõi tình trạng xử lý sự cố.</span></a>{% if not an_menu_ghep_phong %}<a href="{% url 'yeu_cau_ghep_cua_toi' %}" class="{% if request.resolver_match.url_name == 'yeu_cau_ghep_cua_toi' or request.resolver_match.url_name == 'chi_tiet_yeu_cau_ghep' %}is-active{% endif %}"><strong>Người ở cùng</strong><span>Theo dõi và quản lý nhu cầu ở cùng.</span></a>{% endif %}</div></section>
+    <section class="ndt-flyout" data-panel-id="tenant-smart" aria-hidden="true"><div class="ndt-flyout-head"><div><small>SMART LIVING</small><h2>Smart Room</h2><p>Nhận diện, quyền truy cập và lịch sử của bạn.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'quyen_va_lich_su_ra_vao_cua_toi' %}" class="{% if request.resolver_match.url_name == 'quyen_va_lich_su_ra_vao_cua_toi' %}is-active{% endif %}"><strong>Quyền &amp; lịch sử của tôi</strong><span>Xem quyền hiện hành và các lượt ra vào của chính bạn.</span></a>{% if hien_thi_lien_ket_face_id %}<a href="{% url 'nhan_dien_su_dung_phong' %}" class="{% if request.resolver_match.url_name == 'nhan_dien_su_dung_phong' or request.resolver_match.url_name == 'face_id_dang_ky' or request.resolver_match.url_name == 'trang_xac_thuc_face_id' %}is-active{% endif %}"><strong>Face ID của tôi</strong><span>Đăng ký nhận diện theo hợp đồng hiện có.</span></a>{% endif %}</div></section>
+    <section class="ndt-flyout" data-panel-id="tenant-account" aria-hidden="true"><div class="ndt-flyout-head"><div><small>NDT MEMBER</small><h2>Tài khoản</h2><p>Hồ sơ và thiết lập tài khoản cá nhân.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'cap_nhat_thong_tin' %}" class="{% if request.resolver_match.url_name == 'cap_nhat_thong_tin' %}is-active{% endif %}"><strong>Hồ sơ cá nhân</strong><span>Cập nhật thông tin liên hệ và hồ sơ.</span></a><a href="{% url 'doi_mat_khau' %}" class="{% if request.resolver_match.url_name == 'doi_mat_khau' or request.resolver_match.url_name == 'doi_mat_khau_user' %}is-active{% endif %}"><strong>Đổi mật khẩu</strong><span>Cập nhật bảo mật đăng nhập.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="tenant-support" aria-hidden="true"><div class="ndt-flyout-head"><div><small>HỖ TRỢ</small><h2>Trung tâm trợ giúp</h2><p>Hướng dẫn và chính sách hỗ trợ trong quá trình lưu trú.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'trung_tam_tro_giup' %}" class="{% if request.resolver_match.url_name == 'trung_tam_tro_giup' %}is-active{% endif %}"><strong>Trung tâm trợ giúp</strong><span>Tìm nhanh hướng dẫn và câu hỏi thường gặp.</span></a><a href="{% url 'chinh_sach_ho_tro' %}" class="{% if request.resolver_match.url_name == 'chinh_sach_ho_tro' %}is-active{% endif %}"><strong>Chính sách hỗ trợ</strong><span>Xem chính sách dành cho người thuê.</span></a></div></section>
 
     {% endif %}
 
     {% if request.user.is_staff or request.user.is_superuser %}
     <!-- FLYOUT: ADMIN -->
-    <section class="ndt-flyout" data-panel-id="admin-operations" aria-hidden="true"><div class="ndt-flyout-head"><div><small>QUẢN TRỊ</small><h2>Vận hành</h2><p>Quản lý cơ sở, phòng, đặt phòng và hợp đồng.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'quan_ly_co_so' %}"><strong>Cơ sở</strong><span>Địa chỉ và trạng thái vận hành.</span></a><a href="{% url 'quan_ly_phong' %}"><strong>Phòng</strong><span>Giá, sức chứa và tình trạng phòng.</span></a><a href="{% url 'quan_ly_dat_phong' %}"><strong>Đặt phòng</strong><span>Tiếp nhận và xử lý yêu cầu.</span></a><a href="{% url 'quan_ly_hop_dong' %}"><strong>Hợp đồng</strong><span>Thời hạn, hiệu lực và gia hạn.</span></a><a href="{% url 'quan_ly_yeu_cau_ghep' %}"><strong>Yêu cầu ở ghép</strong><span>Theo dõi và xét duyệt yêu cầu.</span></a></div></section>
-    <section class="ndt-flyout" data-panel-id="admin-finance" aria-hidden="true"><div class="ndt-flyout-head"><div><small>QUẢN TRỊ</small><h2>Tài chính</h2><p>Hóa đơn, thanh toán và công nợ.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'quan_ly_hoa_don' %}"><strong>Quản lý hóa đơn</strong><span>Tạo, theo dõi và xác nhận thanh toán.</span></a></div></section>
-    <section class="ndt-flyout" data-panel-id="admin-service" aria-hidden="true"><div class="ndt-flyout-head"><div><small>QUẢN TRỊ</small><h2>Dịch vụ</h2><p>Hỗ trợ khách thuê và truyền thông vận hành.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'quan_ly_nguoi_thue' %}"><strong>Người thuê</strong><span>Tra cứu hồ sơ, hợp đồng và hóa đơn.</span></a><a href="{% url 'quan_ly_sua_chua' %}"><strong>Sửa chữa</strong><span>Tiếp nhận và theo dõi yêu cầu sửa chữa.</span></a><a href="{% url 'quan_ly_chinh_sach' %}"><strong>Chính sách hỗ trợ</strong><span>Quản lý chính sách dành cho người thuê.</span></a><a href="{% url 'quan_ly_thong_bao' %}"><strong>Thông báo</strong><span>Gửi và quản lý thông tin hệ thống.</span></a></div></section>
-    <section class="ndt-flyout" data-panel-id="admin-smart" aria-hidden="true"><div class="ndt-flyout-head"><div><small>SMART LIVING</small><h2>Smart Room</h2><p>Nhận diện và kiểm soát quyền ra vào.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'smart_room_dashboard' %}"><strong>Smart Room Dashboard</strong><span>Tổng quan vận hành phòng thông minh.</span></a><a href="{% url 'smart_access_control' %}"><strong>Kiểm soát ra vào</strong><span>Trung tâm kiểm soát truy cập.</span></a><a href="{% url 'quan_ly_nguoi_o_cung' %}"><strong>Người ở cùng</strong><span>Quản lý người đang lưu trú cùng phòng.</span></a><a href="{% url 'quan_ly_face_profile' %}"><strong>Face Profile</strong><span>Quản lý hồ sơ nhận diện khuôn mặt.</span></a><a href="{% url 'quan_ly_quyen_ra_vao' %}"><strong>Quyền ra vào</strong><span>Phân quyền truy cập theo phòng.</span></a><a href="{% url 'quan_ly_lich_su_ra_vao' %}"><strong>Lịch sử ra vào</strong><span>Tra cứu kết quả và thời điểm truy cập.</span></a></div></section>
-    <section class="ndt-flyout" data-panel-id="admin-system" aria-hidden="true"><div class="ndt-flyout-head"><div><small>QUẢN TRỊ</small><h2>Hệ thống</h2><p>Theo dõi hoạt động và truy vết thao tác.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'nhat_ky_thao_tac' %}"><strong>Nhật ký thao tác</strong><span>Truy vết các hành động quan trọng trong hệ thống.</span></a><a href="{% url 'dashboard_admin' %}"><strong>Dashboard quản trị</strong><span>Quay về tổng quan vận hành.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="admin-operations" aria-hidden="true"><div class="ndt-flyout-head"><div><small>QUẢN TRỊ</small><h2>Vận hành</h2><p>Quản lý cơ sở, phòng, đặt phòng, hợp đồng và tình trạng lưu trú.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng Vận hành">×</button></div><div class="ndt-flyout-links"><a href="{% url 'quan_ly_co_so' %}" class="{% if request.resolver_match.url_name == 'quan_ly_co_so' or request.resolver_match.url_name == 'tao_co_so' or request.resolver_match.url_name == 'chi_tiet_co_so' %}is-active{% endif %}"><strong>Cơ sở</strong><span>Thông tin và trạng thái các cơ sở.</span></a><a href="{% url 'quan_ly_phong' %}" class="{% if request.resolver_match.url_name == 'quan_ly_phong' or request.resolver_match.url_name == 'tao_phong' or request.resolver_match.url_name == 'sua_phong' %}is-active{% endif %}"><strong>Phòng &amp; cơ sở</strong><span>Giá, sức chứa và tình trạng phòng.</span></a><a href="{% url 'quan_ly_dat_phong' %}" class="{% if request.resolver_match.url_name == 'quan_ly_dat_phong' or request.resolver_match.url_name == 'chi_tiet_dat_phong' %}is-active{% endif %}"><strong>Đặt phòng &amp; cọc</strong><span>Tiếp nhận và đối soát tiền cọc.</span></a><a href="{% url 'quan_ly_hop_dong' %}" class="{% if request.resolver_match.url_name == 'quan_ly_hop_dong' or request.resolver_match.url_name == 'chi_tiet_hop_dong' or request.resolver_match.url_name == 'tao_hop_dong' or request.resolver_match.url_name == 'sua_hop_dong' %}is-active{% endif %}"><strong>Hợp đồng</strong><span>Thời hạn, hiệu lực và gia hạn.</span></a><a href="{% url 'quan_ly_nguoi_thue' %}" class="{% if request.resolver_match.url_name == 'quan_ly_nguoi_thue' or request.resolver_match.url_name == 'chi_tiet_nguoi_thue' %}is-active{% endif %}"><strong>Người thuê &amp; lưu trú</strong><span>Tra cứu hồ sơ và trạng thái lưu trú.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="admin-finance" aria-hidden="true"><div class="ndt-flyout-head"><div><small>QUẢN TRỊ</small><h2>Tài chính</h2><p>Hóa đơn, thanh toán và công nợ.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng">×</button></div><div class="ndt-flyout-links"><a href="{% url 'quan_ly_hoa_don' %}" class="{% if request.resolver_match.url_name == 'quan_ly_hoa_don' or request.resolver_match.url_name == 'chi_tiet_hoa_don' or request.resolver_match.url_name == 'tao_hoa_don' %}is-active{% endif %}"><strong>Tài chính</strong><span>Tạo, theo dõi hóa đơn và thanh toán.</span></a><a href="{% url 'quan_ly_hoa_don' %}"><strong>Xác nhận thanh toán</strong><span>Kiểm tra và xử lý trạng thái thanh toán.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="admin-service" aria-hidden="true"><div class="ndt-flyout-head"><div><small>QUẢN TRỊ</small><h2>Dịch vụ</h2><p>Hỗ trợ khách thuê và dịch vụ lưu trú.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng Dịch vụ">×</button></div><div class="ndt-flyout-links"><a href="{% url 'quan_ly_sua_chua' %}" class="{% if request.resolver_match.url_name == 'quan_ly_sua_chua' or request.resolver_match.url_name == 'chi_tiet_sua_chua' or request.resolver_match.url_name == 'tao_sua_chua' %}is-active{% endif %}"><strong>Sửa chữa &amp; bảo trì</strong><span>Tiếp nhận và theo dõi yêu cầu sửa chữa.</span></a><a href="{% url 'quan_ly_yeu_cau_ghep' %}" class="{% if request.resolver_match.url_name == 'quan_ly_yeu_cau_ghep' or request.resolver_match.url_name == 'chi_tiet_yeu_cau_ghep' %}is-active{% endif %}"><strong>Yêu cầu ở ghép</strong><span>Xét duyệt nhu cầu ở cùng của người thuê.</span></a><a href="{% url 'quan_ly_yeu_cau_nguoi_o_cung' %}" class="{% if request.resolver_match.url_name == 'quan_ly_yeu_cau_nguoi_o_cung' or request.resolver_match.url_name == 'chi_tiet_yeu_cau_nguoi_o_cung' %}is-active{% endif %}"><strong>Duyệt người ở cùng</strong><span>Xét duyệt bổ sung cư trú theo hợp đồng.</span></a><a href="{% url 'quan_ly_nguoi_o_cung' %}" class="{% if request.resolver_match.url_name == 'quan_ly_nguoi_o_cung' or request.resolver_match.url_name == 'chi_tiet_nguoi_o_cung' or request.resolver_match.url_name == 'tao_nguoi_o_cung' %}is-active{% endif %}"><strong>Người ở cùng</strong><span>Quản lý người đang lưu trú cùng phòng.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="admin-smart" aria-hidden="true"><div class="ndt-flyout-head"><div><small>SMART LIVING</small><h2>Ra vào &amp; Face ID</h2><p>Nhận diện và kiểm soát quyền ra vào.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng Ra vào và Face ID">×</button></div><div class="ndt-flyout-links"><a href="{% url 'smart_room_dashboard' %}" class="{% if request.resolver_match.url_name == 'smart_room_dashboard' %}is-active{% endif %}"><strong>Ra vào &amp; Face ID</strong><span>Tổng quan vận hành nhận diện và ra vào.</span></a><a href="{% url 'smart_access_control' %}" class="{% if request.resolver_match.url_name == 'smart_access_control' %}is-active{% endif %}"><strong>Kiểm soát truy cập</strong><span>Vận hành nhận diện và kiểm soát cửa.</span></a><a href="{% url 'quan_ly_face_profile' %}" class="{% if request.resolver_match.url_name == 'quan_ly_face_profile' or request.resolver_match.url_name == 'chi_tiet_face_profile' or request.resolver_match.url_name == 'tao_face_profile' %}is-active{% endif %}"><strong>Hồ sơ Face ID</strong><span>Quản lý hồ sơ nhận diện khuôn mặt.</span></a><a href="{% url 'quan_ly_quyen_ra_vao' %}" class="{% if request.resolver_match.url_name == 'quan_ly_quyen_ra_vao' or request.resolver_match.url_name == 'chi_tiet_quyen_ra_vao' or request.resolver_match.url_name == 'tao_quyen_ra_vao' %}is-active{% endif %}"><strong>Quyền ra vào</strong><span>Phân quyền truy cập theo phòng.</span></a><a href="{% url 'quan_ly_lich_su_ra_vao' %}" class="{% if request.resolver_match.url_name == 'quan_ly_lich_su_ra_vao' or request.resolver_match.url_name == 'chi_tiet_lich_su_ra_vao' or request.resolver_match.url_name == 'tao_lich_su_ra_vao' %}is-active{% endif %}"><strong>Lịch sử ra vào</strong><span>Tra cứu kết quả và thời điểm truy cập.</span></a></div></section>
+    <section class="ndt-flyout" data-panel-id="admin-system" aria-hidden="true"><div class="ndt-flyout-head"><div><small>QUẢN TRỊ</small><h2>Hệ thống</h2><p>Chính sách, thông báo, tài khoản và nhật ký quản trị.</p></div><button class="ndt-flyout-close" type="button" aria-label="Đóng Hệ thống">×</button></div><div class="ndt-flyout-links"><a href="{% url 'doi_mat_khau' %}" class="{% if request.resolver_match.url_name == 'doi_mat_khau' %}is-active{% endif %}"><strong>Tài khoản</strong><span>Cập nhật bảo mật tài khoản quản trị.</span></a><a href="{% url 'quan_ly_chinh_sach' %}" class="{% if request.resolver_match.url_name == 'quan_ly_chinh_sach' or request.resolver_match.url_name == 'tao_chinh_sach' or request.resolver_match.url_name == 'chi_tiet_chinh_sach' %}is-active{% endif %}"><strong>Chính sách hỗ trợ</strong><span>Quản lý chính sách dành cho người thuê.</span></a><a href="{% url 'quan_ly_thong_bao' %}" class="{% if request.resolver_match.url_name == 'quan_ly_thong_bao' or request.resolver_match.url_name == 'chi_tiet_thong_bao' or request.resolver_match.url_name == 'tao_thong_bao' %}is-active{% endif %}"><strong>Thông báo</strong><span>Gửi và quản lý thông tin hệ thống.</span></a><a href="{% url 'nhat_ky_thao_tac' %}" class="{% if request.resolver_match.url_name == 'nhat_ky_thao_tac' or request.resolver_match.url_name == 'chi_tiet_nhat_ky_thao_tac' %}is-active{% endif %}"><strong>Nhật ký thao tác</strong><span>Tra cứu lịch sử thay đổi của quản trị viên.</span></a></div></section>
     {% endif %}
 
 
@@ -1651,12 +1709,13 @@
                     </a>
                     <!-- ĐĂNG XUẤT -->
 
-                    <a  
-                        href="{% url 'dang_xuat' %}"  
-                        class="header-login" 
-                    > 
+                    <form method="post" action="{% url 'dang_xuat' %}" style="display: contents">{% csrf_token %}<button
+                        type="submit"
+                        class="header-login"
+                        style="border: 0; background: transparent; font: inherit; cursor: pointer"
+                    >
                         Đăng xuất 
-                    </a>
+                    </button></form>
 
                 {% else %}
 
@@ -1764,7 +1823,7 @@
          MAIN
          ========================================================= -->
 
-    <main class="site-main">
+    <main id="ndtMainContent" class="site-main" tabindex="-1">
 
         {% block content %}
         {% endblock %}
@@ -1810,6 +1869,10 @@
 
                 <a href="{% url 'danh_sach_phong' %}">
                     Tìm phòng
+                </a>
+
+                <a href="{% url 'huong_dan_thue_phong' %}">
+                    Hướng dẫn thuê phòng
                 </a>
 
                 <a href="{% url 'home' %}#features">
@@ -2178,13 +2241,158 @@
         const overlay = document.getElementById("ndtShellOverlay");
         const collapse = document.getElementById("ndtSidebarCollapse");
         const mobile = document.getElementById("ndtMobileMenu");
+        const mobileClose = document.getElementById("ndtSidebarMobileClose");
         const triggers = Array.from(document.querySelectorAll(".ndt-panel-trigger"));
         const panels = Array.from(document.querySelectorAll(".ndt-flyout"));
         const closes = Array.from(document.querySelectorAll(".ndt-flyout-close"));
+        const sideLinks = sidebar ? Array.from(sidebar.querySelectorAll(".ndt-side-link")) : [];
+        const tooltip = document.createElement("div");
+        const panelHomes = new Map();
         let activePanel = null;
+
+        panels.forEach(function (panel) {
+            panelHomes.set(panel, {
+                parent: panel.parentNode,
+                next: panel.nextSibling,
+            });
+            const id = panel.dataset.panelId;
+            if (!panel.id && id) panel.id = "ndtFlyout-" + id;
+            panel.setAttribute("role", "dialog");
+            panel.setAttribute("aria-modal", "true");
+            const title = panel.querySelector(".ndt-flyout-head h2");
+            if (title) {
+                if (!title.id) title.id = panel.id + "-title";
+                panel.setAttribute("aria-labelledby", title.id);
+            }
+            panel.querySelectorAll("a.is-active").forEach(function (link) {
+                link.setAttribute("aria-current", "page");
+            });
+        });
+        triggers.forEach(function (trigger) {
+            const id = trigger.dataset.panel;
+            const panel = document.querySelector('[data-panel-id="' + id + '"]');
+            if (panel) trigger.setAttribute("aria-controls", panel.id);
+        });
+
+        panels.forEach(function (panel) {
+            const id = panel.dataset.panelId;
+            const titleHost = panel.querySelector(".ndt-flyout-head > div");
+            const title = titleHost ? titleHost.querySelector("h2") : null;
+            if (!id || !titleHost || !title || titleHost.classList.contains("ndt-flyout-titleline")) return;
+
+            const trigger = document.querySelector('.ndt-panel-trigger[data-panel="' + id + '"]');
+            const sourceIcon = trigger ? trigger.querySelector(".ndt-side-icon, .ndt-member-avatar svg, svg") : null;
+            titleHost.classList.add("ndt-flyout-titleline");
+            if (sourceIcon && !titleHost.querySelector(".ndt-side-icon")) {
+                const iconWrap = document.createElement("span");
+                iconWrap.className = "ndt-side-icon";
+                iconWrap.setAttribute("aria-hidden", "true");
+                iconWrap.appendChild(sourceIcon.cloneNode(true));
+                titleHost.insertBefore(iconWrap, titleHost.firstChild);
+            }
+        });
+
+        tooltip.className = "ndt-sidebar-tooltip";
+        tooltip.setAttribute("role", "tooltip");
+        document.body.appendChild(tooltip);
+
+        function syncOverlay() {
+            const visible = Boolean(activePanel) || body.classList.contains("ndt-mobile-nav-open");
+            if (overlay) {
+                overlay.classList.toggle("is-visible", visible);
+                overlay.setAttribute("aria-hidden", visible ? "false" : "true");
+            }
+        }
+
+        function setMobileOpen(open) {
+            body.classList.toggle("ndt-mobile-nav-open", open);
+            if (mobile) {
+                mobile.setAttribute("aria-expanded", open ? "true" : "false");
+                mobile.setAttribute("aria-label", open ? "Đóng thanh điều hướng" : "Mở thanh điều hướng");
+            }
+            syncOverlay();
+            if (open && mobileClose) {
+                requestAnimationFrame(function () { mobileClose.focus({preventScroll: true}); });
+            }
+        }
+
+        function setCollapsed(collapsed) {
+            closePanels();
+            body.classList.toggle("ndt-sidebar-collapsed", collapsed);
+            if (collapse) {
+                collapse.setAttribute("aria-expanded", collapsed ? "false" : "true");
+                collapse.setAttribute("aria-label", collapsed ? "Mở rộng thanh điều hướng" : "Thu gọn thanh điều hướng");
+                collapse.setAttribute("title", collapsed ? "Mở rộng thanh điều hướng" : "Thu gọn thanh điều hướng");
+            }
+            tooltip.classList.remove("is-visible");
+        }
+
+        function restorePanel(panel) {
+            const home = panelHomes.get(panel);
+            if (!home || !home.parent) return;
+            if (home.next && home.next.parentNode === home.parent) {
+                home.parent.insertBefore(panel, home.next);
+            } else {
+                home.parent.appendChild(panel);
+            }
+        }
+
+        function placePanelForViewport(panel, trigger) {
+            if (!panel || !trigger) return;
+            if (window.innerWidth <= 900 && sidebar) {
+                const host = trigger.closest(".ndt-public-discovery-wrap") || trigger;
+                host.insertAdjacentElement("afterend", panel);
+                return;
+            }
+            restorePanel(panel);
+        }
+
+        function showTooltip(link) {
+            if (window.innerWidth <= 900 || !body.classList.contains("ndt-sidebar-collapsed")) return;
+            const label = link.dataset.tooltip;
+            if (!label) return;
+            const rect = link.getBoundingClientRect();
+            tooltip.textContent = label;
+            tooltip.style.left = Math.round(rect.right + 12) + "px";
+            tooltip.style.top = Math.round(rect.top + rect.height / 2) + "px";
+            tooltip.classList.add("is-visible");
+        }
+
+        function hideTooltip() {
+            tooltip.classList.remove("is-visible");
+        }
+
+        sideLinks.forEach(function (link) {
+            const label = link.querySelector(".ndt-side-label");
+            if (!label) return;
+            const text = label.textContent.trim();
+            link.dataset.tooltip = text;
+            link.setAttribute("title", text);
+            link.addEventListener("mouseenter", function () { showTooltip(link); });
+            link.addEventListener("mouseleave", hideTooltip);
+            link.addEventListener("focus", function () { showTooltip(link); });
+            link.addEventListener("blur", hideTooltip);
+        });
 
         function positionPanel(panel, trigger) {
             if (!panel || !trigger) return;
+            if (panel.id === "ndtPublicDiscoveryFlyout" && window.innerWidth <= 900) {
+                panel.style.setProperty("--ndt-flyout-top", "16px");
+                panel.style.setProperty("--ndt-flyout-max-height", "calc(100dvh - 32px)");
+                return;
+            }
+
+            if (panel.id === "ndtPublicDiscoveryFlyout") {
+                const triggerRect = trigger.getBoundingClientRect();
+                const curveRadius = 36;
+                const top = Math.max(18, Math.round(triggerRect.top - curveRadius));
+                panel.style.setProperty("--ndt-flyout-top", top + "px");
+                panel.style.setProperty(
+                    "--ndt-flyout-max-height",
+                    Math.max(300, window.innerHeight - top - 18) + "px"
+                );
+                return;
+            }
 
             const viewportGap = 18;
             const topSafe = 104;
@@ -2197,7 +2405,7 @@
              * - long panels are lifted just enough to stay visible;
              * - very long panels keep an internal scrollbar.
              */
-            let top = Math.max(topSafe, Math.round(triggerRect.top - 10));
+            let top = Math.max(topSafe, Math.round(triggerRect.top - (panel.id === "ndtPublicDiscoveryFlyout" ? 38 : 10)));
             panel.style.setProperty("--ndt-flyout-top", top + "px");
 
             requestAnimationFrame(function () {
@@ -2215,7 +2423,9 @@
             });
         }
 
-        function closePanels() {
+        function closePanels(options) {
+            options = options || {};
+            const returnFocus = activePanel ? document.querySelector('.ndt-panel-trigger[data-panel="' + activePanel + '"]') : null;
             panels.forEach(function (panel) {
                 panel.classList.remove("is-open");
                 panel.setAttribute("aria-hidden", "true");
@@ -2224,8 +2434,9 @@
                 trigger.classList.remove("is-open");
                 trigger.setAttribute("aria-expanded", "false");
             });
-            if (overlay) overlay.classList.remove("is-visible");
             activePanel = null;
+            syncOverlay();
+            if (options.returnFocus && returnFocus) returnFocus.focus({preventScroll: true});
         }
 
         function openPanel(id, trigger) {
@@ -2233,42 +2444,93 @@
             if (!panel) return;
             if (activePanel === id) { closePanels(); return; }
             closePanels();
+            placePanelForViewport(panel, trigger);
             positionPanel(panel, trigger);
             panel.classList.add("is-open");
             panel.setAttribute("aria-hidden", "false");
             trigger.classList.add("is-open");
             trigger.setAttribute("aria-expanded", "true");
-            if (overlay) overlay.classList.add("is-visible");
             activePanel = id;
+            syncOverlay();
+            if (window.innerWidth <= 900) {
+                requestAnimationFrame(function () {
+                    panel.scrollIntoView({block: "nearest", inline: "nearest"});
+                });
+            }
+            const closeButton = panel.querySelector(".ndt-flyout-close");
+            if (closeButton) {
+                window.setTimeout(function () {
+                    closeButton.focus({preventScroll: true});
+                }, 50);
+            }
         }
 
         triggers.forEach(function (trigger) {
-            trigger.addEventListener("click", function () { openPanel(trigger.dataset.panel, trigger); });
+            trigger.addEventListener("click", function (event) {
+                event.preventDefault();
+                openPanel(trigger.dataset.panel, trigger);
+            });
         });
-        closes.forEach(function (button) { button.addEventListener("click", closePanels); });
-        if (overlay) overlay.addEventListener("click", function () { closePanels(); body.classList.remove("ndt-mobile-nav-open"); });
+        closes.forEach(function (button) { button.addEventListener("click", function () { closePanels({returnFocus: true}); }); });
+        if (overlay) overlay.addEventListener("click", function () { closePanels(); setMobileOpen(false); });
         document.addEventListener("keydown", function (event) {
-            if (event.key === "Escape") { closePanels(); body.classList.remove("ndt-mobile-nav-open"); }
+            if (event.key === "Tab" && activePanel) {
+                const panel = document.querySelector('[data-panel-id="' + activePanel + '"]');
+                const items = panel ? Array.from(panel.querySelectorAll('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')) : [];
+                const first = items[0], last = items[items.length - 1];
+                if (first && last && event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+                else if (first && last && !event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+            } else if (event.key === "Tab" && body.classList.contains("ndt-mobile-nav-open") && sidebar) {
+                const items = Array.from(sidebar.querySelectorAll('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'))
+                    .filter(function (item) { return item.getClientRects().length; });
+                const first = items[0], last = items[items.length - 1];
+                if (first && last && event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+                else if (first && last && !event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+            }
+            if (event.key === "Escape") {
+                const mobileWasOpen = body.classList.contains("ndt-mobile-nav-open");
+                closePanels({returnFocus: true});
+                setMobileOpen(false);
+                if (mobileWasOpen && mobile) mobile.focus({preventScroll: true});
+            }
         });
         window.addEventListener("resize", function () {
-            if (!activePanel) return;
-            const trigger = document.querySelector('.ndt-panel-trigger[data-panel="' + activePanel + '"]');
-            const panel = document.querySelector('[data-panel-id="' + activePanel + '"]');
-            positionPanel(panel, trigger);
+            hideTooltip();
+            if (window.innerWidth > 900) setMobileOpen(false);
+            panels.forEach(function (panel) {
+                if (window.innerWidth > 900) restorePanel(panel);
+            });
+            if (activePanel) {
+                const trigger = document.querySelector('.ndt-panel-trigger[data-panel="' + activePanel + '"]');
+                const panel = document.querySelector('[data-panel-id="' + activePanel + '"]');
+                placePanelForViewport(panel, trigger);
+                positionPanel(panel, trigger);
+            }
         });
 
         if (collapse) {
             const saved = localStorage.getItem("ndtSidebarCollapsed");
-            if (saved === "1") body.classList.add("ndt-sidebar-collapsed");
+            setCollapsed(saved === "1");
             collapse.addEventListener("click", function () {
-                closePanels();
-                body.classList.toggle("ndt-sidebar-collapsed");
-                localStorage.setItem("ndtSidebarCollapsed", body.classList.contains("ndt-sidebar-collapsed") ? "1" : "0");
+                const collapsed = !body.classList.contains("ndt-sidebar-collapsed");
+                setCollapsed(collapsed);
+                localStorage.setItem("ndtSidebarCollapsed", collapsed ? "1" : "0");
             });
         }
-        if (mobile) mobile.addEventListener("click", function () { body.classList.toggle("ndt-mobile-nav-open"); });
+        if (mobile) mobile.addEventListener("click", function () {
+            setMobileOpen(!body.classList.contains("ndt-mobile-nav-open"));
+        });
+        if (mobileClose) mobileClose.addEventListener("click", function () {
+            closePanels();
+            setMobileOpen(false);
+            if (mobile) mobile.focus({preventScroll: true});
+        });
         if (sidebar) sidebar.querySelectorAll("a").forEach(function (link) {
-            link.addEventListener("click", function () { body.classList.remove("ndt-mobile-nav-open"); closePanels(); });
+            link.addEventListener("click", function () { setMobileOpen(false); closePanels(); });
+        });
+        const discovery = document.getElementById("ndtPublicDiscoveryFlyout");
+        if (discovery) discovery.querySelectorAll("a").forEach(function (link) {
+            link.addEventListener("click", function () { closePanels(); setMobileOpen(false); });
         });
     });
     </script>
@@ -2293,6 +2555,8 @@
 
     <script src="{% static 'js/components/toast.js' %}" defer></script>
     <script src="{% static 'js/ui-system.js' %}" defer></script>
+    {% include "core/partials/support_panel.html" %}
+    <script src="{% static 'js/support-panel.js' %}" defer></script>
 
 </body>
 

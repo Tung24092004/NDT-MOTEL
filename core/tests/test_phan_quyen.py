@@ -11,6 +11,8 @@ from django.utils import timezone
 
 from core.du_lieu_test.du_lieu_test_phan_quyen import RoleAccessFixture
 from core.models import LichSuRaVao, NguoiThue, Phong, ThongBao
+from core.private_storage import private_payment_evidence_storage
+from core.tests.test_thanh_toan import evidence_upload
 
 
 AUDIT_MODELS = (
@@ -170,7 +172,7 @@ class RoleAccessMatrixTests(RoleAccessFixture):
             ('post', 'xu_ly_yeu_cau_ghep', obj('sharing'), {'hanh_dong': 'duyet'}, 302),
             ('post', 'xu_ly_yeu_cau_ghep', obj('sharing'), {'hanh_dong': 'tu_choi'}, 302),
             ('post', 'bat_tat_cho_phep_ghep', obj('contract'), {}, 302),
-            ('get', 'chi_tiet_face_profile', obj('face'), {}, 302),
+            ('get', 'chi_tiet_face_profile', obj('face'), {}, 404),
             ('post', 'face_id_dang_ky', obj('face'), {'image': 'foreign-image'}, 403),
             ('post', 'xu_ly_face_profile', obj('face'), {'hanh_dong': 'xoa'}, 302),
         ]
@@ -586,8 +588,14 @@ class RoleUiPaymentAuditTests(BusinessFixture):
             "buoc": "xac_thuc",
             "phuong_thuc": "chuyen_khoan",
             "xac_nhan": "dong_y",
+            "anh_chung_tu": evidence_upload(),
         }
-        self.client.post(url, data)
+        with patch.object(
+            private_payment_evidence_storage,
+            "save",
+            side_effect=lambda name, content, max_length=None: name,
+        ):
+            self.client.post(url, data)
         self.invoice.refresh_from_db()
         self.assertEqual(self.invoice.trang_thai, "cho_xac_nhan")
         self.assertIsNone(self.invoice.ngay_thanh_toan)
@@ -808,9 +816,17 @@ class RoleUiPaymentAuditTests(BusinessFixture):
         second_admin = User.objects.create_user("payment-admin-2", is_superuser=True)
         self.client.force_login(self.user)
         url = reverse("thanh_toan_hoa_don_cua_toi", args=[self.invoice.pk])
-        self.client.post(url, {
-            "buoc": "xac_thuc", "phuong_thuc": "chuyen_khoan", "xac_nhan": "dong_y",
-        })
+        with patch.object(
+            private_payment_evidence_storage,
+            "save",
+            side_effect=lambda name, content, max_length=None: name,
+        ):
+            self.client.post(url, {
+                "buoc": "xac_thuc",
+                "phuong_thuc": "chuyen_khoan",
+                "xac_nhan": "dong_y",
+                "anh_chung_tu": evidence_upload(),
+            })
         for admin in (self.admin, second_admin):
             self.assertEqual(ThongBao.objects.filter(
                 nguoi_nhan_user=admin,

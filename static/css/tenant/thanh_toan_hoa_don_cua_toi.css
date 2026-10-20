@@ -13,6 +13,9 @@
     font-size: 14px;
     color: #71848a;
 }.tenant-ui .payment-breadcrumb a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
     color: #16879a;
     text-decoration: none;
     font-weight: 700;

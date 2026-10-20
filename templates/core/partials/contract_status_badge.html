@@ -1,13 +1,17 @@
-{% if contract.trang_thai == "dang_hieu_luc" %}
-<span class="ndt-badge ndt-badge--success">{{ contract.get_trang_thai_display|default:"Dang hieu luc" }}</span>
+{% if contract.trang_thai == "nhap" %}
+<span class="ndt-f5-badge ndt-f5-badge--info">Hợp đồng nháp</span>
+{% elif contract.trang_thai == "cho_nguoi_thue_xac_nhan" %}
+<span class="ndt-f5-badge ndt-f5-badge--warning">Chờ bạn xác nhận</span>
+{% elif contract.trang_thai == "dang_hieu_luc" %}
+<span class="ndt-f5-badge ndt-f5-badge--success">{{ contract.get_trang_thai_display|default:"Đang hiệu lực" }}</span>
 {% elif contract.trang_thai == "sap_het_han" %}
-<span class="ndt-badge ndt-badge--warning">{{ contract.get_trang_thai_display|default:"Sap het han" }}</span>
+<span class="ndt-f5-badge ndt-f5-badge--warning">{{ contract.get_trang_thai_display|default:"Sắp hết hạn" }}</span>
 {% elif contract.trang_thai == "da_huy" %}
-<span class="ndt-badge ndt-badge--danger">{{ contract.get_trang_thai_display|default:"Da huy" }}</span>
+<span class="ndt-f5-badge ndt-f5-badge--danger">{{ contract.get_trang_thai_display|default:"Đã hủy" }}</span>
 {% elif contract.trang_thai == "da_het_han" %}
-<span class="ndt-badge ndt-badge--neutral">{{ contract.get_trang_thai_display|default:"Da het han" }}</span>
+<span class="ndt-f5-badge">{{ contract.get_trang_thai_display|default:"Đã hết hạn" }}</span>
 {% elif contract.trang_thai == "cho_hieu_luc" %}
-<span class="ndt-badge ndt-badge--info">{{ contract.get_trang_thai_display|default:"Cho hieu luc" }}</span>
+<span class="ndt-f5-badge ndt-f5-badge--info">{{ contract.get_trang_thai_display|default:"Chờ hiệu lực" }}</span>
 {% else %}
-<span class="ndt-badge ndt-badge--neutral">{{ contract.get_trang_thai_display|default:"Chua xac dinh" }}</span>
+<span class="ndt-f5-badge">{{ contract.get_trang_thai_display|default:"Chưa xác định" }}</span>
 {% endif %}

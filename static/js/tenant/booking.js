@@ -25,16 +25,18 @@
     cancelForm.addEventListener('submit', async event => {
       if (cancelForm.dataset.confirmed === 'true') return;
       event.preventDefault();
-      const confirmed = await window.NDTDialog.confirm({
+      const confirmation = window.NDTFoundationDialog.confirm({
         title: cancelForm.dataset.confirmTitle,
         message: cancelForm.dataset.confirmMessage,
         confirmLabel: 'Xác nhận hủy',
         danger: true,
         trigger: cancelForm.ndtDialogTrigger || event.submitter || document.activeElement
       });
+      document.querySelector('.ndt-f5-dialog__actions [data-ndt-f5-dialog-cancel]')?.focus();
+      const confirmed = await confirmation;
       if (confirmed) {
         cancelForm.dataset.confirmed = 'true';
-        cancelForm.requestSubmit();
+        cancelForm.requestSubmit(cancelForm.ndtDialogTrigger || event.submitter || undefined);
       }
     });
   });
@@ -128,6 +130,11 @@
     for (let i = 0; i < sections.length; i++) {
       const invalid = [...sections[i].querySelectorAll('input, select, textarea')].some(e => !e.disabled && !e.checkValidity());
       if (invalid) { event.preventDefault(); showStep(i); validate(sections[i]); return; }
+    }
+    const submitter = event.submitter;
+    if (submitter && submitter.value !== 'prepare_occupants') {
+      submitter.disabled = true;
+      submitter.setAttribute('aria-busy', 'true');
     }
   });
   showStep(0);

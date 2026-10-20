@@ -1,16 +1,13 @@
-{% extends 'core/tenant_base.html' %}
+﻿{% extends 'core/tenant_base.html' %}
 {% load static %}
 {% block title %}Đặt phòng của tôi - NDT MOTEL{% endblock %}
 {% block tenant_styles %}
-<link rel="stylesheet" href="{% static 'css/foundation/tokens.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/typography.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/components.css' %}">
-<link rel="stylesheet" href="{% static 'css/foundation/utilities.css' %}">
-<link rel="stylesheet" href="{% static 'css/tenant/booking.css' %}">
+<link rel="stylesheet" href="{% static 'css/foundation/p5.css' %}">
+<link rel="stylesheet" href="{% static 'css/booking_management_p6b.css' %}">
 {% endblock %}
 {% block tenant_content %}
-<div class="tenant-booking ndt-foundation" data-tenant-booking-ui="v1">{% block booking_content %}{% endblock %}</div>
-{% include 'core/foundation/dialog_root.html' %}
-<script src="{% static 'js/foundation/dialog.js' %}" defer></script>
+<div class="ndt-f5 ndt-booking-management" data-tenant-booking-ui="p6b"><main class="ndt-f5-page"><div class="ndt-f5-container ndt-f5-container--full">{% block booking_content %}{% endblock %}</div></main></div>
+{% include 'core/foundation/p5_dialog_root.html' %}
+<script src="{% static 'js/foundation/p5-dialog.js' %}" defer></script>
 <script src="{% static 'js/tenant/booking.js' %}" defer></script>
 {% endblock %}
